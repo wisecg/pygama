@@ -1,0 +1,723 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.dsp package &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pygama.io package" href="pygama.io.html" />
+    <link rel="prev" title="pygama.analysis package" href="pygama.analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing pygama</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pygama.html">Package API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pygama.analysis.html">pygama.analysis package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pygama.dsp package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp.ProcessingChain">pygama.dsp.ProcessingChain module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-waveformbrowser-module">pygama.dsp.WaveformBrowser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp.build_processing_chain">pygama.dsp.build_processing_chain module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp.dsp_optimize">pygama.dsp.dsp_optimize module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp.processors">pygama.dsp.processors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp.units">pygama.dsp.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.io.html">pygama.io package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.lh5.html">pygama.lh5 package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#pygama-git-module">pygama.git module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama.utils">pygama.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="pygama.html">pygama package</a> &raquo;</li>
+        
+      <li>pygama.dsp package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/pygama.dsp.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pygama-dsp-package">
+<h1>pygama.dsp package<a class="headerlink" href="#pygama-dsp-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygama.dsp.ProcessingChain">
+<span id="pygama-dsp-processingchain-module"></span><h2>pygama.dsp.ProcessingChain module<a class="headerlink" href="#module-pygama.dsp.ProcessingChain" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.dsp.ProcessingChain.</span></code><code class="sig-name descname"><span class="pre">ProcessingChain</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clock_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A ProcessingChain is used to efficiently perform a sequence of digital
+signal processing (dsp) transforms. It contains a list of dsp functions and
+a set of constant values and named variables contained in fixed memory
+locations. When executing the ProcessingChain, processors will act on the
+internal memory without allocating new memory in the process. Furthermore,
+the memory is allocated in blocks, enabling vectorized processing of many
+entries at once. To set up a ProcessingChain, use the following methods:
+1) add_input_buffer: bind a named variable to an external numpy array to</p>
+<blockquote>
+<div><p>read data from</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><dl class="simple">
+<dt>add_processor: add a dsp function and bind its inputs to a set of named</dt><dd><p>variables and constant values</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>add_output_buffer: bind a named variable to an external numpy array to</dt><dd><p>write data into</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>When calling these methods, the ProcessingChain class will use available
+information to allocate buffers to the correct sizes and data types. For
+this reason, transforms will ideally implement the numpy ufunc class,
+enabling broadcasting of array dimensions. If not enough information is
+available to correctly allocate memory, it can be provided through the
+named variable strings or by calling add_vector or add_scalar.</p>
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.add_input_buffer">
+<code class="sig-name descname"><span class="pre">add_input_buffer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">varname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.add_input_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.add_input_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link an input buffer to a variable. The buffer should be a numpy
+ndarray with length that is a multiple of the buffer length, the block
+width, and the named variable length. If any of these are unknown we
+will try to deduce the right lengths. varname can be of the form:</p>
+<blockquote>
+<div><p>&quot;varname(length, type)[range]&quot;</p>
+</div></blockquote>
+<p>The optional (length, type) field is used to initialize a new variable.
+The optional [range] field copies from the buffer into a subrange of the
+array.</p>
+<p>Optional keyword args:
+- buffer_len: number of entries in buffer. This is needed if we cannot</p>
+<blockquote>
+<div><p>figure it out from the shape (i.e. multi-dimensional buffer fed as
+a one-dimensional array)</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>dtype: data type used for the variable. Use this if the variable is
+automatically allocated here, but with a different type from buff</p></li>
+<li><p>unit specifies a unit to convert the input from. Unit must have same type as clk, or be a ratio to multiply the input by</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.add_output_buffer">
+<code class="sig-name descname"><span class="pre">add_output_buffer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">varname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.add_output_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.add_output_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link an output buffer to a variable. The buffer should be a numpy
+ndarray with length that is a multiple of the buffer length, the block
+width, and the named variable length. If any of these are unknown we
+will try to deduce the right lengths. varname can be of the form:</p>
+<blockquote>
+<div><p>&quot;varname(length, type)[range]&quot;</p>
+</div></blockquote>
+<p>The optional (length, type) field is used to initialize a new variable.
+The optional [range] field copies a subrange of the named array into the
+output buffer.</p>
+<p>Optional keyword args:
+- buffer_len: number of entries in buffer. This is needed if we cannot</p>
+<blockquote>
+<div><p>figure it out from the shape (i.e. multi-dimensional buffer fed as
+a one-dimensional array)</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>dtype: data type used for the variable. Use this if the variable is
+automatically allocated here, but with a different type from buff</p></li>
+<li><p>unit specifies a unit to convert the output into. Unit must have same type as clk, or be a ratio to divide the output by</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.add_processor">
+<code class="sig-name descname"><span class="pre">add_processor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.add_processor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.add_processor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new processor and bind it to a set of parameters.
+- func should be a function implementing the numpy ufunc class. If not,</p>
+<blockquote>
+<div><p>then the signature and types keyword arguments will be necessary.</p>
+</div></blockquote>
+<ul>
+<li><p>args is a list of names and constants. The names link to internal
+numpy array variables that will be bound to the function. Names can
+be given in the form:</p>
+<blockquote>
+<div><p>&quot;varname(length, type)[range]&quot;</p>
+</div></blockquote>
+<p>The optional (length, type) field is used to initialize a new variable
+if necessary. The optional [range] field copies binds only a subrange
+of the array to the function. Non-string constant values will be
+converted to the right type and bound to the function. Constants with
+scimath time units will be converted to the internal clock unit.</p>
+</li>
+<li><p>keyword arguments include:
+- signature: broadcasting signature for a ufunc. By default, use</p>
+<blockquote>
+<div><p>func.signature</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>types: a list of strings defining the types of arrays needed for
+the func. By default, use func.types</p></li>
+</ul>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.add_scalar">
+<code class="sig-name descname"><span class="pre">add_scalar</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.add_scalar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.add_scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add named variable containing a scalar block with fixed type</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.add_waveform">
+<code class="sig-name descname"><span class="pre">add_waveform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.add_waveform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.add_waveform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add named variable containing a waveform block with fixed type and length</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.execute">
+<code class="sig-name descname"><span class="pre">execute</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the dsp chain on the entire input/output buffers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.execute_block">
+<code class="sig-name descname"><span class="pre">execute_block</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.execute_block"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.execute_block" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the dsp chain on a sub-set of the input/output buffers
+starting at entry offset, with length equal to the internal block size.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.get_input_buffer">
+<code class="sig-name descname"><span class="pre">get_input_buffer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">varname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.get_input_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.get_input_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the input buffer associated with varname. If there is no such
+buffer, create one with a shape compatible with the input variable and
+return it. The input varname has the form:</p>
+<blockquote>
+<div><p>&quot;varname(length, type)[range]&quot;</p>
+</div></blockquote>
+<p>The optional (length, type) field is used to initialize a new variable.
+The optional [range] field copies a subrange of the named array into the
+output buffer.</p>
+<p>Optional keyword arguments:
+- dtype can be used to specify the numpy data type of the buffer if it</p>
+<blockquote>
+<div><p>should differ from that held in varname</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>buffer_len specifies the buffer length, if it has not already been set</p></li>
+<li><p>unit specifies a unit to convert the input from. Unit must have same type as clk, or be a ratio to multiply the input by</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.get_output_buffer">
+<code class="sig-name descname"><span class="pre">get_output_buffer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">varname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.get_output_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.get_output_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the output buffer associated with varname. If there is no such
+buffer, create one with a shape compatible with the input variable and
+return it. The input varname has the form:</p>
+<blockquote>
+<div><p>&quot;varname(length, type)[range]&quot;</p>
+</div></blockquote>
+<p>The optional (length, type) field is used to initialize a new variable.
+The optional [range] field copies a subrange of the named array into the
+output buffer.</p>
+<p>Optional keyword arguments:
+- dtype can be used to specify the numpy data type of the buffer if it</p>
+<blockquote>
+<div><p>should differ from that held in varname</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>buffer_len specifies the buffer length, if it has not already been set</p></li>
+<li><p>unit specifies a unit to convert the output into. Unit must have same type as clk, or be a ratio to divide the output by</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.ProcessingChain.ProcessingChain.get_variable">
+<code class="sig-name descname"><span class="pre">get_variable</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">varname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/ProcessingChain.html#ProcessingChain.get_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.ProcessingChain.ProcessingChain.get_variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the numpy array holding the internal memory buffer used for a
+named variable. The varname has the format</p>
+<blockquote>
+<div><p>&quot;varname(length, type)[range]&quot;</p>
+</div></blockquote>
+<p>The optional (length, type) field is used to initialize a new variable
+if necessary. The optional [range] field fetches only a subrange
+of the array to the function.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="pygama-dsp-waveformbrowser-module">
+<h2>pygama.dsp.WaveformBrowser module<a class="headerlink" href="#pygama-dsp-waveformbrowser-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygama.dsp.build_processing_chain">
+<span id="pygama-dsp-build-processing-chain-module"></span><h2>pygama.dsp.build_processing_chain module<a class="headerlink" href="#module-pygama.dsp.build_processing_chain" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pygama.dsp.build_processing_chain.build_processing_chain">
+<code class="sig-prename descclassname"><span class="pre">pygama.dsp.build_processing_chain.</span></code><code class="sig-name descname"><span class="pre">build_processing_chain</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lh5_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsp_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/build_processing_chain.html#build_processing_chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.build_processing_chain.build_processing_chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produces a ProcessingChain object and an lh5 table for output parameters
+from an input lh5 table and a json recipe.</p>
+<p>Returns (proc_chain, lh5_out):
+- proc_chain: ProcessingChain object that is bound to lh5_in and lh5_out;</p>
+<blockquote>
+<div><p>all you need to do is handle file i/o for lh5_in/out and run execute</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>lh5_out: output LH5 table</p></li>
+</ul>
+<p>Required arguments:
+- lh5_in: input LH5 table
+- config: dict or name of json file containing a recipe for</p>
+<blockquote>
+<div><p>constructing the ProcessingChain object produced by this function.
+config is formated as a json dict with different processors. Config
+should have a dictionary called processors, containing dictionaries
+of the following format:</p>
+<blockquote>
+<div><dl>
+<dt>Key: parameter name: name of parameter produced by the processor.</dt><dd><p>can optionally provide multiple, separated by spaces</p>
+</dd>
+<dt>Values:</dt><dd><p>processor (req): name of gufunc
+module (req): name of module in which to find processor
+prereqs (req): name of parameters from other processors and from</p>
+<blockquote>
+<div><p>input that are required to exist to run this</p>
+</div></blockquote>
+<dl class="simple">
+<dt>args (req): list of arguments for processor, with variables passed</dt><dd><p>by name or value. Names should either be inputs from lh5_in, or
+parameter names for other processors. Names of the format db.name
+will look up the parameter in the metadata.</p>
+</dd>
+</dl>
+<p>kwargs (opt): kwargs used when adding processors to proc_chain
+init_args (opt): args used when initializing a processor that has</p>
+<blockquote>
+<div><p>static data (for factory functions)</p>
+</div></blockquote>
+<p>default (opt): default value for db parameters if not found
+unit (opt): unit to be used for attr in lh5 file.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>There may also be a list called 'outputs', containing a list of parameters
+to put into lh5_out.</p>
+</div></blockquote>
+<p>Optional keyword arguments:
+- outputs: list of parameters to put in the output lh5 table. If None,</p>
+<blockquote>
+<div><p>use the parameters in the 'outputs' list from config</p>
+</div></blockquote>
+<ul>
+<li><p>db_dict: a nested dict pointing to values for db args.
+e.g. if a processor uses arg db.trap.risetime, it will look up</p>
+<blockquote>
+<div><p>db_dict['trap']['risetime']</p>
+</div></blockquote>
+<p>and use the found value. If no value is found, use the default defined
+in the config file.</p>
+</li>
+<li><dl class="simple">
+<dt>verbosity: verbosity level:</dt><dd><p>0: Print nothing (except errors...)
+1: Print basic warnings (default)
+2: Print basic debug info
+3: Print friggin' everything!</p>
+</dd>
+</dl>
+</li>
+<li><p>block_width: number of entries to process at once.</p></li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.dsp.dsp_optimize">
+<span id="pygama-dsp-dsp-optimize-module"></span><h2>pygama.dsp.dsp_optimize module<a class="headerlink" href="#module-pygama.dsp.dsp_optimize" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.dsp.dsp_optimize.ParGrid">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.dsp.dsp_optimize.</span></code><code class="sig-name descname"><span class="pre">ParGrid</span></code><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Parameter Grid class</p>
+<p>Each ParGrid entry corresponds to a dsp parameter to be varied.
+The ntuples must follow the pattern:
+( name, i_arg, value_strs companions) : ( str, int, list of str, list or None )
+where name is the name of the dsp routine in dsp_config whose  be
+optimized, i_arg is the index of the argument to be varied, value_strs is
+the array of strings to set the argument to, and companions is an optional
+list of ( name, i_arg, value_strs ) tuples for companion arguments that
+need to change along with this one</p>
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.add_dimension">
+<code class="sig-name descname"><span class="pre">add_dimension</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_strs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">companions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.add_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.add_dimension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.get_data">
+<code class="sig-name descname"><span class="pre">get_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_par</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.get_n_dimensions">
+<code class="sig-name descname"><span class="pre">get_n_dimensions</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.get_n_dimensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.get_n_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.get_n_grid_points">
+<code class="sig-name descname"><span class="pre">get_n_grid_points</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.get_n_grid_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.get_n_grid_points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.get_n_points_of_dim">
+<code class="sig-name descname"><span class="pre">get_n_points_of_dim</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.get_n_points_of_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.get_n_points_of_dim" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.get_par_meshgrid">
+<code class="sig-name descname"><span class="pre">get_par_meshgrid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.get_par_meshgrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.get_par_meshgrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a meshgrid of parameter values</p>
+<p>Always uses Matrix indexing (natural for par grid) so that
+mg[i1][i2][...] corresponds to index order in self.dims</p>
+<p>Note copy is False by default as opposed to numpy default of True</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.get_shape">
+<code class="sig-name descname"><span class="pre">get_shape</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.get_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.get_shape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.get_zero_indices">
+<code class="sig-name descname"><span class="pre">get_zero_indices</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.get_zero_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.get_zero_indices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.iterate_indices">
+<code class="sig-name descname"><span class="pre">iterate_indices</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.iterate_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.iterate_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>iterate given indices [i1, i2, ...] by one.</p>
+<p>For easier iteration. The convention here is arbitrary, but its the
+order the arrays would be traversed in a series of nested for loops in
+the order appearin in dims (first dimension is first for loop, etc):</p>
+<p>Return False when the grid runs out of indices. Otherwise returns True.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.print_data">
+<code class="sig-name descname"><span class="pre">print_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.print_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.print_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.dsp.dsp_optimize.ParGrid.set_dsp_pars">
+<code class="sig-name descname"><span class="pre">set_dsp_pars</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dsp_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#ParGrid.set_dsp_pars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGrid.set_dsp_pars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pygama.dsp.dsp_optimize.ParGridDimension">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.dsp.dsp_optimize.</span></code><code class="sig-name descname"><span class="pre">ParGridDimension</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_strs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">companions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGridDimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<dl class="py attribute">
+<dt id="pygama.dsp.dsp_optimize.ParGridDimension.companions">
+<code class="sig-name descname"><span class="pre">companions</span></code><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGridDimension.companions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pygama.dsp.dsp_optimize.ParGridDimension.i_arg">
+<code class="sig-name descname"><span class="pre">i_arg</span></code><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGridDimension.i_arg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pygama.dsp.dsp_optimize.ParGridDimension.name">
+<code class="sig-name descname"><span class="pre">name</span></code><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGridDimension.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pygama.dsp.dsp_optimize.ParGridDimension.value_strs">
+<code class="sig-name descname"><span class="pre">value_strs</span></code><a class="headerlink" href="#pygama.dsp.dsp_optimize.ParGridDimension.value_strs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.dsp.dsp_optimize.run_grid">
+<code class="sig-prename descclassname"><span class="pre">pygama.dsp.dsp_optimize.</span></code><code class="sig-name descname"><span class="pre">run_grid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tb_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsp_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fom_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#run_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.run_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract a table of optimization values for a grid of DSP parameters</p>
+<p>The grid argument defines a list of parameters and values over which to run
+the DSP defined in dsp_config on tb_data. At each point, a scalar
+figure-of-merit is extracted</p>
+<p>Returns a N-dimensional ndarray of figure-of-merit values, where the array
+axes are in the order they appear in grid.</p>
+<dl class="simple">
+<dt>tb_data<span class="classifier">lh5 Table</span></dt><dd><p>An input table of lh5 data. Typically a selection is made prior to
+sending tb_data to this function: optimization typically doesn't have to
+run over all data</p>
+</dd>
+<dt>dsp_config<span class="classifier">dict</span></dt><dd><p>Specifies the DSP to be performed (see build_processing_chain()) and the
+list of output variables to appear in the output table for each grid point</p>
+</dd>
+<dt>grid<span class="classifier">ParGrid</span></dt><dd><p>See ParGrid class for format</p>
+</dd>
+<dt>fom_function<span class="classifier">function</span></dt><dd><p>When given the output lh5 table of this DSP iteration, the fom_function
+must return a scalar figure-of-merit. Should accept verbosity as a
+second keyword argument</p>
+</dd>
+<dt>db_dict<span class="classifier">dict (optional)</span></dt><dd><p>DSP parameters database. See build_processing_chain for formatting info</p>
+</dd>
+<dt>verbosity<span class="classifier">int (optional)</span></dt><dd><p>verbosity for the processing chain and fom_function calls</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>grid_values<span class="classifier">ndarray of floats</span></dt><dd><p>An N-dimensional numpy ndarray whose Mth axis corresponds to the Mth row
+of the grid argument</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.dsp.dsp_optimize.run_one_dsp">
+<code class="sig-prename descclassname"><span class="pre">pygama.dsp.dsp_optimize.</span></code><code class="sig-name descname"><span class="pre">run_one_dsp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tb_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsp_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fom_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/dsp/dsp_optimize.html#run_one_dsp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.dsp.dsp_optimize.run_one_dsp" title="Permalink to this definition">¶</a></dt>
+<dd><p>run one iteration of DSP on tb_data</p>
+<p>Optionally returns a value for optimization</p>
+<dl class="simple">
+<dt>tb_data<span class="classifier">lh5 Table</span></dt><dd><p>An input table of lh5 data. Typically a selection is made prior to
+sending tb_data to this function: optimization typically doesn't have to
+run over all data</p>
+</dd>
+<dt>dsp_config<span class="classifier">dict</span></dt><dd><p>Specifies the DSP to be performed for this iteration (see
+build_processing_chain()) and the list of output variables to appear in
+the output table</p>
+</dd>
+<dt>db_dict<span class="classifier">dict (optional)</span></dt><dd><p>DSP parameters database. See build_processing_chain for formatting info</p>
+</dd>
+<dt>fom_function<span class="classifier">function or None (optional)</span></dt><dd><p>When given the output lh5 table of this DSP iteration, the
+fom_function must return a scalar figure-of-merit value upon which the
+optimization will be based. Should accept verbosity as a second argument</p>
+</dd>
+<dt>verbosity<span class="classifier">int (optional)</span></dt><dd><p>verbosity for the processing chain and fom_function calls</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>figure_of_merit<span class="classifier">float</span></dt><dd><p>If fom_function is not None, returns figure-of-merit value for the DSP iteration</p>
+</dd>
+<dt>tb_out<span class="classifier">lh5 Table</span></dt><dd><p>If fom_function is None, returns the output lh5 table for the DSP iteration</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.dsp.processors">
+<span id="pygama-dsp-processors-module"></span><h2>pygama.dsp.processors module<a class="headerlink" href="#module-pygama.dsp.processors" title="Permalink to this headline">¶</a></h2>
+<p>Contains a list of dsp processors used by the legend experiment, implemented
+using numba's guvectorize to implement numpy's ufunc interface. In other words,
+all of the functions are void functions whose outputs are given as parameters.
+The ufunc interface provides additional information about the function
+signatures that enables broadcasting the arrays and SIMD processing. Thanks to
+the ufunc interface, they can also be called to return a numpy array, but if</p>
+<blockquote>
+<div><p>this is done, memory will be allocated for this array, slowing things down.</p>
+</div></blockquote>
+</div>
+<div class="section" id="module-pygama.dsp.units">
+<span id="pygama-dsp-units-module"></span><h2>pygama.dsp.units module<a class="headerlink" href="#module-pygama.dsp.units" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygama.dsp">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pygama.dsp" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="pygama.io.html" class="btn btn-neutral float-right" title="pygama.io package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pygama.analysis.html" class="btn btn-neutral float-left" title="pygama.analysis package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

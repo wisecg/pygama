@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.io.io_base &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.io.io_base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.io.io_base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">io_base.py</span>
+
+<span class="sd">base classes for decoding daq data into raw lh5 files</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pygama</span> <span class="kn">import</span> <span class="n">lh5</span>
+
+
+<div class="viewcode-block" id="DataDecoder"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.io_base.DataDecoder">[docs]</a><span class="k">class</span> <span class="nc">DataDecoder</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decodes DAQ stream data packets.</span>
+
+<span class="sd">    The values that get decoded need to be described by a dict called</span>
+<span class="sd">    &#39;decoded_values&#39; that helps determine how to set up the buffers and write</span>
+<span class="sd">    them to file. See ORCAStruck3302 for an example.</span>
+
+<span class="sd">    Subclasses should define a method for decoding data to a buffer like</span>
+<span class="sd">    decode_packet(packet, data_buffer, packet_id, verbose=False)</span>
+
+<span class="sd">    Garbage collection writes binary data as an array of uint32s to a</span>
+<span class="sd">    variable-length array in the output file. If a problematic packet is found,</span>
+<span class="sd">    call put_in_garbage(packet). User should set up an enum or bitbank of garbage</span>
+<span class="sd">    codes to be stored along with the garbage packets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">garbage_length</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">packet_size_guess</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="n">garbage_length</span><span class="p">)</span>
+        <span class="n">shape_guess</span><span class="o">=</span><span class="p">(</span><span class="n">garbage_length</span><span class="p">,</span> <span class="n">packet_size_guess</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;packets&#39;</span><span class="p">,</span>
+                                     <span class="n">lh5</span><span class="o">.</span><span class="n">VectorOfVectors</span><span class="p">(</span><span class="n">shape_guess</span><span class="o">=</span><span class="n">shape_guess</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint8&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;packet_id&#39;</span><span class="p">,</span>
+                                     <span class="n">lh5</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">garbage_length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint32&#39;</span><span class="p">))</span>
+        <span class="c1"># TODO: add garbage codes enum attribute: user supplies in constructor</span>
+        <span class="c1"># before calling super()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;garbage_code&#39;</span><span class="p">,</span>
+                                     <span class="n">lh5</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">garbage_length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint32&#39;</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="DataDecoder.get_decoded_values"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.io_base.DataDecoder.get_decoded_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_decoded_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get decoded values (optionally for a given channel)</span>
+
+<span class="sd">        Must overload for your decoder if it has channel-specific decoded</span>
+<span class="sd">        values. Note: implement channel = None returns a &quot;default&quot; decoded_values</span>
+
+<span class="sd">        Otherwise, just returns self.decoded_values, which should be defined in</span>
+<span class="sd">        the constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to implement channel-specific get_decoded_values for&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="DataDecoder.initialize_lh5_table"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.io_base.DataDecoder.initialize_lh5_table">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_lh5_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lh5_table</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; initialize and lh5 Table based on decoded_values </span>
+<span class="sd">        channel is the channel according to ch_group</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;decoded_values&#39;</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;Error: no decoded_values available for setting up buffer&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">dec_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_decoded_values</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">lh5_table</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">fld_attrs</span> <span class="ow">in</span> <span class="n">dec_vals</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="n">fld_attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s1">&#39;dtype&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;Error: must specify dtype for&#39;</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;dtype&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;datatype&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="c1"># no datatype: just a &quot;normal&quot; array</span>
+                <span class="c1"># allow to override &quot;kind&quot; for the dtype for lh5</span>
+                <span class="k">if</span> <span class="s1">&#39;kind&#39;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                    <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;datatype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;array&lt;1&gt;{&#39;</span> <span class="o">+</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+                <span class="n">lh5_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="n">datatype</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;datatype&#39;</span><span class="p">)</span>
+
+            <span class="c1"># handle waveforms from digitizers in a uniform way</span>
+            <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;waveform&#39;</span><span class="p">:</span>
+                <span class="n">wf_table</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+
+                <span class="c1"># Build t0 array. No attributes for now</span>
+                <span class="c1"># TODO: add more control over t0: another field to fill it?</span>
+                <span class="c1"># Optional units attribute?</span>
+                <span class="n">t0_attrs</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;ns&#39;</span> <span class="p">}</span>
+                <span class="n">wf_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;t0&#39;</span><span class="p">,</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">nda</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">),</span> <span class="n">attrs</span> <span class="o">=</span> <span class="n">t0_attrs</span><span class="p">))</span>
+
+                <span class="c1"># Build sampling period array with units attribute</span>
+                <span class="n">wf_per</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;sample_period&#39;</span><span class="p">)</span>
+                <span class="n">dt_nda</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">wf_per</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">)</span>
+                <span class="n">wf_per_units</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;sample_period_units&#39;</span><span class="p">)</span>
+                <span class="n">dt_attrs</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">wf_per_units</span> <span class="p">}</span>
+                <span class="n">wf_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;dt&#39;</span><span class="p">,</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">nda</span><span class="o">=</span><span class="n">dt_nda</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="n">dt_attrs</span><span class="p">))</span>
+
+                <span class="c1"># Build waveform array. All non-popped attributes get sent</span>
+                <span class="c1"># TODO: add vector of vectors and compression capabilities</span>
+                <span class="n">wf_len</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;length&#39;</span><span class="p">)</span>
+                <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">aoesa</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">ArrayOfEqualSizedArrays</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size</span><span class="p">,</span><span class="n">wf_len</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+                <span class="n">wf_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">,</span> <span class="n">aoesa</span><span class="p">)</span>
+
+                <span class="n">lh5_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">wf_table</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># If we get here, must be a LH5 datatype</span>
+            <span class="n">datatype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">elements</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">parse_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;array_of_equalsized_arrays&#39;</span><span class="p">:</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;length&#39;</span><span class="p">)</span>
+                <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">aoesa</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">ArrayOfEqualSizedArrays</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size</span><span class="p">,</span><span class="n">length</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+                <span class="n">lh5_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">aoesa</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">elements</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;array&#39;</span><span class="p">):</span> <span class="c1"># vector-of-vectors</span>
+                <span class="n">length_guess</span> <span class="o">=</span> <span class="n">size</span>
+                <span class="k">if</span> <span class="s1">&#39;length_guess&#39;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span> <span class="n">length_guess</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;length_guess&#39;</span><span class="p">)</span>
+                <span class="n">vov</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">VectorOfVectors</span><span class="p">(</span><span class="n">shape_guess</span><span class="o">=</span><span class="p">(</span><span class="n">size</span><span class="p">,</span><span class="n">length_guess</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+                <span class="n">lh5_table</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">vov</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;Error: do not know how to make a&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span> <span class="s1">&#39;for&#39;</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DataDecoder.put_in_garbage"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.io_base.DataDecoder.put_in_garbage">[docs]</a>    <span class="k">def</span> <span class="nf">put_in_garbage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="n">i_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="o">.</span><span class="n">loc</span>
+        <span class="n">p8</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="p">[</span><span class="s1">&#39;packets&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_vector</span><span class="p">(</span><span class="n">i_row</span><span class="p">,</span> <span class="n">p8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="p">[</span><span class="s1">&#39;packet_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">i_row</span><span class="p">]</span> <span class="o">=</span> <span class="n">packet_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="p">[</span><span class="s1">&#39;garbage_codes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">i_row</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="o">.</span><span class="n">push_row</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DataDecoder.write_out_garbage"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.io_base.DataDecoder.write_out_garbage">[docs]</a>    <span class="k">def</span> <span class="nf">write_out_garbage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">lh5_store</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">lh5_store</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">lh5_store</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Store</span><span class="p">()</span>
+        <span class="n">n_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="o">.</span><span class="n">loc</span>
+        <span class="k">if</span> <span class="n">n_rows</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span>
+        <span class="n">lh5_store</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="p">,</span> <span class="s1">&#39;garbage&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="n">n_rows</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">garbage_table</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div></div>
+
+
+
+<span class="c1"># TODO: remove this after all DataTaker references have been removed from old</span>
+<span class="c1"># code</span>
+<div class="viewcode-block" id="DataTaker"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.io_base.DataTaker">[docs]</a><span class="k">class</span> <span class="nc">DataTaker</span><span class="p">(</span><span class="n">DataDecoder</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

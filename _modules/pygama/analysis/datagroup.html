@@ -1,0 +1,518 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.analysis.datagroup &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.analysis.datagroup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.analysis.datagroup</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">Formatter</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">parse</span> <span class="kn">import</span> <span class="n">parse</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">import</span> <span class="nn">pygama.utils</span> <span class="k">as</span> <span class="nn">pu</span>
+
+
+<div class="viewcode-block" id="DataGroup"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.datagroup.DataGroup">[docs]</a><span class="k">class</span> <span class="nc">DataGroup</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to create an in-memory or on-disk set of files, according to the</span>
+<span class="sd">    LEGEND data convention.  Typically requires a JSON config file with:</span>
+
+<span class="sd">      - path to DAQ and LH5 directories</span>
+<span class="sd">      - format strings for daq/lh5 files</span>
+<span class="sd">      - partitions for the LH5 data directory</span>
+
+<span class="sd">    Reference: https://docs.legend-exp.org/index.php/apps/files/?dir=/LEGEND%20Documents/Technical%20Documents/Analysis&amp;fileid=9140#pdfviewer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nfiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># master table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># typical usage: JSON config file</span>
+        <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
+
+        <span class="c1"># limit number of files (useful for debug &amp; testing)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nfiles</span> <span class="o">=</span> <span class="n">nfiles</span>
+
+        <span class="c1"># load a pre-existing set of keys.  should be True by default</span>
+        <span class="k">if</span> <span class="n">load</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_df</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="DataGroup.set_config"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.datagroup.DataGroup.set_config">[docs]</a>    <span class="k">def</span> <span class="nf">set_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># experiment name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span>
+
+        <span class="c1"># experiment-specific runDB.  optional but recommended</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_runDB</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;runDB&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f_runDB</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f_runDB</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">runDB</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">object_pairs_hook</span><span class="o">=</span><span class="n">OrderedDict</span><span class="p">)</span>
+
+        <span class="c1"># experiment-specific fileDB (h5 list of file keys)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_fileDB</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;fileDB&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;fileDB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;fileDB&#39;</span><span class="p">])</span>
+
+        <span class="c1"># set DAQ data directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daq_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;daq_dir&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daq_ignore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;daq_ignore&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daq_dir</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning, DAQ directory not found:&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">daq_dir</span><span class="p">)</span>
+
+        <span class="c1"># set LH5 data directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lh5_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;lh5_dir&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_dir</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning, LH5 directory not found:&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_dir</span><span class="p">)</span>
+
+        <span class="c1"># optional: set a user directory (useful for testing file processing)</span>
+        <span class="k">if</span> <span class="s1">&#39;lh5_user&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lh5_user_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;lh5_user&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_user_dir</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning, LH5 user directory not found:&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_user_dir</span><span class="p">)</span>
+
+        <span class="c1"># optional: run selection json file</span>
+        <span class="k">if</span> <span class="s1">&#39;runSelectionDB&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+            <span class="n">f_runsel</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;runSelectionDB&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">f_runsel</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning, run selection file not found:&#39;</span><span class="p">,</span> <span class="n">f_runsel</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">f_runsel</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">runSelectionDB</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># get LH5 subdirectory names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tier_dirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;tier_dirs&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subsystems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;subsystems&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;run_types&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evt_dirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;evt_dirs&#39;</span><span class="p">]</span>
+
+        <span class="c1"># get format strings for unique keys, DAQ files, and LH5 files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;unique_key&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daq_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;daq_template&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lh5_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;lh5_template&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="DataGroup.lh5_dir_setup"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.datagroup.DataGroup.lh5_dir_setup">[docs]</a>    <span class="k">def</span> <span class="nf">lh5_dir_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_dir</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        generate paths to LH5 data directories, using `self.lh5_dir`</span>
+<span class="sd">        if user_dir is True, create them in `self.lh5_user` instead.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dirs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lh5_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_user</span> <span class="k">if</span> <span class="n">user_dir</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_dir</span>
+
+        <span class="c1"># directories for hit-level data</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tier_dirs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_types</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsystems</span>
+        <span class="k">for</span> <span class="n">tier</span><span class="p">,</span> <span class="n">subs</span><span class="p">,</span> <span class="n">rtp</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+            <span class="n">dirname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lh5_dir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">tier</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">subs</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">rtp</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+            <span class="n">dirs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+
+        <span class="c1"># directories for event-level data</span>
+        <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">evt_dirs</span><span class="p">:</span>
+            <span class="n">dirname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lh5_dir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="nb">dir</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+            <span class="n">dirs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Base LH5 path:&#39;</span><span class="p">,</span> <span class="n">lh5_dir</span><span class="p">)</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Create directories here? (y/n)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ans</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DataGroup.scan_daq_dir"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.datagroup.DataGroup.scan_daq_dir">[docs]</a>    <span class="k">def</span> <span class="nf">scan_daq_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        scan the DAQ directory and build a DataFrame of file keys.</span>
+<span class="sd">        don&#39;t make any experiment-specific choices here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">daq_template</span>
+        <span class="n">di</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">daq_ignore</span>
+
+        <span class="n">file_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">stop_walk</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">n_files</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daq_dir</span><span class="p">):</span>
+
+            <span class="n">n_files</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+
+                <span class="c1"># in some cases, we need information from the path name</span>
+                <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daq_template</span><span class="p">:</span>
+                    <span class="n">f_tmp</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daq_dir</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">f</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">f_tmp</span> <span class="o">=</span> <span class="n">f</span>
+
+                <span class="c1"># check if we should ignore this file</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">di</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">ig</span> <span class="ow">in</span> <span class="n">f_tmp</span> <span class="k">for</span> <span class="n">ig</span> <span class="ow">in</span> <span class="n">di</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="n">finfo</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daq_template</span><span class="p">,</span> <span class="n">f_tmp</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">finfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">finfo</span> <span class="o">=</span> <span class="n">finfo</span><span class="o">.</span><span class="n">named</span> <span class="c1"># convert to dict</span>
+                    <span class="n">finfo</span><span class="p">[</span><span class="s1">&#39;daq_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daq_dir</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="c1"># sub-dir</span>
+                    <span class="n">finfo</span><span class="p">[</span><span class="s1">&#39;daq_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
+                    <span class="n">file_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">finfo</span><span class="p">)</span>
+
+                <span class="c1"># limit number of files (debug mode)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nfiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_keys</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nfiles</span><span class="p">:</span>
+                    <span class="n">stop_walk</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">stop_walk</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">stop_walk</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">n_files</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no daq files found...&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no daq files matched pattern&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">daq_template</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># create the main DataFrame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">file_keys</span><span class="p">)</span>
+
+        <span class="c1"># grab the unique key and sort the DataFrame by it</span>
+        <span class="n">fk</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_key</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="p">[</span><span class="s1">&#39;unique_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fk</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># reorder cols to match the daq_template string</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;unique_key&#39;</span><span class="p">]</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">fn</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span><span class="n">fn</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="ow">in</span> <span class="n">Formatter</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="k">if</span> <span class="n">fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;daq_dir&#39;</span><span class="p">,</span><span class="s1">&#39;daq_file&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
+
+        <span class="c1"># convert cols to numeric dtypes where possible</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s1">&#39;YYmmdd&#39;</span> <span class="ow">and</span> <span class="n">col</span> <span class="o">!=</span> <span class="s1">&#39;hhmmss&#39;</span><span class="p">:</span>
+             <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+             <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="DataGroup.save_keys"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.datagroup.DataGroup.save_keys">[docs]</a>    <span class="k">def</span> <span class="nf">save_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        default: save the unique_key and the relative path to the DAQ file,</span>
+<span class="sd">        as a CSV file.  this will probably change in the future, but at least</span>
+<span class="sd">        this way we can:</span>
+
+<span class="sd">          - easily get a list of available DAQ files</span>
+<span class="sd">          - regenerate the DataFrame from scan_daq_dir by parsing format string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_fileDB</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving file key list to: &#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+
+        <span class="n">df_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span>
+        <span class="n">df_keys</span><span class="p">[</span><span class="s1">&#39;rel_daq_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_keys</span><span class="p">[</span><span class="s1">&#39;daq_dir&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">df_keys</span><span class="p">[</span><span class="s1">&#39;daq_file&#39;</span><span class="p">]</span>
+
+        <span class="c1"># export to csv</span>
+        <span class="n">df_keys</span><span class="p">[[</span><span class="s1">&#39;unique_key&#39;</span><span class="p">,</span><span class="s1">&#39;rel_daq_path&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DataGroup.load_keys"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.datagroup.DataGroup.load_keys">[docs]</a>    <span class="k">def</span> <span class="nf">load_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        load a list of file keys and parse data into columns according to</span>
+<span class="sd">        the format string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_fileDB</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading file key list from:&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+
+        <span class="n">df_keys</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">daq_template</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">fn</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span><span class="n">fn</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="ow">in</span> <span class="n">Formatter</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="k">if</span> <span class="n">fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">parse_key</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot; extract variables from format string from daq_path &quot;&quot;&quot;</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;rel_daq_path&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="n">daq_dir</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">daq_file</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">unique_key</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;unique_key&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">daq_template</span><span class="p">:</span>
+                <span class="n">finfo</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daq_template</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;rel_daq_path&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">named</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">finfo</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">daq_template</span><span class="p">,</span> <span class="n">daq_file</span><span class="p">)</span><span class="o">.</span><span class="n">named</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">finfo</span><span class="p">)</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;unique_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unique_key</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;daq_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">daq_dir</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;daq_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">daq_file</span>
+            <span class="k">return</span> <span class="n">row</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span> <span class="o">=</span> <span class="n">df_keys</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parse_key</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># reorder cols to match the daq_template string</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;unique_key&#39;</span><span class="p">]</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">fn</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span><span class="n">fn</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="ow">in</span> <span class="n">Formatter</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span> <span class="k">if</span> <span class="n">fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;daq_dir&#39;</span><span class="p">,</span><span class="s1">&#39;daq_file&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="DataGroup.save_df"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.datagroup.DataGroup.save_df">[docs]</a>    <span class="k">def</span> <span class="nf">save_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        save the current self.fileDB dataframe. If we&#39;ve added extra columns</span>
+<span class="sd">        specific to an experiment (outside this class), this will preserve them.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_fileDB</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving file key list to: &#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="c1"># self.fileDB.to_json(fname, indent=2)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;file_keys&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DataGroup.load_df"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.datagroup.DataGroup.load_df">[docs]</a>    <span class="k">def</span> <span class="nf">load_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_fileDB</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;file_keys&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DataGroup.get_lh5_cols"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.datagroup.DataGroup.get_lh5_cols">[docs]</a>    <span class="k">def</span> <span class="nf">get_lh5_cols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        compute the LH5 filenames.</span>
+
+<span class="sd">        need to generate the file names, and then figure out which folder</span>
+<span class="sd">        to store them in.  probably best to separate these tasks</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s1">&#39;runtype&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You must add a &#39;runtype&#39; column to the file key DF.&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">get_files</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">tier</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tier_dirs</span><span class="p">:</span>
+
+                <span class="c1"># get filename</span>
+                <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;tier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tier</span>
+
+                <span class="c1"># leave subsystem unspecified</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsystems</span> <span class="o">!=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]:</span>
+                    <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;sysn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{sysn}</span><span class="s1">&#39;</span>
+
+                <span class="c1"># set the filename.  might have a &#39;{sysn}&#39; string present</span>
+                <span class="n">row</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tier</span><span class="si">}</span><span class="s1">_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_template</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+
+                <span class="c1"># compute file path.</span>
+                <span class="c1"># daq_to_raw outputs a file for each subsystem, and we</span>
+                <span class="c1"># handle this here by leaving a regex in the file string</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">tier</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsystems</span> <span class="o">!=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]:</span>
+                    <span class="n">path</span> <span class="o">+=</span> <span class="s1">&#39;/</span><span class="si">{sysn}</span><span class="s1">&#39;</span>
+                <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;runtype&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_types</span><span class="p">:</span>
+                    <span class="n">path</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;runtype&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                <span class="n">row</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tier</span><span class="si">}</span><span class="s1">_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="k">return</span> <span class="n">row</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDB</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_files</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

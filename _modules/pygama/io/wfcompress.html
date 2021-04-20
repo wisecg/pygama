@@ -1,0 +1,440 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.io.wfcompress &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.io.wfcompress</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.io.wfcompress</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="c1">#compression function</span>
+<div class="viewcode-block" id="compression"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.wfcompress.compression">[docs]</a><span class="nd">@nb</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">compression</span><span class="p">(</span><span class="n">sig_in</span><span class="p">,</span> <span class="n">sig_out</span><span class="p">,</span> <span class="n">sig_len_in</span><span class="p">):</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">63</span><span class="p">,</span><span class="mi">127</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">511</span><span class="p">,</span><span class="mi">1023</span><span class="p">,</span><span class="mi">2047</span><span class="p">,</span><span class="mi">4095</span><span class="p">,</span><span class="mi">8191</span><span class="p">,</span><span class="mi">16383</span><span class="p">,</span><span class="mi">32767</span><span class="p">,</span><span class="mi">65535</span><span class="p">]</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">iso</span> <span class="o">=</span> <span class="n">bp</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span><span class="o">=</span><span class="n">sig_len_in</span> 
+    <span class="n">db</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ushort</span><span class="p">)</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uintc</span><span class="p">)</span>
+
+    <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">sig_len_in</span><span class="p">):</span>
+        <span class="n">max1</span> <span class="o">=</span> <span class="n">min1</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">max2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">16000</span>
+        <span class="n">min2</span> <span class="o">=</span> <span class="mi">16000</span>
+        <span class="n">nb1</span> <span class="o">=</span> <span class="n">nb2</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">nw</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">while</span> <span class="p">((</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">sig_len_in</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span><span class="o">&lt;</span><span class="n">j</span><span class="o">+</span><span class="mi">48</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">max1</span> <span class="o">&lt;</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">max1</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">min1</span> <span class="o">&gt;</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">min1</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="p">(</span><span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">max2</span> <span class="o">&lt;</span> <span class="n">ds</span><span class="p">:</span>
+                    <span class="n">max2</span> <span class="o">=</span> <span class="n">ds</span>
+                <span class="k">if</span> <span class="n">min2</span> <span class="o">&gt;</span> <span class="n">ds</span><span class="p">:</span>
+                    <span class="n">min2</span> <span class="o">=</span> <span class="n">ds</span>
+                <span class="n">nw</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">max1</span><span class="o">-</span><span class="n">min1</span> <span class="o">&lt;=</span> <span class="n">max2</span><span class="o">-</span><span class="n">min2</span><span class="p">):</span>
+            <span class="n">nb2</span> <span class="o">=</span> <span class="mi">99</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">max1</span> <span class="o">-</span> <span class="n">min1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">mask</span><span class="p">[</span><span class="n">nb1</span><span class="p">]:</span>
+                <span class="n">nb1</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">sig_len_in</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="o">+</span><span class="mi">128</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">max1</span> <span class="o">&lt;</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                    <span class="n">max1</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">dd1</span> <span class="o">=</span> <span class="n">max1</span> <span class="o">-</span> <span class="n">min1</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">min1</span> <span class="o">&gt;</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                    <span class="n">dd1</span> <span class="o">=</span> <span class="n">max1</span> <span class="o">-</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">dd1</span> <span class="o">&gt;</span> <span class="n">mask</span><span class="p">[</span><span class="n">nb1</span><span class="p">]):</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">min1</span> <span class="o">&gt;</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                    <span class="n">min1</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">nw</span> <span class="o">+=</span><span class="mi">1</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nb1</span> <span class="o">=</span> <span class="mi">99</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">max2</span> <span class="o">-</span> <span class="n">min2</span> <span class="o">&gt;</span> <span class="n">mask</span><span class="p">[</span><span class="n">nb2</span><span class="p">]):</span>
+                <span class="n">nb2</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="p">((</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">sig_len_in</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="o">+</span><span class="mi">128</span><span class="p">)):</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">max2</span> <span class="o">&lt;</span> <span class="n">ds</span><span class="p">):</span>
+                    <span class="n">max2</span> <span class="o">=</span> <span class="n">ds</span>
+                <span class="n">dd2</span> <span class="o">=</span> <span class="n">max2</span> <span class="o">-</span> <span class="n">min2</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">min2</span> <span class="o">&gt;</span> <span class="n">ds</span><span class="p">):</span>
+                    <span class="n">dd2</span> <span class="o">=</span> <span class="n">max2</span> <span class="o">-</span> <span class="n">ds</span> 
+                <span class="k">if</span> <span class="p">(</span><span class="n">dd2</span> <span class="o">&gt;</span> <span class="n">mask</span><span class="p">[</span><span class="n">nb2</span><span class="p">]):</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">min2</span> <span class="o">&gt;</span> <span class="n">ds</span><span class="p">):</span>
+                    <span class="n">min2</span> <span class="o">=</span> <span class="n">ds</span>
+                <span class="n">nw</span> <span class="o">+=</span><span class="mi">1</span>
+                <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">bp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span> 
+            <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="n">nw</span> 
+        <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="mi">0</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">nb1</span> <span class="o">&lt;=</span> <span class="n">nb2</span><span class="p">):</span>
+            <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb1</span>
+            <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="n">min1</span> 
+            <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+ 
+            <span class="n">i</span><span class="o">=</span><span class="n">iso</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">iso</span> <span class="o">+</span> <span class="n">nw</span><span class="o">*</span><span class="n">nb1</span><span class="o">/</span><span class="mi">16</span><span class="p">)):</span>
+                <span class="n">sig_out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span><span class="mi">0</span>
+                <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+
+            <span class="n">i</span><span class="o">=</span><span class="n">j</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span> <span class="o">+</span> <span class="n">nw</span><span class="p">):</span>
+                <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">min1</span><span class="p">)</span>
+                <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">-</span> <span class="n">bp</span> <span class="o">-</span> <span class="n">nb1</span><span class="p">)</span>  
+                <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">|=</span> <span class="n">db</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">bp</span> <span class="o">+=</span> <span class="n">nb1</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">bp</span> <span class="o">&gt;</span> <span class="mi">15</span><span class="p">):</span>
+                    <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">bp</span> <span class="o">-=</span><span class="mi">16</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">nb2</span> <span class="o">+</span> <span class="mi">32</span><span class="p">)</span>
+            <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">sig_in</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">min2</span><span class="p">)</span>
+            <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">i</span> <span class="o">=</span> <span class="n">iso</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">iso</span> <span class="o">+</span> <span class="n">nw</span><span class="o">*</span><span class="n">nb2</span><span class="o">/</span><span class="mi">16</span><span class="p">):</span>
+                <span class="n">sig_out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            
+            <span class="n">i</span> <span class="o">=</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span> <span class="o">+</span> <span class="n">nw</span><span class="p">):</span>
+                <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">min2</span>
+                <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span><span class="p">(</span><span class="mi">32</span><span class="o">-</span><span class="n">bp</span><span class="o">-</span><span class="n">nb2</span><span class="p">)</span>
+                <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">|=</span> <span class="n">db</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">bp</span> <span class="o">+=</span> <span class="n">nb2</span>
+                <span class="k">if</span> <span class="n">bp</span> <span class="o">&gt;</span> <span class="mi">15</span><span class="p">:</span>
+                    <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">bp</span> <span class="o">-=</span> <span class="mi">16</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">j</span> <span class="o">+=</span> <span class="n">nw</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">bp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">iso</span></div>
+
+
+<span class="c1">#decompression function</span>
+<div class="viewcode-block" id="decompression"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.wfcompress.decompression">[docs]</a><span class="nd">@nb</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">decompression</span><span class="p">(</span><span class="n">sig_in</span><span class="p">,</span> <span class="n">sig_out</span><span class="p">,</span> <span class="n">sig_len_in</span><span class="p">):</span>
+    <span class="n">mask</span><span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span><span class="mi">63</span><span class="p">,</span><span class="mi">127</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span> <span class="mi">511</span><span class="p">,</span><span class="mi">1023</span><span class="p">,</span><span class="mi">2047</span><span class="p">,</span><span class="mi">4095</span><span class="p">,</span> <span class="mi">8191</span><span class="p">,</span><span class="mi">16383</span><span class="p">,</span><span class="mi">32767</span><span class="p">,</span><span class="mi">65535</span><span class="p">]</span>
+
+    <span class="n">j</span> <span class="o">=</span> <span class="n">isi</span> <span class="o">=</span> <span class="n">iso</span> <span class="o">=</span> <span class="n">bp</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">siglen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ushort</span><span class="p">(</span><span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">])</span>
+    <span class="n">isi</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ushort</span><span class="p">)</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uintc</span><span class="p">)</span>
+    <span class="k">while</span> <span class="p">((</span><span class="n">isi</span> <span class="o">&lt;</span> <span class="n">sig_len_in</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">iso</span> <span class="o">&lt;</span> <span class="n">siglen</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">bp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">isi</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nw</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">]</span>
+        <span class="n">isi</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nb</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">]</span>
+        <span class="n">isi</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">nb</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">):</span>
+            <span class="n">min_val</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">]</span>
+            <span class="n">isi</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">db</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="p">((</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">nw</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">iso</span> <span class="o">&lt;</span> <span class="n">siglen</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">bp</span><span class="o">+</span><span class="n">nb</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">15</span><span class="p">:</span>
+                    <span class="n">bp</span> <span class="o">-=</span> <span class="mi">16</span>
+                    <span class="n">db</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">]</span>
+                    <span class="n">isi</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">db</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">]</span>
+                    <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">bp</span><span class="o">+</span><span class="n">nb</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">nb</span>
+                <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">db</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">[</span><span class="n">nb</span><span class="p">])</span> <span class="o">+</span> <span class="n">min_val</span>
+                <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">bp</span> <span class="o">+=</span> <span class="n">nb</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nb</span> <span class="o">-=</span> <span class="mi">32</span>
+            <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">short</span><span class="p">(</span><span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">])</span>
+            <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">isi</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">min_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">short</span><span class="p">(</span><span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">])</span>
+            <span class="n">isi</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">db</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">]</span>
+
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="p">((</span><span class="n">i</span><span class="o">&lt;</span><span class="n">nw</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">iso</span> <span class="o">&lt;</span> <span class="n">siglen</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">bp</span><span class="o">+</span><span class="n">nb</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">15</span><span class="p">:</span>
+                    <span class="n">bp</span> <span class="o">-=</span> <span class="mi">16</span>
+                    <span class="n">db</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">]</span>
+                    <span class="n">isi</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">db</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_in</span><span class="p">[</span><span class="n">isi</span><span class="p">]</span>
+                    <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">bp</span><span class="o">+</span><span class="n">nb</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span><span class="n">nb</span>
+                <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">db</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">[</span><span class="n">nb</span><span class="p">])</span> <span class="o">+</span> <span class="n">min_val</span> <span class="o">+</span> <span class="n">sig_out</span><span class="p">[</span><span class="n">iso</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">iso</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">bp</span> <span class="o">+=</span> <span class="n">nb</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">j</span> <span class="o">+=</span> <span class="n">nw</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">siglen</span> <span class="o">!=</span> <span class="n">iso</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;iso != siglen&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">siglen</span></div>
+
+
+<span class="c1">#turn ndarray to vecotr of vectors</span>
+<div class="viewcode-block" id="nda_to_vect"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.wfcompress.nda_to_vect">[docs]</a><span class="nd">@nb</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">nda_to_vect</span><span class="p">(</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">flattened_data</span><span class="p">,</span> <span class="n">cumulative_length</span><span class="p">):</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">cumulative_length</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">sig_in</span> <span class="ow">in</span> <span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">sig_len_in</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sig_in</span><span class="p">)</span>
+        <span class="n">sig_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">sig_len_in</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ushort</span><span class="p">)</span>
+        <span class="n">iso</span> <span class="o">=</span> <span class="n">compression</span><span class="p">(</span><span class="n">sig_in</span><span class="p">,</span> <span class="n">sig_out</span><span class="p">,</span> <span class="n">sig_len_in</span><span class="p">)</span>
+        <span class="n">flattened_data</span><span class="p">[</span><span class="n">length</span> <span class="p">:</span> <span class="n">length</span><span class="o">+</span><span class="n">iso</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_out</span><span class="p">[:</span><span class="n">iso</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">length</span> <span class="o">+=</span> <span class="n">iso</span>
+        <span class="n">cumulative_length</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span>
+
+    <span class="k">return</span> <span class="n">length</span></div>
+
+
+<span class="c1">#turn vector of vectors to ndarray</span>
+<div class="viewcode-block" id="vect_to_nda"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.wfcompress.vect_to_nda">[docs]</a><span class="nd">@nb</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">vect_to_nda</span><span class="p">(</span><span class="n">flattened_data</span><span class="p">,</span> <span class="n">cumulative_length</span><span class="p">,</span> <span class="n">nda</span><span class="p">):</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cumulative_length</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">cumulative_length</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="n">sig_in</span> <span class="o">=</span> <span class="n">flattened_data</span><span class="p">[</span><span class="n">idx1</span><span class="p">:</span><span class="n">idx2</span><span class="p">]</span>
+        <span class="n">sig_len_in</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sig_in</span><span class="p">)</span>
+        <span class="n">iso</span> <span class="o">=</span> <span class="n">decompression</span><span class="p">(</span><span class="n">sig_in</span><span class="p">,</span> <span class="n">nda</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span> <span class="n">sig_len_in</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="kc">None</span> </div>
+
+
+<span class="c1">#generate an empty ndarray with appropriate shape for converting vector of vectors to ndarray</span>
+<div class="viewcode-block" id="empty"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.wfcompress.empty">[docs]</a><span class="k">def</span> <span class="nf">empty</span><span class="p">(</span><span class="n">flattened_data</span><span class="p">,</span> <span class="n">cumulative_length</span><span class="p">):</span>
+    <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span> <span class="o">=</span> <span class="n">cumulative_length</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cumulative_length</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">sig_in</span> <span class="o">=</span> <span class="n">flattened_data</span><span class="p">[</span><span class="n">idx1</span><span class="p">:</span><span class="n">idx2</span><span class="p">]</span>
+    <span class="n">sig_len_in</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sig_in</span><span class="p">)</span>
+    <span class="n">sig_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">sig_in</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ushort</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">cumulative_length</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">decompression</span><span class="p">(</span><span class="n">sig_in</span><span class="p">,</span> <span class="n">sig_out</span><span class="p">,</span> <span class="n">sig_len_in</span><span class="p">)</span>
+    <span class="n">empty_ndarray</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">r</span><span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ushort</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">empty_ndarray</span></div>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

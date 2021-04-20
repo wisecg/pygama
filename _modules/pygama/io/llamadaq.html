@@ -1,0 +1,776 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.io.llamadaq &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.io.llamadaq</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.io.llamadaq</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>  
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">from</span> <span class="nn">.io_base</span> <span class="kn">import</span> <span class="n">DataTaker</span>
+<span class="c1">#from .waveform import Waveform</span>
+
+<div class="viewcode-block" id="llama_3316"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.llama_3316">[docs]</a><span class="k">class</span> <span class="nc">llama_3316</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    A parser file for the sis3316 able to decode header and events.</span>
+<span class="sd">    The inputs are files produced by the llamaDAQ sis3316 readout program</span>
+<span class="sd">    magic bytes: &quot;LArU&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_binary</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span> <span class="o">=</span> <span class="n">file_binary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbosity</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_fileheader</span><span class="p">()</span>
+        <span class="c1"># chConf = self.parse_channelConfigs()</span>
+        
+        <span class="c1">#idx, nrx = self.__read_chunk_header()</span>
+        <span class="c1">#print(&quot;head1: ID: {}, nr: {}&quot;.format(idx, nrx))</span>
+        <span class="c1">#flag = True</span>
+        <span class="c1">#while flag:</span>
+        <span class="c1">#    fi, ci, da = self.read_next_event(chConf)</span>
+        <span class="c1">#    if da is None:</span>
+        <span class="c1">#        flag = False</span>
+        
+<div class="viewcode-block" id="llama_3316.parse_fileheader"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.llama_3316.parse_fileheader">[docs]</a>    <span class="k">def</span> <span class="nf">parse_fileheader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        parses the fileheader of a SIS3316 file.</span>
+<span class="sd">        The fileheader takes the first 4 32-bit words and includes:</span>
+<span class="sd">        Magic bytes (&quot;LArU&quot;)</span>
+<span class="sd">        version of the llamaDAQ program producing the output file</span>
+<span class="sd">        nr of open channels</span>
+<span class="sd">        length in bytes of channel configurations (information for every channel, following the file header)</span>
+<span class="sd">        returns true, if magic bytes match, false if not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>    <span class="c1">#should be there anyhow, but re-set if not</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">evt_data_32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+        <span class="n">evt_data_16</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+        
+        <span class="c1">#line0: magic bytes</span>
+        <span class="n">magic</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">#print(hex(magic))</span>
+        <span class="k">if</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x5572414c</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Read in file as SIS3316, magic bytes correct.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;ERROR: Magic bytes not matching for SIS3316 file!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">version_major</span> <span class="o">=</span> <span class="n">evt_data_16</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version_minor</span> <span class="o">=</span> <span class="n">evt_data_16</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version_patch</span> <span class="o">=</span> <span class="n">evt_data_16</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length_econf</span> <span class="o">=</span> <span class="n">evt_data_16</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_chOpen</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;File version: </span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version_major</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version_minor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version_patch</span><span class="p">))</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> channels open, each config </span><span class="si">{}</span><span class="s2"> bytes long&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_chOpen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_econf</span><span class="p">))</span>
+            
+        <span class="k">return</span> <span class="kc">True</span></div>
+       
+        
+<div class="viewcode-block" id="llama_3316.parse_channelConfigs"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.llama_3316.parse_channelConfigs">[docs]</a>    <span class="k">def</span> <span class="nf">parse_channelConfigs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads the metadata from the beginning of the file (the &quot;channel configuration&quot; part, directly after the file header).</span>
+<span class="sd">        Creates a dictionary of the metadata for each FADC/channel combination, which is returned</span>
+<span class="sd">        </span>
+<span class="sd">        structure of channelConfigs:</span>
+<span class="sd">        FADCindex      channelIndex</span>
+<span class="sd">        A ------------- x ----------- metadata for FADC A channel x</span>
+<span class="sd">                      | y ----------- metadata for FADC A channel y</span>
+<span class="sd">                      | z ----------- metadata for FADC A channel z</span>
+<span class="sd">                      </span>
+<span class="sd">        B ------------- k ----------- metadata for FADC B channel k</span>
+<span class="sd">                      | l ----------- metadata for FADC B channel l</span>
+<span class="sd">        ...</span>
+<span class="sd">                      </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>    <span class="c1">#should be after file header anyhow, but re-set if not</span>
+        
+        <span class="n">channelConfigs</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_chOpen</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;reading in channel config </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                
+            <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">68</span><span class="p">)</span>
+            <span class="n">ch_dpf</span> <span class="o">=</span> <span class="n">channel</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">32</span><span class="p">]</span>
+            <span class="n">evt_data_32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+            <span class="n">evt_data_dpf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">ch_dpf</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            
+            <span class="n">fadcIndex</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">channelIndex</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">fadcIndex</span> <span class="ow">in</span> <span class="n">channelConfigs</span><span class="p">:</span>
+                <span class="c1">#print(&quot;pre-existing fadc&quot;)</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#print(&quot;new fadc #{}&quot;.format(fadcIndex))</span>
+                <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    
+            <span class="k">if</span> <span class="n">channelIndex</span> <span class="ow">in</span> <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: Duplicate channel configuration in file: FADCID: </span><span class="si">{}</span><span class="s2">, ChannelID: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fadcIndex</span><span class="p">,</span> <span class="n">channelIndex</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;14BitFlag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x00000001</span>
+            <span class="k">if</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x00000002</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Channel in configuration marked as non-open!&quot;</span><span class="p">)</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;ADCOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;SampleFreq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_dpf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>     <span class="c1">#64 bit float</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;Gain&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_dpf</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;FormatBits&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;SampleLength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;MAWBufferLength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;EventLength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;EventHeaderLength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;Accum6Offset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;Accum2Offset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">14</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;MAW3Offset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>
+            <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcIndex</span><span class="p">][</span><span class="n">channelIndex</span><span class="p">][</span><span class="s2">&quot;SampleOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+            
+            
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">pprint</span><span class="p">(</span><span class="n">channelConfigs</span><span class="p">)</span>
+            
+        <span class="c1">#self.chConfigs = channelConfigs</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEventIndex</span><span class="o">=-</span><span class="mi">1</span>   <span class="c1">#points to header of next chunk, not to event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentChunkIndex</span><span class="o">=</span><span class="mi">0</span>    <span class="c1">#points to first chunk of file</span>
+            
+        <span class="k">return</span> <span class="n">channelConfigs</span></div>
+        
+        
+    <span class="k">def</span> <span class="nf">__read_chunk_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        reads the header of the chunk</span>
+<span class="sd">        The current file position has to point to the FADCID line of the requested chunk header</span>
+<span class="sd">        file position afterwards is at first event of chunk</span>
+<span class="sd">        returns FADCID, nr of events in chunk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BinaryReadException</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span>
+        
+        <span class="n">header_data_32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEventIndex</span><span class="o">=</span><span class="mi">0</span>   <span class="c1">#points to first event of chunk</span>
+ 
+        <span class="k">if</span> <span class="n">header_data_32</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: having a chunk with 0 events&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">header_data_32</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">header_data_32</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    
+    
+    <span class="k">def</span> <span class="nf">__read_next_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fadcID</span><span class="p">,</span> <span class="n">channelConfigs</span><span class="p">,</span> <span class="n">nrEventsPerChunk</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        reads a chunk of data containing event data (event header and samples)</span>
+<span class="sd">        file pointer has to be on beginning of event, NOT on chunk header</span>
+<span class="sd">        Returns the channelID of the Event, as well as the chunk of data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEventIndex</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: pointing at chunk header!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reading chunk #</span><span class="si">{}</span><span class="s2"> event #</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentChunkIndex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEventIndex</span><span class="p">))</span>
+        
+        <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>     <span class="c1">#save position of the event header&#39;s 1st byte</span>
+        <span class="n">data1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>       <span class="c1">#read the first (32 bit) word of the event&#39;s header: channelID &amp; format bits</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BinaryReadException</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>        <span class="c1">#go back to 1st position of event header</span>
+        
+        <span class="n">header_data_32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+        <span class="n">channelID</span> <span class="o">=</span> <span class="p">(</span><span class="n">header_data_32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x00000fff</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Event is from FADC #</span><span class="si">{}</span><span class="s2">, channel #</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fadcID</span><span class="p">,</span> <span class="n">channelID</span><span class="p">))</span>
+        <span class="n">eventLength8</span> <span class="o">=</span> <span class="n">channelConfigs</span><span class="p">[</span><span class="n">fadcID</span><span class="p">][</span><span class="n">channelID</span><span class="p">][</span><span class="s2">&quot;EventLength&quot;</span><span class="p">]</span>
+        <span class="n">eventLength8</span> <span class="o">*=</span> <span class="mi">4</span> <span class="c1">#EventLength is in 32 bit</span>
+        
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_in</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">eventLength8</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">eventLength8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BinaryReadException</span><span class="p">(</span><span class="n">eventLength8</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEventIndex</span> <span class="o">+=</span> <span class="mi">1</span>     <span class="c1">#move to next event</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentEventIndex</span> <span class="o">==</span> <span class="n">nrEventsPerChunk</span><span class="p">):</span> <span class="c1">#if this event was the last of the chunk</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEventIndex</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>     <span class="c1">#points to header of next chunk, not to event</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentChunkIndex</span> <span class="o">+=</span> <span class="mi">1</span>     <span class="c1">#points to next chunk of file</span>
+    
+    
+        <span class="k">return</span> <span class="n">channelID</span><span class="p">,</span> <span class="n">data</span>
+    
+    
+<div class="viewcode-block" id="llama_3316.read_next_event"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.llama_3316.read_next_event">[docs]</a>    <span class="k">def</span> <span class="nf">read_next_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channelConfigs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This should be the main method to call when parsing the file for events.</span>
+<span class="sd">        returns the current FADC index, the channel ID and the binary data of the event if a valid event is found</span>
+<span class="sd">        Returns -1, -1, None when after the last event in the file.</span>
+<span class="sd">        automatically goes to the next event in the file, calling __read_chunk_header and __read_next_event</span>
+<span class="sd">        when appropriate.</span>
+<span class="sd">        returns FADCindex, channelIndex, binaryEventData</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># have to extract channel index from binary, since we need the length of the event, which can change between channels</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEventIndex</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>     <span class="c1">#points to header of next chunk, not to event</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentChunkSize</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentChunkSize</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>   <span class="c1">#apparently needed, as there can be 0-size chunks in the file</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">currentFADC</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentChunkSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__read_chunk_header</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">BinaryReadException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1">#print(&quot;  No more data...\n&quot;)</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="kc">None</span>
+                
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">channelID</span><span class="p">,</span> <span class="n">binary_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__read_next_event</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFADC</span><span class="p">,</span> <span class="n">channelConfigs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentChunkSize</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">BinaryReadException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1">#print(&quot;  No more data...\n&quot;)</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="kc">None</span>
+            
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFADC</span><span class="p">,</span> <span class="n">channelID</span><span class="p">,</span> <span class="n">binary_data</span></div></div>
+        
+    
+    
+<div class="viewcode-block" id="BinaryReadException"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.BinaryReadException">[docs]</a><span class="k">class</span> <span class="nc">BinaryReadException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requestedNrOfBytes</span><span class="p">,</span> <span class="n">gotNrOfBytes</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reqNOB</span> <span class="o">=</span> <span class="n">requestedNrOfBytes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gotNOB</span> <span class="o">=</span> <span class="n">gotNrOfBytes</span>
+    
+<div class="viewcode-block" id="BinaryReadException.printMessage"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.BinaryReadException.printMessage">[docs]</a>    <span class="k">def</span> <span class="nf">printMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exception: tried to read </span><span class="si">{}</span><span class="s2"> bytes, got </span><span class="si">{}</span><span class="s2"> bytes&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reqNOB</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gotNOB</span><span class="p">))</span></div></div>
+    
+
+
+<div class="viewcode-block" id="LLAMAStruck3316"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.LLAMAStruck3316">[docs]</a><span class="k">class</span> <span class="nc">LLAMAStruck3316</span><span class="p">(</span><span class="n">DataTaker</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    decode Struck 3316 digitizer data</span>
+<span class="sd">    </span>
+<span class="sd">    TODO:</span>
+<span class="sd">    handle per-channel data (gain, ...)</span>
+<span class="sd">    most metadata of Struck header (energy, ...)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoder_name</span> <span class="o">=</span> <span class="s1">&#39;SIS3316Decoder&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_name</span> <span class="o">=</span> <span class="s1">&#39;SIS3316&#39;</span>
+
+        <span class="c1"># store an entry for every event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;packet_id&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;ievt&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;energy_first&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;energy&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;peakhigh_index&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;peakhigh_value&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;information&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;accumulator1&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;accumulator2&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;accumulator3&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;accumulator4&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;accumulator5&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;accumulator6&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;accumulator7&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;accumulator8&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;mawMax&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;maw_before&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;maw_after&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;fadcID&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;channel&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;waveform&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_names</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1">#TODO at some point we want the metainfo here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readMetadata</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;We have </span><span class="si">{}</span><span class="s2"> adcs and </span><span class="si">{}</span><span class="s2"> samples per WF.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_config</span><span class="p">[</span><span class="s2">&quot;nadcs&quot;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">file_config</span><span class="p">[</span><span class="s2">&quot;nsamples&quot;</span><span class="p">]))</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c1"># also initializes the garbage df (whatever that means...)</span>
+
+        <span class="c1"># self.event_header_length = 1 #?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_period</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># ns, I will set this later, according to header info</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="mi">0</span>           
+        <span class="bp">self</span><span class="o">.</span><span class="n">h5_format</span> <span class="o">=</span> <span class="s2">&quot;table&quot;</span>	<span class="c1">#was table</span>
+        <span class="c1">#self.n_blsamp = 2000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">=</span> <span class="mi">0</span>       <span class="c1">#event number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ievt_gbg</span> <span class="o">=</span> <span class="mi">0</span>      <span class="c1">#garbage event number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_metadata</span> <span class="o">=</span> <span class="n">metadata</span> <span class="c1">#seems that was passed to superclass before, try now like this</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pytables_col_limit</span> <span class="o">=</span> <span class="mi">3000</span>
+
+<div class="viewcode-block" id="LLAMAStruck3316.readMetadata"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.LLAMAStruck3316.readMetadata">[docs]</a>    <span class="k">def</span> <span class="nf">readMetadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">):</span>
+        <span class="n">nsamples</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">totChan</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">adcOff</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">fadc</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">:</span>
+            <span class="n">adcOff</span><span class="p">[</span><span class="n">fadc</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">[</span><span class="n">fadc</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">nsamples</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># FIXME everything is fixed to 1st existing channel.</span>
+                    <span class="n">nsamples</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="n">fadc</span><span class="p">][</span><span class="n">channel</span><span class="p">][</span><span class="s2">&quot;SampleLength&quot;</span><span class="p">]</span>
+                    <span class="n">configs</span><span class="p">[</span><span class="s2">&quot;14BitFlag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="n">fadc</span><span class="p">][</span><span class="n">channel</span><span class="p">][</span><span class="s2">&quot;14BitFlag&quot;</span><span class="p">]</span>
+                    <span class="c1">#configs[&quot;ADCOffset&quot;] = meta[fadc][channel][&quot;ADCOffset&quot;]</span>
+                    <span class="n">configs</span><span class="p">[</span><span class="s2">&quot;FormatBits&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="n">fadc</span><span class="p">][</span><span class="n">channel</span><span class="p">][</span><span class="s2">&quot;FormatBits&quot;</span><span class="p">]</span>
+                    <span class="n">configs</span><span class="p">[</span><span class="s2">&quot;Gain&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="n">fadc</span><span class="p">][</span><span class="n">channel</span><span class="p">][</span><span class="s2">&quot;Gain&quot;</span><span class="p">]</span>
+                    <span class="n">configs</span><span class="p">[</span><span class="s2">&quot;SampleFreq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="n">fadc</span><span class="p">][</span><span class="n">channel</span><span class="p">][</span><span class="s2">&quot;SampleFreq&quot;</span><span class="p">]</span>
+                    <span class="n">configs</span><span class="p">[</span><span class="s2">&quot;SampleOffset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="n">fadc</span><span class="p">][</span><span class="n">channel</span><span class="p">][</span><span class="s2">&quot;SampleOffset&quot;</span><span class="p">]</span>
+                    <span class="n">adcOff</span><span class="p">[</span><span class="n">fadc</span><span class="p">][</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="n">fadc</span><span class="p">][</span><span class="n">channel</span><span class="p">][</span><span class="s2">&quot;ADCOffset&quot;</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">nsamples</span> <span class="o">!=</span> <span class="n">meta</span><span class="p">[</span><span class="n">fadc</span><span class="p">][</span><span class="n">channel</span><span class="p">][</span><span class="s2">&quot;SampleLength&quot;</span><span class="p">]:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;samples not uniform!!!&quot;</span><span class="p">)</span>
+                <span class="n">totChan</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">configs</span><span class="p">[</span><span class="s2">&quot;nadcs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">totChan</span>
+        <span class="n">configs</span><span class="p">[</span><span class="s2">&quot;nsamples&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nsamples</span>
+        <span class="k">return</span> <span class="n">configs</span></div>
+        
+<div class="viewcode-block" id="LLAMAStruck3316.initialize"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.LLAMAStruck3316.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_period</span><span class="p">,</span> <span class="n">gain</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        sets certain global values from a run, like:</span>
+<span class="sd">        sample_period: time difference btw 2 samples in ns</span>
+<span class="sd">        gain: multiply the integer sample value with the gain to get the voltage in V</span>
+<span class="sd">        Method has to be called before the actual decoding work starts !</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_period</span> <span class="o">=</span> <span class="n">sample_period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="n">gain</span></div>
+        
+        
+<div class="viewcode-block" id="LLAMAStruck3316.decode_event"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.LLAMAStruck3316.decode_event">[docs]</a>    <span class="k">def</span> <span class="nf">decode_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_data_bytes</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">,</span> <span class="n">header_dict</span><span class="p">,</span> <span class="n">fadcIndex</span><span class="p">,</span> 
+                     <span class="n">channelIndex</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        see the llamaDAQ documentation for data word diagrams</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: Sample period not set; use initialize() before using decode_event() on SIS3316Decoder&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s2">&quot;Sample period not set&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># parse the raw event data into numpy arrays of 16 and 32 bit ints</span>
+        <span class="n">evt_data_32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">event_data_bytes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+        <span class="n">evt_data_16</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">event_data_bytes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+        
+        <span class="c1"># e sti gran binaries non ce li metti</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="p">((</span><span class="n">evt_data_32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xffff0000</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">format_bits</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt_data_32</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="mh">0x0000000f</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="n">format_bits</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="p">:</span>
+            <span class="n">peakhigh_value</span> <span class="o">=</span> <span class="n">evt_data_16</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">peakhigh_index</span> <span class="o">=</span> <span class="n">evt_data_16</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">information</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span>
+            <span class="n">accumulator1</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">accumulator2</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">accumulator3</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">accumulator4</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">accumulator5</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">accumulator6</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">7</span><span class="p">]</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="mi">7</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">peakhigh_value</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">peakhigh_index</span> <span class="o">=</span> <span class="mi">0</span>  
+            <span class="n">information</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">accumulator1</span> <span class="o">=</span> <span class="n">accumulator2</span> <span class="o">=</span> <span class="n">accumulator3</span> <span class="o">=</span> <span class="n">accumulator4</span> <span class="o">=</span> <span class="n">accumulator5</span> <span class="o">=</span> <span class="n">accumulator6</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">format_bits</span> <span class="o">&amp;</span> <span class="mh">0x2</span><span class="p">:</span>
+            <span class="n">accumulator7</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">accumulator8</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">accumulator7</span> <span class="o">=</span> <span class="n">accumulator8</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">format_bits</span> <span class="o">&amp;</span> <span class="mh">0x4</span><span class="p">:</span>
+            <span class="n">mawMax</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">maw_before</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">maw_after</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mawMax</span> <span class="o">=</span> <span class="n">maw_before</span> <span class="o">=</span> <span class="n">maw_after</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">format_bits</span> <span class="o">&amp;</span> <span class="mh">0x8</span><span class="p">:</span>
+            <span class="n">energy_first</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">energy_first</span> <span class="o">=</span> <span class="n">energy</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">pass</span>
+        <span class="n">wf_length_32</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt_data_32</span><span class="p">[</span><span class="n">offset</span><span class="o">+</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="mh">0x03ffffff</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c1">#now the offset points to the wf data</span>
+        <span class="n">fadcID</span> <span class="o">=</span> <span class="n">fadcIndex</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">channelIndex</span>
+        
+        
+        <span class="c1"># compute expected and actual array dimensions</span>
+        <span class="n">wf_length16</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">wf_length_32</span>
+        <span class="n">header_length16</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">expected_wf_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">evt_data_16</span><span class="p">)</span> <span class="o">-</span> <span class="n">header_length16</span>
+
+        <span class="c1"># error check: waveform size must match expectations</span>
+        <span class="k">if</span> <span class="n">wf_length16</span> <span class="o">!=</span> <span class="n">expected_wf_length</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">evt_data_16</span><span class="p">),</span> <span class="n">header_length16</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: Waveform size </span><span class="si">%d</span><span class="s2"> doesn&#39;t match expected size </span><span class="si">%d</span><span class="s2">.&quot;</span> <span class="o">%</span>
+                  <span class="p">(</span><span class="n">wf_length16</span><span class="p">,</span> <span class="n">expected_wf_length</span><span class="p">))</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+        <span class="c1"># indexes of stuff (all referring to the 16 bit array)</span>
+        <span class="n">i_wf_start</span> <span class="o">=</span> <span class="n">header_length16</span>
+        <span class="n">i_wf_stop</span> <span class="o">=</span> <span class="n">i_wf_start</span> <span class="o">+</span> <span class="n">wf_length16</span>
+
+        <span class="c1"># handle the waveform(s)</span>
+        <span class="k">if</span> <span class="n">wf_length_32</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">wf_data</span> <span class="o">=</span> <span class="n">evt_data_16</span><span class="p">[</span><span class="n">i_wf_start</span><span class="p">:</span><span class="n">i_wf_stop</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf_data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected_wf_length</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: event </span><span class="si">%d</span><span class="s2">, we expected </span><span class="si">%d</span><span class="s2"> WF samples and only got </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span>
+                  <span class="p">(</span><span class="n">ievt</span><span class="p">,</span> <span class="n">expected_wf_length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf_data</span><span class="p">)))</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+        <span class="c1"># final raw wf array</span>
+        <span class="n">waveform</span> <span class="o">=</span> <span class="n">wf_data</span>
+
+        <span class="c1"># if the wf is too big for pytables, we can window it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">:</span>
+            <span class="n">wf</span> <span class="o">=</span> <span class="n">Waveform</span><span class="p">(</span><span class="n">wf_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_period</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_name</span><span class="p">)</span>
+            <span class="n">win_wf</span><span class="p">,</span> <span class="n">win_ts</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">window_waveform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">win_type</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">n_samp</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">n_blsamp</span><span class="p">,</span>
+                                                <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># ts_lo, ts_hi = win_ts[0], win_ts[-1]  # FIXME: what does this mean?</span>
+
+            <span class="n">waveform</span> <span class="o">=</span> <span class="n">win_wf</span> <span class="c1"># modify final wf array</span>
+
+            <span class="k">if</span> <span class="n">wf</span><span class="o">.</span><span class="n">is_garbage</span><span class="p">:</span>
+                <span class="n">ievt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ievt_gbg</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ievt_gbg</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">format_data</span><span class="p">(</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">wf</span><span class="o">.</span><span class="n">is_garbage</span><span class="p">)</span>
+                <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">waveform</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">pytables_col_limit</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5_format</span> <span class="o">==</span> <span class="s2">&quot;table&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: too many columns for tables output,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;         reverting to saving as fixed hdf5 ...&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h5_format</span> <span class="o">=</span> <span class="s2">&quot;fixed&quot;</span>
+
+        <span class="c1"># set the event number (searchable HDF5 column)</span>
+        <span class="n">ievt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># send any variable with a name in &quot;decoded_values&quot; to the pandas output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_data</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="process_llama_3316"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.llamadaq.process_llama_3316">[docs]</a><span class="k">def</span> <span class="nf">process_llama_3316</span><span class="p">(</span><span class="n">daq_filename</span><span class="p">,</span> <span class="n">raw_filename</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">n_max</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convert llama DAQ data to pygama &quot;raw&quot; lh5</span>
+
+<span class="sd">    Mario&#39;s implementation for the Struck SIS3316 digitizer.</span>
+<span class="sd">    Requires the llamaDAQ program for producing compatible input files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ROW_LIMIT</span> <span class="o">=</span> <span class="mf">5e4</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">f_in</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">daq_filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">f_in</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t find the file </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">daq_filename</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1">#file = llama_3316(f_in,2) #test</span>
+
+    <span class="n">verbosity</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">verbose</span> <span class="k">else</span> <span class="mi">0</span>     <span class="c1"># 2 is for debug</span>
+    <span class="n">sisfile</span> <span class="o">=</span> <span class="n">llama_3316</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">)</span>
+
+    <span class="c1"># figure out the total size</span>
+    <span class="n">SEEK_END</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">f_in</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">SEEK_END</span><span class="p">)</span>
+    <span class="n">file_size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">f_in</span><span class="o">.</span><span class="n">tell</span><span class="p">())</span>
+    <span class="n">f_in</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># rewind</span>
+    <span class="n">file_size_MB</span> <span class="o">=</span> <span class="n">file_size</span> <span class="o">/</span> <span class="mf">1e6</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total file size: </span><span class="si">{:.3f}</span><span class="s2"> MB&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_size_MB</span><span class="p">))</span>
+
+    <span class="n">header_dict</span> <span class="o">=</span> <span class="n">sisfile</span><span class="o">.</span><span class="n">parse_channelConfigs</span><span class="p">()</span>    <span class="c1"># parse the header dict after manipulating position in file</span>
+
+    <span class="c1"># run = get_run_number(header_dict)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run number: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run</span><span class="p">))</span>
+
+    <span class="n">pprint</span><span class="p">(</span><span class="n">header_dict</span><span class="p">)</span>
+
+    <span class="c1">#see pygama/pygama/io/decoders/io_base.py</span>
+    <span class="n">decoders</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#decoders.append(LLAMAStruck3316(metadata=pd.DataFrame.from_dict(header_dict)))   #we just have that one</span>
+    <span class="n">decoders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LLAMAStruck3316</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">header_dict</span><span class="p">))</span>  <span class="c1">#we just have that one</span>
+                    <span class="c1"># fix: saving metadata using io_bases ctor</span>
+                    <span class="c1"># have to convert to dataframe here in order to avoid</span>
+                    <span class="c1"># passing to xml_header.get_object_info in io_base.load_metadata</span>
+    <span class="n">channelOne</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">header_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">decoders</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="mf">1000.</span><span class="o">/</span><span class="n">channelOne</span><span class="p">[</span><span class="s2">&quot;SampleFreq&quot;</span><span class="p">],</span> <span class="n">channelOne</span><span class="p">[</span><span class="s2">&quot;Gain&quot;</span><span class="p">])</span>
+        <span class="c1"># FIXME: gain set according to first found channel, but gain can change!</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pygama will run this fancy decoder: SIS3316Decoder&quot;</span><span class="p">)</span>
+
+    <span class="c1"># pass in specific decoder options (windowing, multisampling, etc.)</span>
+    <span class="c1">#for d in decoders:</span>
+    <span class="c1">#    d.apply_config(config) #no longer used (why?)</span>
+
+    <span class="c1"># ------------ scan over raw data starts here -----------------</span>
+    <span class="c1"># more code duplication</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Beginning Tier 0 processing ...&quot;</span><span class="p">)</span>
+
+    <span class="n">packet_id</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># number of events decoded</span>
+    <span class="n">row_id</span> <span class="o">=</span> <span class="mi">0</span>      <span class="c1">#index of written rows, FIXME maybe gets unused</span>
+    <span class="n">unrecognized_data_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># header is already skipped by llama_3316,</span>
+
+    <span class="k">def</span> <span class="nf">toFile</span><span class="p">(</span><span class="n">digitizer</span><span class="p">,</span> <span class="n">filename_raw</span><span class="p">,</span> <span class="n">rowID</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+        <span class="n">numb</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rowID</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">filename_mod</span> <span class="o">=</span> <span class="n">filename_raw</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">numb</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;redirecting output file to packetfile &quot;</span><span class="o">+</span><span class="n">filename_mod</span><span class="p">)</span>
+        <span class="n">digitizer</span><span class="o">.</span><span class="n">save_to_pytables</span><span class="p">(</span><span class="n">filename_mod</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+
+    <span class="c1"># start scanning</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">packet_id</span> <span class="o">&lt;</span> <span class="n">n_max</span> <span class="ow">and</span> <span class="n">f_in</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">file_size</span><span class="p">):</span>
+        <span class="n">packet_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">packet_id</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">update_progress</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">f_in</span><span class="o">.</span><span class="n">tell</span><span class="p">())</span> <span class="o">/</span> <span class="n">file_size</span><span class="p">)</span>
+
+        <span class="c1"># write periodically to the output file instead of writing all at once</span>
+        <span class="k">if</span> <span class="n">packet_id</span> <span class="o">%</span> <span class="n">ROW_LIMIT</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">decoders</span><span class="p">:</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">save_to_lh5</span><span class="p">(</span><span class="n">raw_filename</span><span class="p">)</span>
+            <span class="n">row_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fadcID</span><span class="p">,</span> <span class="n">channelID</span><span class="p">,</span> <span class="n">event_data</span> <span class="o">=</span> <span class="n">sisfile</span><span class="o">.</span><span class="n">read_next_event</span><span class="p">(</span><span class="n">header_dict</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to get the next event ... Exception:&quot;</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">event_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">decoder</span> <span class="o">=</span> <span class="n">decoders</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>       <span class="c1">#well, ...</span>
+        <span class="c1"># sends data to the pandas dataframe</span>
+        <span class="n">decoder</span><span class="o">.</span><span class="n">decode_event</span><span class="p">(</span><span class="n">event_data</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">,</span> <span class="n">header_dict</span><span class="p">,</span> <span class="n">fadcID</span><span class="p">,</span> <span class="n">channelID</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done.  last packet ID:&quot;</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">)</span>
+    <span class="n">f_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># final write to file</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">decoders</span><span class="p">:</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">save_to_lh5</span><span class="p">(</span><span class="n">raw_filename</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">update_progress</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unrecognized_data_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING, Found the following unknown data IDs:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">unrecognized_data_ids</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hopefully they weren&#39;t important!</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ---------  summary ------------</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Wrote: Tier 1 File:</span><span class="se">\n</span><span class="s2">    </span><span class="si">{}</span><span class="se">\n</span><span class="s2">FILE INFO:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">raw_filename</span><span class="p">))</span>
+    <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">HDFStore</span><span class="p">(</span><span class="n">raw_filename</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">store</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+    <span class="c1">#    # print(store.info())</span>
+
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,481 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.utils &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">pygama convenience functions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<div class="viewcode-block" id="SafeDict"><a class="viewcode-back" href="../../pygama.html#pygama.utils.SafeDict">[docs]</a><span class="k">class</span> <span class="nc">SafeDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    used in handling LEGEND file format strings.</span>
+<span class="sd">    when a key is missing, return the string value of that key.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__missing__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span></div>
+
+
+<div class="viewcode-block" id="get_dataset_from_cmdline"><a class="viewcode-back" href="../../pygama.html#pygama.utils.get_dataset_from_cmdline">[docs]</a><span class="k">def</span> <span class="nf">get_dataset_from_cmdline</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">run_db</span><span class="p">,</span> <span class="n">cal_db</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    make it easier to call this from argparse:</span>
+<span class="sd">        arg(&quot;-ds&quot;, nargs=&#39;*&#39;, action=&quot;store&quot;, help=&quot;load runs for a DS&quot;)</span>
+<span class="sd">        arg(&quot;-r&quot;, &quot;--run&quot;, nargs=1, help=&quot;load a single run&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pygama</span> <span class="kn">import</span> <span class="n">DataSet</span>
+    
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;ds&quot;</span><span class="p">]:</span>
+        <span class="n">ds_lo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;ds&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ds_hi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;ds&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">ds_hi</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">ds_lo</span><span class="p">,</span> <span class="n">ds_hi</span><span class="p">,</span> <span class="n">md</span><span class="o">=</span><span class="n">run_db</span><span class="p">,</span> <span class="n">cal</span><span class="o">=</span><span class="n">cal_db</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]:</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">run</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">md</span><span class="o">=</span><span class="n">run_db</span><span class="p">,</span> <span class="n">cal</span><span class="o">=</span><span class="n">cal_db</span><span class="p">,</span> 
+                     <span class="n">v</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">ds</span></div>
+
+
+<span class="k">def</span> <span class="nf">sh</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">sh</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    input a shell command as you would type it on the command line.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">decoders</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">DataTaker</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">subsub</span> <span class="ow">in</span> <span class="n">sub</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">decoder</span> <span class="o">=</span> <span class="n">subsub</span><span class="p">(</span><span class="n">object_info</span><span class="p">)</span> <span class="c1"># initialize the decoder</span>
+                <span class="n">decoders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decoder</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">decoders</span>
+
+
+<div class="viewcode-block" id="update_progress"><a class="viewcode-back" href="../../pygama.html#pygama.utils.update_progress">[docs]</a><span class="k">def</span> <span class="nf">update_progress</span><span class="p">(</span><span class="n">progress</span><span class="p">,</span> <span class="n">run</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    adapted from from https://stackoverflow.com/a/15860757</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">barLength</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># length of the progress bar</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">progress</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">progress</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">progress</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">progress</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">progress</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;error: progress var must be float</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">progress</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">progress</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;Halt...</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">progress</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">progress</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;Done...</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">barLength</span> <span class="o">*</span> <span class="n">progress</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">run</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s2">Progress : [</span><span class="si">{}</span><span class="s2">] </span><span class="si">{:0.1f}</span><span class="s2">% </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;#&quot;</span> <span class="o">*</span> <span class="n">block</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">barLength</span> <span class="o">-</span> <span class="n">block</span><span class="p">),</span> <span class="n">progress</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s2">Progress : [</span><span class="si">{}</span><span class="s2">] </span><span class="si">{:0.1f}</span><span class="s2">% </span><span class="si">{}</span><span class="s2"> (Run </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;#&quot;</span> <span class="o">*</span> <span class="n">block</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">barLength</span> <span class="o">-</span> <span class="n">block</span><span class="p">),</span> <span class="n">progress</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span>
+            <span class="n">run</span><span class="p">)</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="sizeof_fmt"><a class="viewcode-back" href="../../pygama.html#pygama.utils.sizeof_fmt">[docs]</a><span class="k">def</span> <span class="nf">sizeof_fmt</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    given a file size in bytes, output a human-readable form.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1000.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{:.3f}</span><span class="s2"> </span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+        <span class="n">num</span> <span class="o">/=</span> <span class="mf">1000.0</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{:.1f}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="set_plot_style"><a class="viewcode-back" href="../../pygama.html#pygama.utils.set_plot_style">[docs]</a><span class="k">def</span> <span class="nf">set_plot_style</span><span class="p">(</span><span class="n">style</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Choose a pygama plot style.</span>
+<span class="sd">    Current options: &#39;clint&#39;, &#39;root&#39;</span>
+<span class="sd">    Or add your own [label].mpl file in the pygama directory!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="vm">__file__</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;.utils.py&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">style</span><span class="o">+</span><span class="s1">&#39;.mpl&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_par_names"><a class="viewcode-back" href="../../pygama.html#pygama.utils.get_par_names">[docs]</a><span class="k">def</span> <span class="nf">get_par_names</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a list containing the names of the arguments of &quot;func&quot; other than the</span>
+<span class="sd">    first argument. In pygamaland, those are the function&#39;s &quot;parameters.&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy._lib._util</span> <span class="kn">import</span> <span class="n">getargspec_no_self</span>
+    <span class="n">args</span><span class="p">,</span> <span class="n">varargs</span><span class="p">,</span> <span class="n">varkw</span><span class="p">,</span> <span class="n">defaults</span> <span class="o">=</span> <span class="n">getargspec_no_self</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="plot_func"><a class="viewcode-back" href="../../pygama.html#pygama.utils.plot_func">[docs]</a><span class="k">def</span> <span class="nf">plot_func</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">npx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    plot a function.  take care of the x-axis points automatically, or user can</span>
+<span class="sd">    specify via range and npx arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">npx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">npx</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="k">if</span> <span class="nb">range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">range</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">()</span>
+    <span class="n">xvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">npx</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="n">func</span><span class="p">(</span><span class="n">xvals</span><span class="p">,</span> <span class="o">*</span><span class="n">pars</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_formatted_stats"><a class="viewcode-back" href="../../pygama.html#pygama.utils.get_formatted_stats">[docs]</a><span class="k">def</span> <span class="nf">get_formatted_stats</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">ndigs</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convenience function for formatting mean +/- sigma to the right number of</span>
+<span class="sd">    significant figures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sig_pos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sigma</span><span class="p">))))</span>
+    <span class="n">sig_fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ndigs</span>
+    <span class="n">sig_fmt</span> <span class="o">=</span> <span class="s1">&#39;%#.&#39;</span> <span class="o">+</span> <span class="n">sig_fmt</span> <span class="o">+</span> <span class="s1">&#39;g&#39;</span>
+    <span class="n">mean_pos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mean</span><span class="p">))))</span>
+    <span class="n">mdigs</span> <span class="o">=</span> <span class="n">mean_pos</span><span class="o">-</span><span class="n">sig_pos</span><span class="o">+</span><span class="n">ndigs</span>
+    <span class="k">if</span> <span class="n">mdigs</span> <span class="o">&lt;</span> <span class="n">ndigs</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">mdigs</span> <span class="o">=</span> <span class="n">ndigs</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">mean_fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mdigs</span>
+    <span class="n">mean_fmt</span> <span class="o">=</span> <span class="s1">&#39;%#.&#39;</span> <span class="o">+</span> <span class="n">mean_fmt</span> <span class="o">+</span> <span class="s1">&#39;g&#39;</span>
+    <span class="k">return</span> <span class="n">mean_fmt</span> <span class="o">%</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sig_fmt</span> <span class="o">%</span> <span class="n">sigma</span></div>
+
+
+<div class="viewcode-block" id="print_fit_results"><a class="viewcode-back" href="../../pygama.html#pygama.utils.print_fit_results">[docs]</a><span class="k">def</span> <span class="nf">print_fit_results</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convenience function for scipy.optimize.curve_fit results</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">title</span><span class="o">+</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pars</span><span class="p">)):</span> <span class="n">par_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">par_names</span> <span class="o">=</span> <span class="n">get_par_names</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pars</span><span class="p">)):</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">get_formatted_stats</span><span class="p">(</span><span class="n">pars</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">cov</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">par_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="s2">&quot;+/-&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pad</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="tree_draw"><a class="viewcode-back" href="../../pygama.html#pygama.utils.tree_draw">[docs]</a><span class="k">def</span> <span class="nf">tree_draw</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="nb">vars</span><span class="p">,</span> <span class="n">tcut</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    if you have to debase yourself and use ROOT, this is an easy</span>
+<span class="sd">    convenience function for quickly extracting data from TTrees.</span>
+<span class="sd">    TTree::Draw can only handle groups of 4 variables at a time,</span>
+<span class="sd">    but here we can put in as many as we want, and</span>
+<span class="sd">    return a list of numpy.ndarrays for each one</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">var_list</span> <span class="o">=</span> <span class="nb">vars</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+    <span class="n">np_arrs</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">var_list</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_list</span><span class="p">),</span> <span class="mi">4</span><span class="p">):</span>
+
+        <span class="n">tmp_list</span> <span class="o">=</span> <span class="n">var_list</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>
+        <span class="n">tmp_draw</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_list</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">tmp_draw</span><span class="p">,</span> <span class="n">tcut</span><span class="p">,</span> <span class="s2">&quot;goff&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmp_list</span><span class="p">):</span>
+            <span class="c1"># print(i, j, var, &quot;getting V&quot;, j+1, &quot;writing to np_arrs&quot;, i + j)</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s2">&quot;GetV</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))()</span>
+            <span class="n">np_arrs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tmp</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np_arrs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="peakdet"><a class="viewcode-back" href="../../pygama.html#pygama.utils.peakdet">[docs]</a><span class="k">def</span> <span class="nf">peakdet</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converted from MATLAB script at: http://billauer.co.il/peakdet.html</span>
+<span class="sd">    Returns two arrays: [maxtab, mintab] = peakdet(v, delta, x)</span>
+<span class="sd">    An updated (vectorized) version is in pygama.dsp.transforms.peakdet</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">maxtab</span><span class="p">,</span> <span class="n">mintab</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="c1"># sanity checks</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Input vectors v and x must have same length&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">delta</span><span class="p">):</span>
+        <span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Input argument delta must be a scalar&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">delta</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Input argument delta must be positive&quot;</span><span class="p">)</span>
+
+    <span class="n">maxes</span><span class="p">,</span> <span class="n">mins</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">find_max</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+
+        <span class="c1"># for i=0, all 4 of these get set</span>
+        <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">:</span>
+            <span class="nb">max</span><span class="p">,</span> <span class="n">imax</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">:</span>
+            <span class="nb">min</span><span class="p">,</span> <span class="n">imin</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">find_max</span><span class="p">:</span>
+            <span class="c1"># if the sample is less than the current max,</span>
+            <span class="c1"># declare the previous one a maximum, then set this as the new &quot;min&quot;</span>
+            <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">max</span> <span class="o">-</span> <span class="n">delta</span><span class="p">:</span>
+                <span class="n">maxes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">imax</span><span class="p">,</span> <span class="nb">max</span><span class="p">))</span>
+                <span class="nb">min</span><span class="p">,</span> <span class="n">imin</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">find_max</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if the sample is more than the current min,</span>
+            <span class="c1"># declare the previous one a minimum, then set this as the new &quot;max&quot;</span>
+            <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">min</span> <span class="o">+</span> <span class="n">delta</span><span class="p">:</span>
+                <span class="n">mins</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">imin</span><span class="p">,</span> <span class="nb">min</span><span class="p">))</span>
+                <span class="nb">max</span><span class="p">,</span> <span class="n">imax</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">find_max</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">maxes</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mins</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sh"><a class="viewcode-back" href="../../pygama.html#pygama.utils.sh">[docs]</a><span class="k">def</span> <span class="nf">sh</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">sh</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    input a shell command as you would type it on the command line.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">shlex</span>
+    <span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="nn">sp</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sh</span><span class="p">:</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">cmd</span><span class="p">))</span>  <span class="c1"># &quot;safe&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="n">sh</span><span class="p">)</span>  <span class="c1"># &quot;less safe&quot;</span></div>
+
+
+<div class="viewcode-block" id="linear_fit_by_sums"><a class="viewcode-back" href="../../pygama.html#pygama.utils.linear_fit_by_sums">[docs]</a><span class="k">def</span> <span class="nf">linear_fit_by_sums</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fast computation of weighted linear least squares fit to a linear model</span>
+
+<span class="sd">    Note: doesn&#39;t compute covariances. If you want covariances, just use polyfit</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array like</span>
+<span class="sd">        x values for the fit</span>
+<span class="sd">    y : array like</span>
+<span class="sd">        y values for the fit</span>
+<span class="sd">    var : array like (optional)</span>
+<span class="sd">        The variances for each y-value</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    (m, b) : tuple (float, float)</span>
+<span class="sd">        The slope (m) and y-intercept (b) of the best fit (in the least-squares</span>
+<span class="sd">        sense) of the data to y = mx + b</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">/</span><span class="n">var</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">/</span><span class="n">var</span>
+    <span class="n">sum_wts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="n">var</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">var</span><span class="p">)</span> 
+    <span class="n">sum_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">sum_xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">sum_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">sum_yx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">sum_wts</span> <span class="o">*</span> <span class="n">sum_yx</span> <span class="o">-</span> <span class="n">sum_y</span> <span class="o">*</span> <span class="n">sum_x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sum_wts</span> <span class="o">*</span> <span class="n">sum_xx</span> <span class="o">-</span> <span class="n">sum_x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">sum_y</span> <span class="o">-</span> <span class="n">m</span> <span class="o">*</span> <span class="n">sum_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">sum_wts</span>
+    <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">b</span></div>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

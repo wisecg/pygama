@@ -1,0 +1,731 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.io.orca_digitizers &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.io.orca_digitizers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.io.orca_digitizers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.orcadaq</span> <span class="kn">import</span> <span class="n">OrcaDecoder</span><span class="p">,</span> <span class="n">get_ccc</span>
+
+<div class="viewcode-block" id="ORCAStruck3302"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302">[docs]</a><span class="k">class</span> <span class="nc">ORCAStruck3302</span><span class="p">(</span><span class="n">OrcaDecoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ORCA decoder for Struck 3302 digitizer data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoder_name</span> <span class="o">=</span> <span class="s1">&#39;ORSIS3302DecoderForEnergy&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orca_class_name</span> <span class="o">=</span> <span class="s1">&#39;ORSIS3302Model&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;packet_id&#39;</span><span class="p">:</span> <span class="p">{</span>
+               <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+             <span class="p">},</span>
+            <span class="s1">&#39;ievt&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;adc&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;energy_first&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint64&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;clock_ticks&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;crate&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint8&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;card&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint8&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;channel&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint8&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;waveform&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint16&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;waveform&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="mi">65532</span><span class="p">,</span> <span class="c1"># max value. override this before initalizing buffers to save RAM</span>
+              <span class="s1">&#39;sample_period&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="c1"># override if a different clock rate is used</span>
+              <span class="s1">&#39;sample_period_units&#39;</span><span class="p">:</span> <span class="s1">&#39;ns&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;adc&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c1"># also initializes the garbage df</span>
+        <span class="c1"># self.enabled_cccs = []</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="ORCAStruck3302.get_decoded_values"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302.get_decoded_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_decoded_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># TODO: return channel-specific decoded_values</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span></div>
+
+
+<div class="viewcode-block" id="ORCAStruck3302.set_object_info"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302.set_object_info">[docs]</a>    <span class="k">def</span> <span class="nf">set_object_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_info</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object_info</span> <span class="o">=</span> <span class="n">object_info</span>
+
+        <span class="c1"># parse object_info for important info</span>
+        <span class="k">for</span> <span class="n">card_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_info</span><span class="p">:</span>
+            <span class="n">crate</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Crate&#39;</span><span class="p">]</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Card&#39;</span><span class="p">]</span>
+
+            <span class="n">int_enabled_mask</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;internalTriggerEnabledMask&#39;</span><span class="p">]</span>
+            <span class="n">ext_enabled_mask</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;externalTriggerEnabledMask&#39;</span><span class="p">]</span>
+            <span class="n">enabled_mask</span> <span class="o">=</span> <span class="n">int_enabled_mask</span> <span class="o">|</span> <span class="n">ext_enabled_mask</span>
+            <span class="n">trace_length</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+                <span class="c1"># only care about enabled channels</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">enabled_mask</span> <span class="o">&gt;&gt;</span> <span class="n">channel</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="p">:</span>
+                    <span class="c1"># save list of enabled channels</span>
+                    <span class="c1">#self.enabled_cccs.append(get_ccc(crate, card, channel))</span>
+
+                    <span class="c1"># get trace length(s). Should all be the same until</span>
+                    <span class="c1"># multi-buffer mode is implemented AND each channel has its</span>
+                    <span class="c1"># own buffer</span>
+                    <span class="n">this_length</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;sampleLengths&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">channel</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
+                    <span class="k">if</span> <span class="n">trace_length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">trace_length</span> <span class="o">=</span> <span class="n">this_length</span>
+                    <span class="k">elif</span> <span class="n">this_length</span> <span class="o">!=</span> <span class="n">trace_length</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SIS3316ORCADecoder Error: multiple trace lengths not supported&#39;</span><span class="p">)</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+            <span class="c1"># check trace length and update decoded_values</span>
+            <span class="k">if</span> <span class="n">trace_length</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">trace_length</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="mi">16</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SIS3316ORCADecoder Error: invalid trace_length&#39;</span><span class="p">,</span> <span class="n">trace_length</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_length</span></div>
+
+
+<div class="viewcode-block" id="ORCAStruck3302.max_n_rows_per_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302.max_n_rows_per_packet">[docs]</a>    <span class="k">def</span> <span class="nf">max_n_rows_per_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="ORCAStruck3302.decode_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302.decode_packet">[docs]</a>    <span class="k">def</span> <span class="nf">decode_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">lh5_tables</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">,</span> <span class="n">header_dict</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        see README for the 32-bit data word diagram</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># interpret the raw event data into numpy arrays of 16 and 32 bit ints</span>
+        <span class="c1"># does not copy data. p32 and p16 are read-only</span>
+        <span class="n">p32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+        <span class="n">p16</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+        
+        <span class="c1"># read the crate/card/channel first</span>
+        <span class="n">crate</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">21</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xF</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1F</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
+        <span class="n">ccc</span> <span class="o">=</span> <span class="n">get_ccc</span><span class="p">(</span><span class="n">crate</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+        
+        <span class="c1"># aliases for brevity</span>
+        <span class="n">tb</span> <span class="o">=</span> <span class="n">lh5_tables</span>
+        <span class="c1"># if the first key is an int, then there are different tables for </span>
+        <span class="c1"># each channel.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">tb</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lh5_tables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">:</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">return</span>
+            <span class="n">tb</span> <span class="o">=</span> <span class="n">lh5_tables</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">loc</span>
+
+        <span class="c1"># store packet id</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;packet_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">packet_id</span>
+
+        <span class="c1"># read the rest of the record</span>
+        <span class="n">n_lost_msb</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">25</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7F</span>
+        <span class="n">n_lost_lsb</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7F</span>
+        <span class="n">n_lost_records</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_lost_msb</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_lost_lsb</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;crate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">21</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xF</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;card&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1F</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;channel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
+        <span class="n">buffer_wrap</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x1</span>
+        <span class="n">wf_length32</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ene_wf_length32</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">evt_header_id</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">p32</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xFFFF0000</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="n">last_word</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># get the footer</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;energy_first&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">extra_flags</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># compute expected and actual array dimensions</span>
+        <span class="n">wf_length16</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">wf_length32</span>
+        <span class="n">orca_helper_length16</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">sis_header_length16</span> <span class="o">=</span> <span class="mi">12</span> <span class="k">if</span> <span class="n">buffer_wrap</span> <span class="k">else</span> <span class="mi">8</span>
+        <span class="n">header_length16</span> <span class="o">=</span> <span class="n">orca_helper_length16</span> <span class="o">+</span> <span class="n">sis_header_length16</span>
+        <span class="n">ene_wf_length16</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ene_wf_length32</span>
+        <span class="n">footer_length16</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="n">expected_wf_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">p16</span><span class="p">)</span> <span class="o">-</span> <span class="n">orca_helper_length16</span> <span class="o">-</span> <span class="n">sis_header_length16</span> <span class="o">-</span> \
+            <span class="n">footer_length16</span> <span class="o">-</span> <span class="n">ene_wf_length16</span>
+
+        <span class="c1"># error check: waveform size must match expectations</span>
+        <span class="k">if</span> <span class="n">wf_length16</span> <span class="o">!=</span> <span class="n">expected_wf_length</span> <span class="ow">or</span> <span class="n">last_word</span> <span class="o">!=</span> <span class="mh">0xdeadbeef</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p16</span><span class="p">),</span> <span class="n">orca_helper_length16</span><span class="p">,</span> <span class="n">sis_header_length16</span><span class="p">,</span>
+                  <span class="n">footer_length16</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: Waveform size </span><span class="si">%d</span><span class="s2"> doesn&#39;t match expected size </span><span class="si">%d</span><span class="s2">.&quot;</span> <span class="o">%</span>
+                  <span class="p">(</span><span class="n">wf_length16</span><span class="p">,</span> <span class="n">expected_wf_length</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;       The Last Word (should be 0xdeadbeef):&quot;</span><span class="p">,</span>
+                  <span class="nb">hex</span><span class="p">(</span><span class="n">last_word</span><span class="p">))</span>
+            <span class="n">exit</span><span class="p">()</span>
+
+        <span class="c1"># indexes of stuff (all referring to the 16 bit array)</span>
+        <span class="n">i_wf_start</span> <span class="o">=</span> <span class="n">header_length16</span>
+        <span class="n">i_wf_stop</span> <span class="o">=</span> <span class="n">i_wf_start</span> <span class="o">+</span> <span class="n">wf_length16</span>
+        <span class="n">i_ene_start</span> <span class="o">=</span> <span class="n">i_wf_stop</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">i_ene_stop</span> <span class="o">=</span> <span class="n">i_ene_start</span> <span class="o">+</span> <span class="n">ene_wf_length16</span>
+        <span class="k">if</span> <span class="n">buffer_wrap</span><span class="p">:</span>
+            <span class="c1"># start somewhere in the middle of the record</span>
+            <span class="n">i_start_1</span> <span class="o">=</span> <span class="n">p32</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">header_length16</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">i_stop_1</span> <span class="o">=</span> <span class="n">i_wf_stop</span>  <span class="c1"># end of the wf record</span>
+            <span class="n">i_start_2</span> <span class="o">=</span> <span class="n">i_wf_start</span>  <span class="c1"># beginning of the wf record</span>
+            <span class="n">i_stop_2</span> <span class="o">=</span> <span class="n">i_start_1</span>
+
+        <span class="c1"># handle the waveform(s)</span>
+        <span class="c1">#energy_wf = np.zeros(ene_wf_length16)  # not used rn</span>
+        <span class="n">tbwf</span> <span class="o">=</span> <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">wf_length32</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">buffer_wrap</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i_wf_stop</span> <span class="o">-</span> <span class="n">i_wf_start</span> <span class="o">!=</span> <span class="n">expected_wf_length</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: event </span><span class="si">%d</span><span class="s2">, we expected </span><span class="si">%d</span><span class="s2"> WF samples and only got </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span>
+                          <span class="p">(</span><span class="n">ievt</span><span class="p">,</span> <span class="n">expected_wf_length</span><span class="p">,</span> <span class="n">i_wf_stope</span> <span class="o">-</span> <span class="n">i_wf_start</span><span class="p">))</span>
+                <span class="n">tbwf</span><span class="p">[:</span><span class="n">expected_wf_length</span><span class="p">]</span> <span class="o">=</span> <span class="n">p16</span><span class="p">[</span><span class="n">i_wf_start</span><span class="p">:</span><span class="n">i_wf_stop</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">len1</span> <span class="o">=</span> <span class="n">i_stop_1</span><span class="o">-</span><span class="n">i_start_1</span>
+                <span class="n">len2</span> <span class="o">=</span> <span class="n">i_stop_2</span><span class="o">-</span><span class="n">i_start_2</span>
+                <span class="k">if</span> <span class="n">len1</span><span class="o">+</span><span class="n">len2</span> <span class="o">!=</span> <span class="n">expected_wf_length</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: event </span><span class="si">%d</span><span class="s2">, we expected </span><span class="si">%d</span><span class="s2"> WF samples and only got </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span>
+                          <span class="p">(</span><span class="n">ievt</span><span class="p">,</span> <span class="n">expected_wf_length</span><span class="p">,</span> <span class="n">len1</span><span class="o">+</span><span class="n">len2</span><span class="p">))</span>
+                    <span class="n">exit</span><span class="p">()</span>
+                <span class="n">tbwf</span><span class="p">[:</span><span class="n">len1</span><span class="p">]</span> <span class="o">=</span> <span class="n">p16</span><span class="p">[</span><span class="n">i_start_1</span><span class="p">:</span><span class="n">i_stop_1</span><span class="p">]</span>
+                <span class="n">tbwf</span><span class="p">[</span><span class="n">len1</span><span class="p">:</span><span class="n">len1</span><span class="o">+</span><span class="n">len2</span><span class="p">]</span> <span class="o">=</span> <span class="n">p16</span><span class="p">[</span><span class="n">i_start_2</span><span class="p">:</span><span class="n">i_stop_2</span><span class="p">]</span>
+
+
+        <span class="c1"># set the event number (searchable HDF5 column)</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;ievt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">tb</span><span class="o">.</span><span class="n">push_row</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="ORCAGretina4M"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAGretina4M">[docs]</a><span class="k">class</span> <span class="nc">ORCAGretina4M</span><span class="p">(</span><span class="n">OrcaDecoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decoder for Majorana Gretina4M digitizer data</span>
+
+<span class="sd">    NOTE: Tom Caldwell made some nice new summary slides on a 2019 LEGEND call</span>
+<span class="sd">    https://indico.legend-exp.org/event/117/contributions/683/attachments/467/717/mjd_data_format.pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoder_name</span> <span class="o">=</span> <span class="s1">&#39;ORGretina4MWaveformDecoder&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orca_class_name</span> <span class="o">=</span> <span class="s1">&#39;ORGretina4MModel&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values_template</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;packet_id&#39;</span><span class="p">:</span> <span class="p">{</span>
+               <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+             <span class="p">},</span>
+            <span class="s1">&#39;ievt&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;adc&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;clock_ticks&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;crate&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint8&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;card&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint8&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;channel&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint8&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;board_id&quot;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;waveform&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int16&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;waveform&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="mi">2016</span><span class="p">,</span> <span class="c1"># shorter if multispampling is used</span>
+              <span class="s1">&#39;sample_period&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+              <span class="s1">&#39;sample_period_units&#39;</span><span class="p">:</span> <span class="s1">&#39;ns&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;adc&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_MS</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wf_skip</span> <span class="o">=</span> <span class="mi">16</span> <span class="c1"># the first ~dozen samples are sometimes junk</span>
+        <span class="c1"># channel pars for multisampling mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ft_len</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ps</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">div</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rises</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2016</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remainders</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2016</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ORCAGretina4M.get_decoded_values"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAGretina4M.get_decoded_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_decoded_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+            <span class="n">dec_vals_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dec_vals_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ORGretina4MModel: Error: decoded_values not built yet!&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">dec_vals_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ORGretina4MModel: Error: No decoded values for channel&quot;</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ORCAGretina4M.max_n_rows_per_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAGretina4M.max_n_rows_per_packet">[docs]</a>    <span class="k">def</span> <span class="nf">max_n_rows_per_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="ORCAGretina4M.set_object_info"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAGretina4M.set_object_info">[docs]</a>    <span class="k">def</span> <span class="nf">set_object_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_info</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object_info</span> <span class="o">=</span> <span class="n">object_info</span>
+
+        <span class="c1"># parse object_info for important info</span>
+        <span class="k">for</span> <span class="n">card_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_info</span><span class="p">:</span>
+            <span class="n">crate</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Crate&#39;</span><span class="p">]</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Card&#39;</span><span class="p">]</span>
+
+            <span class="n">is_enabled</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Enabled&#39;</span><span class="p">]</span>
+            <span class="n">ftcnt</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;FtCnt&#39;</span><span class="p">]</span>
+            <span class="n">presum_rates</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span> <span class="p">]</span> <span class="c1"># number presummed in MS</span>
+            <span class="n">mrpsrt</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Mrpsrt&#39;</span><span class="p">]</span> <span class="c1"># index for channel&#39;s presum rate</span>
+            <span class="n">dividers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span> <span class="p">]</span> <span class="c1"># dividers for presummed data</span>
+            <span class="n">mrpsdv</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Mrpsdv&#39;</span><span class="p">]</span> <span class="c1"># index for channel&#39;s divider</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+                <span class="c1"># only care about enabled channels</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_enabled</span><span class="p">[</span><span class="n">channel</span><span class="p">]:</span> <span class="k">continue</span>
+                <span class="n">ccc</span> <span class="o">=</span> <span class="n">get_ccc</span><span class="p">(</span><span class="n">crate</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decoded_values_template</span><span class="p">)</span>
+                <span class="n">sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="c1"># alias</span>
+
+                <span class="c1"># find MS parameters</span>
+                <span class="c1"># MS is on if FtCnt &gt; 0</span>
+                <span class="c1"># forget pre-rising-edge MS: it&#39;s broken so MJ doesn&#39;t use it</span>
+                <span class="c1"># Skip samples at beginning, fully sample, then FtCnt samples of</span>
+                <span class="c1"># pre-sampled, divided by div. Make one long fully-sampled wf.</span>
+                <span class="n">ft_len</span> <span class="o">=</span> <span class="n">ftcnt</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ft_len</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="n">ft_len</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_multisampled</span><span class="p">(</span><span class="n">ccc</span><span class="p">):</span>
+                    <span class="n">ps</span> <span class="o">=</span> <span class="n">presum_rates</span><span class="p">[</span><span class="n">mrpsrt</span><span class="p">[</span><span class="n">channel</span><span class="p">]]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="n">ps</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">div</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="n">dividers</span><span class="p">[</span><span class="n">mrpsdv</span><span class="p">[</span><span class="n">channel</span><span class="p">]]</span>
+                    <span class="c1"># chop off 3 values at the end because 2 are bad and we need</span>
+                    <span class="c1"># one for interpolation</span>
+                    <span class="n">min_len</span> <span class="o">=</span> <span class="mi">2018</span> <span class="o">-</span> <span class="n">ft_len</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_skip</span> <span class="o">+</span> <span class="p">(</span><span class="n">ps</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">ft_len</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="n">sd</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_len</span>
+                    <span class="k">if</span> <span class="n">min_len</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">min_len</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span> <span class="n">sd</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2016</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_skip</span></div>
+
+
+<div class="viewcode-block" id="ORCAGretina4M.is_multisampled"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAGretina4M.is_multisampled">[docs]</a>    <span class="k">def</span> <span class="nf">is_multisampled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ccc</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ccc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ft_len</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ft_len</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;channel&#39;</span><span class="p">,</span> <span class="n">ccc</span><span class="p">,</span> <span class="s1">&#39;not in ft_len...&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="ORCAGretina4M.decode_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAGretina4M.decode_packet">[docs]</a>    <span class="k">def</span> <span class="nf">decode_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">lh5_tables</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">,</span> <span class="n">header_dict</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse the header for an individual event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pu16</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+        <span class="n">p16</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+
+        <span class="n">crate</span> <span class="o">=</span> <span class="p">(</span><span class="n">pu16</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">5</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xF</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="n">pu16</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x1F</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">pu16</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xf</span>
+        <span class="n">ccc</span> <span class="o">=</span> <span class="n">get_ccc</span><span class="p">(</span><span class="n">crate</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+
+        <span class="c1"># aliases for brevity</span>
+        <span class="n">tb</span> <span class="o">=</span> <span class="n">lh5_tables</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tb</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lh5_tables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">:</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">return</span>
+            <span class="n">tb</span> <span class="o">=</span> <span class="n">lh5_tables</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">loc</span>
+
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;packet_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">packet_id</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;ievt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">pu16</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">pu16</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x1FF</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">pu16</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">pu16</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">pu16</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span><span class="p">)</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;crate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">crate</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;card&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">card</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;channel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">channel</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;board_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">pu16</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xFFF0</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+
+        <span class="c1"># wf starts from p16[18] and is always 2018 samples</span>
+        <span class="c1"># we will chop off the start (~a dozen) and end (last 2), but not until</span>
+        <span class="c1"># after we have handled multisampling</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">p16</span><span class="p">[</span><span class="mi">18</span><span class="p">:]</span>
+        <span class="n">wf_len</span> <span class="o">=</span> <span class="mi">2018</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_multisampled</span><span class="p">(</span><span class="n">ccc</span><span class="p">):</span>
+            <span class="c1"># get ccc pars</span>
+            <span class="n">ps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span>
+            <span class="n">div</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">div</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">div</span> <span class="o">/</span> <span class="n">ps</span>
+
+            <span class="c1"># find start of presummed section</span>
+            <span class="c1"># because it&#39;s not always self.ft_len :(</span>
+            <span class="n">ift</span> <span class="o">=</span> <span class="n">wf_len</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ft_len</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span>
+            <span class="n">min_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="n">min_diff_ift</span> <span class="o">=</span> <span class="n">ift</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_skip</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">d1</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">wf</span><span class="p">[</span><span class="n">ift</span><span class="o">+</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">ratio</span> <span class="o">-</span> <span class="n">wf</span><span class="p">[</span><span class="n">ift</span><span class="o">+</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">d1</span> <span class="o">&lt;</span> <span class="n">min_diff</span><span class="p">:</span>
+                    <span class="n">min_diff</span> <span class="o">=</span> <span class="n">d1</span>
+                    <span class="n">min_diff_ift</span> <span class="o">=</span> <span class="n">ift</span><span class="o">+</span><span class="n">i</span>
+            <span class="n">ift</span> <span class="o">=</span> <span class="n">min_diff_ift</span>
+            <span class="n">ift_out</span> <span class="o">=</span> <span class="n">ift</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_skip</span>
+
+            <span class="c1"># copy over fully-sampled portion</span>
+            <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">][:</span><span class="n">ift_out</span><span class="p">]</span> <span class="o">=</span> <span class="n">wf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_skip</span><span class="p">:</span><span class="n">ift</span><span class="p">]</span>
+
+            <span class="c1"># compute slopes for interpolation</span>
+            <span class="c1"># rise[i-1] is the slope prior to sample i, while rise[i] is the</span>
+            <span class="c1"># slope following it</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rises</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">rises</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wf</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rises</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">wf</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">wf</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># correct the value right before ift</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rises</span><span class="p">[</span><span class="n">ift</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">wf</span><span class="p">[</span><span class="n">ift</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">wf</span><span class="p">[</span><span class="n">ift</span><span class="o">-</span><span class="n">ps</span><span class="p">:</span><span class="n">ift</span><span class="p">])</span> <span class="o">/</span> <span class="n">div</span>
+
+            <span class="c1"># store double-precision values in self.remainders (later it will be</span>
+            <span class="c1"># used to compute remainders and do round-off</span>
+            <span class="c1"># Note: the interpolation done here is meant to preserve the</span>
+            <span class="c1"># presumming: re-presumming should reproduce the original waveform</span>
+            <span class="n">rem_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">)</span> <span class="o">-</span> <span class="n">ift_out</span>
+            <span class="k">for</span> <span class="n">ips</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ps</span><span class="p">):</span>
+                <span class="n">nn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span> <span class="p">(</span><span class="n">rem_len</span> <span class="o">-</span> <span class="n">ips</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">ps</span> <span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">[</span><span class="n">ift_out</span><span class="o">+</span><span class="n">ips</span><span class="p">::</span><span class="n">ps</span><span class="p">]</span> <span class="o">=</span> <span class="n">wf</span><span class="p">[</span><span class="n">ift</span><span class="p">:</span><span class="n">ift</span><span class="o">+</span><span class="n">nn</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">[</span><span class="n">ift_out</span><span class="o">+</span><span class="n">ips</span><span class="p">::</span><span class="n">ps</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">ips</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">ps</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">rises</span><span class="p">[</span><span class="n">ift</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">ift</span><span class="o">+</span><span class="n">nn</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">[</span><span class="n">ift_out</span><span class="o">+</span><span class="n">ips</span><span class="p">::</span><span class="n">ps</span><span class="p">]</span> <span class="o">*=</span> <span class="n">ratio</span>
+
+            <span class="c1"># now set the output based on rounding cumulative remainders</span>
+            <span class="n">wf_out</span> <span class="o">=</span> <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf_out</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: remainders len&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">),</span> <span class="s2">&quot;but wf_out len&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf_out</span><span class="p">))</span>
+                <span class="k">return</span>
+            <span class="k">for</span> <span class="n">ips</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ps</span><span class="p">):</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">[</span><span class="n">ift_out</span><span class="o">+</span><span class="n">ips</span><span class="p">::</span><span class="n">ps</span><span class="p">],</span> <span class="n">out</span><span class="o">=</span><span class="n">wf_out</span><span class="p">[</span><span class="n">ift_out</span><span class="o">+</span><span class="n">ips</span><span class="p">::</span><span class="n">ps</span><span class="p">],</span> <span class="n">casting</span><span class="o">=</span><span class="s1">&#39;unsafe&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ips</span> <span class="o">==</span> <span class="n">ps</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="k">break</span><span class="p">;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">[</span><span class="n">ift_out</span><span class="o">+</span><span class="n">ips</span><span class="p">::</span><span class="n">ps</span><span class="p">]</span> <span class="o">-=</span> <span class="n">wf_out</span><span class="p">[</span><span class="n">ift_out</span><span class="o">+</span><span class="n">ips</span><span class="p">::</span><span class="n">ps</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">[</span><span class="n">ift_out</span><span class="o">+</span><span class="n">ips</span><span class="o">+</span><span class="mi">1</span><span class="p">::</span><span class="n">ps</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainders</span><span class="p">[</span><span class="n">ift_out</span><span class="o">+</span><span class="n">ips</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">ps</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="mi">2016</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_skip</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="mi">16</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_skip</span>
+            <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">p16</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">length</span><span class="p">]</span>
+
+        <span class="n">tb</span><span class="o">.</span><span class="n">push_row</span><span class="p">()</span>
+
+        <span class="c1"># update the event number (searchable HDF5 column)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">class SIS3316ORCADecoder(DataTaker):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    handle ORCA Struck 3316 digitizer</span>
+
+<span class="sd">    TODO:</span>
+<span class="sd">    handle per-channel data (gain, ...)</span>
+<span class="sd">    most metadata of Struck header (energy, ...)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    def __init__(self, *args, **kwargs):</span>
+
+<span class="sd">        self.decoder_name = &#39;ORSIS3316WaveformDecoder&#39;</span>
+<span class="sd">        self.class_name = &#39;ORSIS3316Model&#39;</span>
+
+<span class="sd">        # store an entry for every event</span>
+<span class="sd">        self.decoded_values = {</span>
+<span class="sd">            &quot;packet_id&quot;: [],</span>
+<span class="sd">            &quot;ievt&quot;: [],</span>
+<span class="sd">            &quot;energy_first&quot;: [],</span>
+<span class="sd">            &quot;energy&quot;: [],</span>
+<span class="sd">            &quot;timestamp&quot;: [],</span>
+<span class="sd">            &quot;channel&quot;: [],</span>
+<span class="sd">            &quot;waveform&quot;: [],</span>
+<span class="sd">        }</span>
+<span class="sd">        super().__init__(*args, **kwargs) # also initializes the garbage df (whatever that means...)</span>
+
+<span class="sd">        # self.event_header_length = 1 #?</span>
+<span class="sd">        self.sample_period = 10  # ns, I will set this later, according to header info</span>
+<span class="sd">        self.gain = 0</span>
+<span class="sd">        self.h5_format = &quot;table&quot;</span>
+<span class="sd">        self.ievt = 0       #event number</span>
+<span class="sd">        self.ievt_gbg = 0      #garbage event number</span>
+<span class="sd">        self.window = False</span>
+
+
+<span class="sd">    def decode_event(self, event_data_bytes, packet_id, header_dict, verbose=False):</span>
+
+<span class="sd">        # parse the raw event data into numpy arrays of 16 and 32 bit ints</span>
+<span class="sd">        evt_data_32 = np.fromstring(event_data_bytes, dtype=np.uint32)</span>
+<span class="sd">        evt_data_16 = np.fromstring(event_data_bytes, dtype=np.uint16)</span>
+
+<span class="sd">        #TODO Figure out the header, particularly card/crate/channel/timestamp</span>
+<span class="sd">        n_lost_msb = 0</span>
+<span class="sd">        n_lost_lsb = 0</span>
+<span class="sd">        n_lost_records = 0</span>
+<span class="sd">        crate = evt_data_32[3]</span>
+<span class="sd">        card = evt_data_32[4]</span>
+<span class="sd">        channel = evt_data_32[4]</span>
+<span class="sd">        buffer_wrap = 0</span>
+<span class="sd">        crate_card_chan = crate + card + channel</span>
+<span class="sd">        wf_length_32 = 0</span>
+<span class="sd">        ene_wf_length = evt_data_32[4]</span>
+<span class="sd">        evt_header_id = 0</span>
+<span class="sd">        timestamp = 0</span>
+
+<span class="sd">        # compute expected and actual array dimensions</span>
+<span class="sd">        wf_length16 = 1024</span>
+<span class="sd">        orca_helper_length16 = 52</span>
+<span class="sd">        header_length16 = orca_helper_length16</span>
+<span class="sd">        ene_wf_length16 = 2 * ene_wf_length</span>
+<span class="sd">        footer_length16 = 0</span>
+
+<span class="sd">        expected_wf_length = (len(evt_data_16) - header_length16 - ene_wf_length16)/2</span>
+
+<span class="sd">        if wf_length16 != expected_wf_length:</span>
+<span class="sd">            print(&quot;ERROR: Waveform size %d doesn&#39;t match expected size %d.&quot; %</span>
+<span class="sd">                  (wf_length16, expected_wf_length))</span>
+<span class="sd">            #exit()</span>
+
+<span class="sd">        # indexes of stuff (all referring to the 16 bit array)</span>
+<span class="sd">        i_wf_start = header_length16</span>
+<span class="sd">        i_wf_stop = i_wf_start + wf_length16</span>
+<span class="sd">        i_ene_start = i_wf_stop + 1</span>
+<span class="sd">        i_ene_stop = i_ene_start + ene_wf_length16</span>
+
+
+<span class="sd">        # handle the waveform(s)</span>
+<span class="sd">        if wf_length16 &gt; 0:</span>
+<span class="sd">            wf_data = evt_data_16[i_wf_start:i_wf_stop]</span>
+
+
+<span class="sd">        #TODO check if number of events matches expected</span>
+<span class="sd">        #if len(wf_data) != expected_wf_length:</span>
+<span class="sd">        #    print(&quot;ERROR: We expected %d WF samples and only got %d&quot; %</span>
+<span class="sd">        #          (expected_wf_length, len(wf_data)))</span>
+<span class="sd">        #    exit()</span>
+
+<span class="sd">        # final raw wf array</span>
+<span class="sd">        waveform = wf_data</span>
+
+<span class="sd">        # set the event number (searchable HDF5 column)</span>
+<span class="sd">        ievt = self.ievt</span>
+<span class="sd">        self.ievt += 1</span>
+
+<span class="sd">        # send any variable with a name in &quot;decoded_values&quot; to the pandas output</span>
+<span class="sd">        self.format_data(locals())</span>
+<span class="sd">&#39;&#39;&#39;</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

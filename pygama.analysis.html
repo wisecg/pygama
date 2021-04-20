@@ -1,0 +1,913 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.analysis package &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pygama.dsp package" href="pygama.dsp.html" />
+    <link rel="prev" title="pygama package" href="pygama.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing pygama</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pygama.html">Package API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pygama.analysis package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.analysis.calibration">pygama.analysis.calibration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.analysis.data_cleaning">pygama.analysis.data_cleaning module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.analysis.datagroup">pygama.analysis.datagroup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.analysis.histograms">pygama.analysis.histograms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.analysis.metadata">pygama.analysis.metadata module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.analysis.peak_fitting">pygama.analysis.peak_fitting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-analysis-pulse-shape-analysis-module">pygama.analysis.pulse_shape_analysis module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.analysis">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.dsp.html">pygama.dsp package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.io.html">pygama.io package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.lh5.html">pygama.lh5 package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#pygama-git-module">pygama.git module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama.utils">pygama.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="pygama.html">pygama package</a> &raquo;</li>
+        
+      <li>pygama.analysis package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/pygama.analysis.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pygama-analysis-package">
+<h1>pygama.analysis package<a class="headerlink" href="#pygama-analysis-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygama.analysis.calibration">
+<span id="pygama-analysis-calibration-module"></span><h2>pygama.analysis.calibration module<a class="headerlink" href="#module-pygama.analysis.calibration" title="Permalink to this headline">¶</a></h2>
+<p>routines for automatic calibration.
+- peakdet (useful to find maxima in an array without taking derivative)
+- get_most_prominent_peaks (find by looking for spikes in spectrum derivative)
+- match_peaks (identify peaks based on ratios between known gamma energies)
+- calibrate_tl208 (main routine -- fits multiple peaks w/ Radford peak shape)
+- get_calibration_energies (a good place to put pk energies)</p>
+<dl class="py function">
+<dt id="pygama.analysis.calibration.calibrate_tl208">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.calibration.</span></code><code class="sig-name descname"><span class="pre">calibrate_tl208</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cal_peaks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotFigure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/calibration.html#calibrate_tl208"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.calibration.calibrate_tl208" title="Permalink to this definition">¶</a></dt>
+<dd><p>energy_series: array of energies we want to calibrate
+cal_peaks: array of peaks to fit</p>
+<p>1.) we find the 2614 peak by looking for the tallest peak at &gt;0.1 the max adc value
+2.) fit that peak to get a rough guess at a calibration to find other peaks with
+3.) fit each peak in peak_energies
+4.) do a linear fit to the peak centroids to find a calibration</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.calibration.get_calibration_energies">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.calibration.</span></code><code class="sig-name descname"><span class="pre">get_calibration_energies</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cal_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/calibration.html#get_calibration_energies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.calibration.get_calibration_energies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.calibration.get_most_prominent_peaks">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.calibration.</span></code><code class="sig-name descname"><span class="pre">get_most_prominent_peaks</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energySeries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xhi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xpb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_peaks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/calibration.html#get_most_prominent_peaks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.calibration.get_most_prominent_peaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>find the most prominent peaks in a spectrum by looking for spikes in derivative of spectrum
+energySeries: array of measured energies
+max_num_peaks = maximum number of most prominent peaks to find
+return a histogram around the most prominent peak in a spectrum of a given percentage of width</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.calibration.match_peaks">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.calibration.</span></code><code class="sig-name descname"><span class="pre">match_peaks</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_pks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cal_pks</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/calibration.html#match_peaks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.calibration.match_peaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match uncalibrated peaks with literature energy values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.calibration.peakdet">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.calibration.</span></code><code class="sig-name descname"><span class="pre">peakdet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/calibration.html#peakdet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.calibration.peakdet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converted from MATLAB script at: <a class="reference external" href="http://billauer.co.il/peakdet.html">http://billauer.co.il/peakdet.html</a>
+Returns two arrays: [maxtab, mintab] = peakdet(v, delta, x)
+An updated (vectorized) version is in pygama.dsp.transforms.peakdet</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.analysis.data_cleaning">
+<span id="pygama-analysis-data-cleaning-module"></span><h2>pygama.analysis.data_cleaning module<a class="headerlink" href="#module-pygama.analysis.data_cleaning" title="Permalink to this headline">¶</a></h2>
+<p>mainly pulser tagging
+- gaussian_cut (fits data to a gaussian, returns mean +/- cut_sigma values)
+- xtalball_cut (fits data to a crystalball, returns mean +/- cut_sigma values)
+- find_pulser_properties (find pulser by looking for which peak has a constant time between events)
+- tag_pulsers</p>
+<dl class="py function">
+<dt id="pygama.analysis.data_cleaning.find_pulser_properties">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.data_cleaning.</span></code><code class="sig-name descname"><span class="pre">find_pulser_properties</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trap_max'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/data_cleaning.html#find_pulser_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.data_cleaning.find_pulser_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.data_cleaning.gaussian_cut">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.data_cleaning.</span></code><code class="sig-name descname"><span class="pre">gaussian_cut</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotAxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/data_cleaning.html#gaussian_cut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.data_cleaning.gaussian_cut" title="Permalink to this definition">¶</a></dt>
+<dd><p>fits data to a gaussian, returns mean +/- cut_sigma values for a cut</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.data_cleaning.tag_pulsers">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.data_cleaning.</span></code><code class="sig-name descname"><span class="pre">tag_pulsers</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chan_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">250</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/data_cleaning.html#tag_pulsers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.data_cleaning.tag_pulsers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.data_cleaning.xtalball_cut">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.data_cleaning.</span></code><code class="sig-name descname"><span class="pre">xtalball_cut</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotFigure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/data_cleaning.html#xtalball_cut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.data_cleaning.xtalball_cut" title="Permalink to this definition">¶</a></dt>
+<dd><p>fits data to a crystalball, returns mean +/- cut_sigma values for a cut</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.analysis.datagroup">
+<span id="pygama-analysis-datagroup-module"></span><h2>pygama.analysis.datagroup module<a class="headerlink" href="#module-pygama.analysis.datagroup" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.analysis.datagroup.DataGroup">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.analysis.datagroup.</span></code><code class="sig-name descname"><span class="pre">DataGroup</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/datagroup.html#DataGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.datagroup.DataGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to create an in-memory or on-disk set of files, according to the
+LEGEND data convention.  Typically requires a JSON config file with:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>path to DAQ and LH5 directories</p></li>
+<li><p>format strings for daq/lh5 files</p></li>
+<li><p>partitions for the LH5 data directory</p></li>
+</ul>
+</div></blockquote>
+<p>Reference: <a class="reference external" href="https://docs.legend-exp.org/index.php/apps/files/?dir=/LEGEND%20Documents/Technical%20Documents/Analysis&amp;fileid=9140#pdfviewer">https://docs.legend-exp.org/index.php/apps/files/?dir=/LEGEND%20Documents/Technical%20Documents/Analysis&amp;fileid=9140#pdfviewer</a></p>
+<dl class="py method">
+<dt id="pygama.analysis.datagroup.DataGroup.get_lh5_cols">
+<code class="sig-name descname"><span class="pre">get_lh5_cols</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/datagroup.html#DataGroup.get_lh5_cols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.datagroup.DataGroup.get_lh5_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute the LH5 filenames.</p>
+<p>need to generate the file names, and then figure out which folder
+to store them in.  probably best to separate these tasks</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.analysis.datagroup.DataGroup.lh5_dir_setup">
+<code class="sig-name descname"><span class="pre">lh5_dir_setup</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/datagroup.html#DataGroup.lh5_dir_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.datagroup.DataGroup.lh5_dir_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate paths to LH5 data directories, using <cite>self.lh5_dir</cite>
+if user_dir is True, create them in <cite>self.lh5_user</cite> instead.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.analysis.datagroup.DataGroup.load_df">
+<code class="sig-name descname"><span class="pre">load_df</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/datagroup.html#DataGroup.load_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.datagroup.DataGroup.load_df" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.analysis.datagroup.DataGroup.load_keys">
+<code class="sig-name descname"><span class="pre">load_keys</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/datagroup.html#DataGroup.load_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.datagroup.DataGroup.load_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>load a list of file keys and parse data into columns according to
+the format string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.analysis.datagroup.DataGroup.save_df">
+<code class="sig-name descname"><span class="pre">save_df</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/datagroup.html#DataGroup.save_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.datagroup.DataGroup.save_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>save the current self.fileDB dataframe. If we've added extra columns
+specific to an experiment (outside this class), this will preserve them.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.analysis.datagroup.DataGroup.save_keys">
+<code class="sig-name descname"><span class="pre">save_keys</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/datagroup.html#DataGroup.save_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.datagroup.DataGroup.save_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>default: save the unique_key and the relative path to the DAQ file,
+as a CSV file.  this will probably change in the future, but at least
+this way we can:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>easily get a list of available DAQ files</p></li>
+<li><p>regenerate the DataFrame from scan_daq_dir by parsing format string</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.analysis.datagroup.DataGroup.scan_daq_dir">
+<code class="sig-name descname"><span class="pre">scan_daq_dir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/datagroup.html#DataGroup.scan_daq_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.datagroup.DataGroup.scan_daq_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>scan the DAQ directory and build a DataFrame of file keys.
+don't make any experiment-specific choices here.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.analysis.datagroup.DataGroup.set_config">
+<code class="sig-name descname"><span class="pre">set_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/datagroup.html#DataGroup.set_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.datagroup.DataGroup.set_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.analysis.histograms">
+<span id="pygama-analysis-histograms-module"></span><h2>pygama.analysis.histograms module<a class="headerlink" href="#module-pygama.analysis.histograms" title="Permalink to this headline">¶</a></h2>
+<p>pygama convenience functions for 1D histograms.</p>
+<p>1D hists in pygama require 3 things available from all implementations
+of 1D histograms of numerical data in python: hist, bins, and var:
+- hist: an array of histogram values
+- bins: an array of bin edges
+- var: an array of variances in each bin
+If var is not provided, pygama assuems that the hist contains &quot;counts&quot; with
+variance = counts (Poisson stats)</p>
+<p>These are just convenience functions, provided for your convenience. Hopefully
+they will help you if you need to do something trickier than is provided (e.g.
+2D hists).</p>
+<dl class="py function">
+<dt id="pygama.analysis.histograms.find_bin">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.histograms.</span></code><code class="sig-name descname"><span class="pre">find_bin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/histograms.html#find_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.histograms.find_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the index of the bin containing x
+Returns -1 for underflow, and len(bins) for overflow
+For uniform bins, jumps directly to the appropriate index.
+For non-uniform bins, binary search is used.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.histograms.get_bin_centers">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.histograms.</span></code><code class="sig-name descname"><span class="pre">get_bin_centers</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/histograms.html#get_bin_centers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.histograms.get_bin_centers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of bin centers from an input array of bin edges.
+Works for non-uniform binning. Note: a new array is allocated</p>
+<p>Parameters:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.histograms.get_bin_widths">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.histograms.</span></code><code class="sig-name descname"><span class="pre">get_bin_widths</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/histograms.html#get_bin_widths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.histograms.get_bin_widths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of bin widths from an input array of bin edges.
+Works for non-uniform binning.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.histograms.get_fwfm">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.histograms.</span></code><code class="sig-name descname"><span class="pre">get_fwfm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fraction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dmx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bins_over_f'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/histograms.html#get_fwfm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.histograms.get_fwfm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the full width at some fraction of the max of data in a histogram</p>
+<p>Typically used by sending slices around a peak. Searches about argmax(hist)
+for the peak to fall by [fraction] from mx to bl</p>
+<dl class="simple">
+<dt>fraction<span class="classifier">float</span></dt><dd><p>The fractional amplitude at which to evaluate the full width</p>
+</dd>
+<dt>hist<span class="classifier">array-like</span></dt><dd><p>The histogram data array containing the peak</p>
+</dd>
+<dt>bin_centers<span class="classifier">array-like</span></dt><dd><p>An array of bin centers for the histogram</p>
+</dd>
+<dt>var<span class="classifier">array-like (optional)</span></dt><dd><p>An array of histogram variances. Used with the 'fit_slopes' method</p>
+</dd>
+<dt>mx<span class="classifier">float or tuple(float, float) (optional)</span></dt><dd><p>The value to use for the max of the peak. If None, np.amax(hist) is
+used.</p>
+</dd>
+<dt>dmx<span class="classifier">float (optional)</span></dt><dd><p>The uncertainty in mx</p>
+</dd>
+<dt>bl<span class="classifier">float or tuple (float, float) (optional)</span></dt><dd><p>Used to specify an offset from which to estimate the FWFM.</p>
+</dd>
+<dt>dbl<span class="classifier">float (optional)</span></dt><dd><p>The uncertainty in the bl</p>
+</dd>
+<dt>method<span class="classifier">string</span></dt><dd><dl class="simple">
+<dt>'bins_over_f'<span class="classifier">the simplest method: just take the diffence in the bin</span></dt><dd><p>centers that are over [fraction] of max. Only works for high stats and
+FWFM/bin_width &gt;&gt; 1</p>
+</dd>
+<dt>'interpolate'<span class="classifier">interpolate between the bins that cross the [fration]</span></dt><dd><p>line.  Works well for high stats and a reasonable number of bins.
+Uncertainty incorporates var, if provided.</p>
+</dd>
+<dt>'fit_slopes'<span class="classifier">fit over n_slope bins in the vicinity of the FWFM and</span></dt><dd><p>interpolate to get the fractional crossing point. Works okay even
+when stats are moderate but requires enough bins that dx traversed
+by n_slope bins is approximately linear. Incorporates bin variances
+in fit and final uncertainties if provided.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>fwfm, dfwfm</strong> -- fwfm: the full width at [fraction] of the maximum above bl
+dfwfm: the uncertainty in fwfm</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float, float</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pygama.analysis.histograms</span> <span class="k">as</span> <span class="nn">pgh</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">normal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="n">pgh</span><span class="o">.</span><span class="n">get_hist</span><span class="p">(</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10000</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pgh</span><span class="o">.</span><span class="n">get_fwfm</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bins_over_f&#39;</span><span class="p">)</span>
+<span class="go">(2.2, 0.15919638684132664) # may vary</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pgh</span><span class="o">.</span><span class="n">get_fwfm</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;interpolate&#39;</span><span class="p">)</span>
+<span class="go">(2.2041666666666666, 0.09790931254396479) # may vary</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pgh</span><span class="o">.</span><span class="n">get_fwfm</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fit_slopes&#39;</span><span class="p">)</span>
+<span class="go">(2.3083363869003466, 0.10939486522749278) # may vary</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.histograms.get_fwhm">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.histograms.</span></code><code class="sig-name descname"><span class="pre">get_fwhm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dmx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bins_over_f'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/histograms.html#get_fwhm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.histograms.get_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the FWHM of data in a histogram</p>
+<p>See get_fwfm for parameters and return values</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.histograms.get_gaussian_guess">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.histograms.</span></code><code class="sig-name descname"><span class="pre">get_gaussian_guess</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/histograms.html#get_gaussian_guess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.histograms.get_gaussian_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>given a hist, gives guesses for mu, sigma, and amplitude</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.histograms.get_hist">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.histograms.</span></code><code class="sig-name descname"><span class="pre">get_hist</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/histograms.html#get_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.histograms.get_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>return hist, bins, var after binning data</p>
+<p>This is just a wrapper for numpy.histogram, with optional weights for each
+element and proper computing of variances.</p>
+<p>Note: there are no overflow / underflow bins.</p>
+<p>Available binning methods:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Default (no binning arguments) : 100 bins over an auto-detected range</p></li>
+<li><p>bins=N, range=(x_lo, x_hi) : N bins over the specified range (or leave
+range=None for auto-detected range)</p></li>
+<li><p>bins=[str] : use one of np.histogram's automatic binning algorithms</p></li>
+<li><p>bins=bin_edges_array : array lower bin edges, supports non-uniform binning</p></li>
+<li><p>dx=dx, range=(x_lo, x_hi): bins of width dx over the specified range.
+Note: dx overrides the bins argument!</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>array like</em>) -- The array of data to be histogrammed</p></li>
+<li><p><strong>bins</strong> (<em>int</em><em>, </em><em>array</em><em>, or </em><em>str</em><em> (</em><em>optional</em><em>)</em>) -- int: the number of bins to be used in the histogram
+array: an array of bin edges to use
+str: the name of the np.histogram automatic binning algorithm to use
+If not provided, np.histogram's default auto-binning routine is used</p></li>
+<li><p><strong>range</strong> (<em>tuple</em><em> (</em><em>float</em><em>, </em><em>float</em><em>) </em><em>(</em><em>optional</em><em>)</em>) -- (x_lo, x_high) is the tuple of low and high x values to uses for the
+very ends of the bin range. If not provided, np.histogram chooses the
+ends based on the data in data</p></li>
+<li><p><strong>dx</strong> (<em>float</em><em> (</em><em>optional</em><em>)</em>) -- Specifies the bin width. Overrides &quot;bins&quot; if both arguments are present</p></li>
+<li><p><strong>wts</strong> (<em>float</em><em> or </em><em>array like</em><em> (</em><em>optional</em><em>)</em>) -- Array of weights for each bin. For example, if you want to divide all
+bins by a time T to get the bin contents in count rate, set wts = 1/T.
+Variances will be computed for each bin that appropriately account for
+each data point's weighting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><strong>hist, bins, var</strong> -- hist : the values in each bin of the histogram
+bins : an array of bin edges: bins[i] is the lower edge of the ith bin.</p>
+<blockquote>
+<div><p>Note: it includes the upper edge of the last bin and does not
+include underflow or overflow bins. So len(bins) = len(hist) + 1</p>
+</div></blockquote>
+<p>var : array of variances in each bin of the histogram</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple (array, array, array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.histograms.plot_hist">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.histograms.</span></code><code class="sig-name descname"><span class="pre">plot_hist</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats_hloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats_vloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.85</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/histograms.html#plot_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.histograms.plot_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>plot a step histogram, with optional error bars</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.histograms.range_slice">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.histograms.</span></code><code class="sig-name descname"><span class="pre">range_slice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/histograms.html#range_slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.histograms.range_slice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pygama.analysis.metadata">
+<span id="pygama-analysis-metadata-module"></span><h2>pygama.analysis.metadata module<a class="headerlink" href="#module-pygama.analysis.metadata" title="Permalink to this headline">¶</a></h2>
+<p>utility functions for metadata lookup</p>
+<dl class="py function">
+<dt id="pygama.analysis.metadata.write_pretty">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.metadata.</span></code><code class="sig-name descname"><span class="pre">write_pretty</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_db</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/metadata.html#write_pretty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.metadata.write_pretty" title="Permalink to this definition">¶</a></dt>
+<dd><p>write a TinyDB database to a special pretty-printed JSON file.
+if i cared less about the format, i would just call TinyDB(index=2)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.analysis.peak_fitting">
+<span id="pygama-analysis-peak-fitting-module"></span><h2>pygama.analysis.peak_fitting module<a class="headerlink" href="#module-pygama.analysis.peak_fitting" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.Am_double">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">Am_double</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#Am_double"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.Am_double" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Fit function exclusevly for a 241Am 99keV and 103keV lines situation
+Consists of</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>three gaussian peaks (two lines + one bkg line in between)</p></li>
+<li><p>two steps (for the two lines)</p></li>
+<li><p>two tails (for the two lines)</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.cal_slope">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">cal_slope</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#cal_slope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.cal_slope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the calibration values</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.double_gauss">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">double_gauss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#double_gauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.double_gauss" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Fit function exclusevly for a 133Ba 81keV peak situation
+Consists of</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>two gaussian peaks (two lines)</p></li>
+<li><p>one step</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.fit_binned">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">fit_binned</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_guess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#fit_binned"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.fit_binned" title="Permalink to this definition">¶</a></dt>
+<dd><p>regular old binned fit (nonlinear least squares). data should already be
+histogrammed (see e.g. pygama.analysis.histograms.get_hist)
+# jason says this is deprecated. Use ph.fit_hist() instead.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.fit_hist">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">fit_hist</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poissonLL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#fit_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.fit_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>do a binned fit to a histogram (nonlinear least squares).
+can either do a poisson log-likelihood fit (jason's fave) or
+use curve_fit w/ an arbitrary function.</p>
+<ul class="simple">
+<li><p>hist, bins, var : as in return value of pygama.histograms.get_hist()</p></li>
+<li><dl class="simple">
+<dt>guess<span class="classifier">initial parameter guesses. Should be optional -- we can auto-guess</span></dt><dd><p>for many common functions. But not yet implemented.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>poissonLL<span class="classifier">use Poisson stats instead of the Gaussian approximation in</span></dt><dd><p>each bin. Requires integer stats. You must use parameter
+bounds to make sure that func does not go negative over the
+x-range of the histogram.</p>
+</dd>
+</dl>
+</li>
+<li><p>method, bounds : options to pass to scipy.optimize.minimize</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>coeff, cov_matrix</strong></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple(array, matrix)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.fit_unbinned">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">fit_unbinned</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_guess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#fit_unbinned"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.fit_unbinned" title="Permalink to this definition">¶</a></dt>
+<dd><p>unbinned max likelihood fit to data with given likelihood func</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss" title="Permalink to this definition">¶</a></dt>
+<dd><p>define a gaussian distribution, w/ args: mu, sigma, area, const.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss_basic">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss_basic</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss_basic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss_basic" title="Permalink to this definition">¶</a></dt>
+<dd><p>define a gaussian distribution, w/ args: mu, sigma, height
+(behaves differently than gauss() in fits)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss_bkg">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss_bkg</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss_bkg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss_bkg" title="Permalink to this definition">¶</a></dt>
+<dd><p>gaussian + const background function</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss_cdf">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss_cdf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss_cdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss_cdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>I guess this should be similar to radford_peak (peak + tail + step)
+This is how I used it in root peak fitting scripts</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss_int">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss_int</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>integral of a gaussian from 0 to x, w/ args: mu, sigma, area, const.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss_lin">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss_lin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss_lin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss_lin" title="Permalink to this definition">¶</a></dt>
+<dd><p>gaussian + linear background function</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss_mode_max">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss_mode_max</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poissonLL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss_mode_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss_mode_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for gauss_mode_width_max that just returns the max and mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>gauss_mode_width_max</strong> (<em>See</em>) -- </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><strong>(pars, cov)</strong> --</p>
+<dl class="simple">
+<dt>pars<span class="classifier">2-tuple with the parameters (maximum, mode) of the gaussian fit</span></dt><dd><p>maximum : the estimated maximum value of the peak
+mode : the estimated x-position of the maximum</p>
+</dd>
+<dt>cov<span class="classifier">2x2 matrix of floats</span></dt><dd><p>The covariance matrix for the 2 parameters in pars</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple (array, matrix)</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pygama.analysis.histograms</span> <span class="k">as</span> <span class="nn">pgh</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">normal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pygama.analysis.peak_fitting</span> <span class="k">as</span> <span class="nn">pgf</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="n">pgh</span><span class="o">.</span><span class="n">get_hist</span><span class="p">(</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10000</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pgf</span><span class="o">.</span><span class="n">gauss_mode_max</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss_mode_width_max">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss_mode_width_max</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poissonLL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss_mode_width_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss_mode_width_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the max, mode, and width of a peak based on gauss fit near the max</p>
+<p>Returns the parameters of a gaussian fit over n_bins in the vicinity of the
+maximum of the hist (or the max near mode_guess, if provided). This is
+equivalent to a Taylor expansion around the peak maximum because near its
+maximum a Gaussian can be approximated by a 2nd-order polynomial in x:</p>
+<dl class="simple">
+<dt>A exp[ -(x-mu)^2 / 2 sigma^2 ] ~= A [ 1 - (x-mu)^2 / 2 sigma^2 ]</dt><dd><p>= A - (1/2!) (A/sigma^2) (x-mu)^2</p>
+</dd>
+</dl>
+<p>The advantage of using a gaussian over a polynomial directly is that the
+gaussian parameters are the ones we care about most for a peak, whereas for
+a poly we would have to extract them after the fit, accounting for
+covariances. The guassian also better approximates most peaks farther down
+the peak. However, the gauss fit is nonlinear and thus less stable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hist</strong> (<em>array-like</em>) -- The values of the histogram to be fit</p></li>
+<li><p><strong>bins</strong> (<em>array-like</em>) -- The bin edges of the histogram to be fit</p></li>
+<li><p><strong>var</strong> (<em>array-like</em><em> (</em><em>optional</em><em>)</em>) -- The variances of the histogram values. If not provided, square-root
+variances are assumed.</p></li>
+<li><p><strong>mode_guess</strong> (<em>float</em><em> (</em><em>optional</em><em>)</em>) -- An x-value (not a bin index!) near which a peak is expected. The
+algorithm fits around the maximum within +/- n_bins of the guess. If not
+provided, the center of the max bin of the histogram is used.</p></li>
+<li><p><strong>n_bins</strong> (<em>int</em>) -- The number of bins (including the max bin) to be used in the fit. Also
+used for searching for a max near mode_guess</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><strong>(pars, cov)</strong> --</p>
+<dl>
+<dt>pars<span class="classifier">3-tuple containing the parameters (mode, sigma, maximum) of the</span></dt><dd><blockquote>
+<div><p>gaussian fit</p>
+</div></blockquote>
+<p>mode : the estimated x-position of the maximum
+sigma : the estimated width of the peak. Equivalent to a guassian</p>
+<blockquote>
+<div><p>width (sigma), but based only on the curvature within n_bins of
+the peak.  Note that the Taylor-approxiamted curvature of the
+underlying function in the vicinity of the max is given by max /
+sigma^2</p>
+</div></blockquote>
+<p>maximum : the estimated maximum value of the peak</p>
+</dd>
+<dt>cov<span class="classifier">3x3 matrix of floats</span></dt><dd><p>The covariance matrix for the 3 parameters in pars</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple (array, matrix)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss_step">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss_step</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>gaussian + step function for Compton spectrum</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.gauss_tail">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">gauss_tail</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#gauss_tail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.gauss_tail" title="Permalink to this definition">¶</a></dt>
+<dd><p>A gaussian tail function template
+Can be used as a component of other fit functions</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.get_bin_estimates">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">get_bin_estimates</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#get_bin_estimates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.get_bin_estimates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bin expected means are estimated by f(bin_center)*bin_width. Supply an
+integrating function to compute the integral over the bin instead.
+TODO: make default integrating function a numerical method that is off by
+default.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.goodness_of_fit">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">goodness_of_fit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_fit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#goodness_of_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.goodness_of_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute reduced chisq and fwhm_err for</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.neg_log_like">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">neg_log_like</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#neg_log_like"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.neg_log_like" title="Permalink to this definition">¶</a></dt>
+<dd><p>given a likelihood function and data, return the negative log likelihood.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.neg_poisson_log_like">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">neg_poisson_log_like</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#neg_poisson_log_like"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.neg_poisson_log_like" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Wrapper to give me poisson neg log likelihoods of a histogram</dt><dd><p>ln[ f(x)^n / n! exp(-f(x) ] = const + n ln(f(x)) - f(x)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.poisson_gof">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">poisson_gof</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#poisson_gof"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.poisson_gof" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Poisson likelihood does not give a good GOF until the counts are very
+high and all the poisson stats are roughly gaussian and you don't need it
+anyway. But the G.O.F. is calculable for the Poisson likelihood. So we do
+it here.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.radford_peak">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">radford_peak</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">htail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#radford_peak"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.radford_peak" title="Permalink to this definition">¶</a></dt>
+<dd><p>David Radford's HPGe peak shape function</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.step">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">step</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>A step function template
+Can be used as a component of other fit functions</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.taylor_mode_max">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">taylor_mode_max</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poissonLL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#taylor_mode_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.taylor_mode_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the max and mode of a peak based on Taylor exp near the max</p>
+<p>Returns the amplitude and position of a peak based on a poly fit over n_bins
+in the vicinity of the maximum of the hist (or the max near mode_guess, if provided)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hist</strong> (<em>array-like</em>) -- The values of the histogram to be fit. Often: send in a slice around a peak</p></li>
+<li><p><strong>bins</strong> (<em>array-like</em>) -- The bin edges of the histogram to be fit</p></li>
+<li><p><strong>var</strong> (<em>array-like</em><em> (</em><em>optional</em><em>)</em>) -- The variances of the histogram values. If not provided, square-root
+variances are assumed.</p></li>
+<li><p><strong>mode_guess</strong> (<em>float</em><em> (</em><em>optional</em><em>)</em>) -- An x-value (not a bin index!) near which a peak is expected. The
+algorithm fits around the maximum within +/- n_bins of the guess. If not
+provided, the center of the max bin of the histogram is used.</p></li>
+<li><p><strong>n_bins</strong> (<em>int</em>) -- The number of bins (including the max bin) to be used in the fit. Also
+used for searching for a max near mode_guess</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>(maximum, mode)</strong> -- maximum : the estimated maximum value of the peak
+mode : the estimated x-position of the maximum</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple (float, float)</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pygama.analysis.histograms</span> <span class="k">as</span> <span class="nn">pgh</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">normal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pygama.analysis.peak_fitting</span> <span class="k">as</span> <span class="nn">pgf</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="n">pgh</span><span class="o">.</span><span class="n">get_hist</span><span class="p">(</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10000</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pgf</span><span class="o">.</span><span class="n">taylor_mode_max</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.analysis.peak_fitting.xtalball">
+<code class="sig-prename descclassname"><span class="pre">pygama.analysis.peak_fitting.</span></code><code class="sig-name descname"><span class="pre">xtalball</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/analysis/peak_fitting.html#xtalball"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.analysis.peak_fitting.xtalball" title="Permalink to this definition">¶</a></dt>
+<dd><p>power-law tail plus gaussian <a class="reference external" href="https://en.wikipedia.org/wiki/Crystal_Ball_function">https://en.wikipedia.org/wiki/Crystal_Ball_function</a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="pygama-analysis-pulse-shape-analysis-module">
+<h2>pygama.analysis.pulse_shape_analysis module<a class="headerlink" href="#pygama-analysis-pulse-shape-analysis-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygama.analysis">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pygama.analysis" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="pygama.dsp.html" class="btn btn-neutral float-right" title="pygama.dsp package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pygama.html" class="btn btn-neutral float-left" title="pygama package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

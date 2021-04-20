@@ -1,0 +1,613 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.io.orcadaq &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.io.orcadaq</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.io.orcadaq</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">plistlib</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">update_progress</span>
+<span class="kn">from</span> <span class="nn">.io_base</span> <span class="kn">import</span> <span class="n">DataDecoder</span>
+<span class="kn">from</span> <span class="nn">pygama</span> <span class="kn">import</span> <span class="n">lh5</span>
+<span class="kn">from</span> <span class="nn">.ch_group</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="OrcaDecoder"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.OrcaDecoder">[docs]</a><span class="k">class</span> <span class="nc">OrcaDecoder</span><span class="p">(</span><span class="n">DataDecoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for ORCA decoders.</span>
+
+<span class="sd">    ORCA data packets have a dataID-to-decoder_name mapping so these decoders</span>
+<span class="sd">    need to have self.decoder_name defined in __init__</span>
+
+<span class="sd">    ORCA also stores an object_info dictionary in the header by &#39;class name&quot; so</span>
+<span class="sd">    these decoders need to have self.orca_class_name defined in __init__</span>
+
+<span class="sd">    ORCA also uses a uniform packet structure so put some boiler plate here so</span>
+<span class="sd">    that all ORCA decoders can make use of it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">object_info</span><span class="o">=</span><span class="p">[],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataID</span> <span class="o">=</span> <span class="n">dataID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_object_info</span><span class="p">(</span><span class="n">object_info</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OrcaDecoder.set_header_dict"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.OrcaDecoder.set_header_dict">[docs]</a>    <span class="k">def</span> <span class="nf">set_header_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header_dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">header_dict</span> <span class="o">=</span> <span class="n">header_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_object_info</span><span class="p">(</span><span class="n">get_object_info</span><span class="p">(</span><span class="n">header_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orca_class_name</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="OrcaDecoder.set_object_info"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.OrcaDecoder.set_object_info">[docs]</a>    <span class="k">def</span> <span class="nf">set_object_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Overload to e.g. update decoded_values based on object_info.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object_info</span> <span class="o">=</span> <span class="n">object_info</span></div></div>
+
+
+<div class="viewcode-block" id="open_orca"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.open_orca">[docs]</a><span class="k">def</span> <span class="nf">open_orca</span><span class="p">(</span><span class="n">orca_filename</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">orca_filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">orca_filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="n">orca_filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="parse_header"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.parse_header">[docs]</a><span class="k">def</span> <span class="nf">parse_header</span><span class="p">(</span><span class="n">orca_filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Opens the given file for binary read (&#39;rb&#39;), then grabs the first 8 bytes</span>
+<span class="sd">    The first 4 bytes (1 long) of an orca data file are the total length in</span>
+<span class="sd">    longs of the record</span>
+<span class="sd">    The next 4 bytes (1 long) is the length of the header in bytes</span>
+<span class="sd">    The header is then read in ...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">open_orca</span><span class="p">(</span><span class="n">orca_filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">xmlfile_handle</span><span class="p">:</span>
+        <span class="c1">#read the first word:</span>
+        <span class="n">ba</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">xmlfile_handle</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
+
+        <span class="c1">#Replacing this to be python2 friendly</span>
+        <span class="c1"># #first 4 bytes: header length in long words</span>
+        <span class="c1"># i = int.from_bytes(ba[:4], byteorder=sys.byteorder)</span>
+        <span class="c1"># #second 4 bytes: header length in bytes</span>
+        <span class="c1"># j = int.from_bytes(ba[4:], byteorder=sys.byteorder)</span>
+
+        <span class="n">big_endian</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span> <span class="o">==</span> <span class="s2">&quot;little&quot;</span> <span class="k">else</span> <span class="kc">True</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">from_bytes</span><span class="p">(</span><span class="n">ba</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">big_endian</span><span class="o">=</span><span class="n">big_endian</span><span class="p">)</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">from_bytes</span><span class="p">(</span><span class="n">ba</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">big_endian</span><span class="o">=</span><span class="n">big_endian</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">j</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span> <span class="o">!=</span> <span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">j</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span> <span class="o">!=</span> <span class="n">i</span><span class="o">-</span><span class="mi">3</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error: header byte length = </span><span class="si">%d</span><span class="s1"> is the wrong size to fit into </span><span class="si">%d</span><span class="s1"> header packet words&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">{}</span>
+
+        <span class="c1">#read in the next that-many bytes that occupy the plist header</span>
+        <span class="n">as_bytes</span> <span class="o">=</span> <span class="n">xmlfile_handle</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+        <span class="n">ba</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">as_bytes</span><span class="p">)</span>
+
+        <span class="c1">#convert to string</span>
+        <span class="c1">#the readPlistFromBytes method doesn&#39;t exist in 2.7</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">header_string</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+            <span class="n">header_dict</span> <span class="o">=</span> <span class="n">plistlib</span><span class="o">.</span><span class="n">readPlistFromString</span><span class="p">(</span><span class="n">header_string</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="n">header_dict</span> <span class="o">=</span> <span class="n">plistlib</span><span class="o">.</span><span class="n">readPlistFromBytes</span><span class="p">(</span><span class="n">ba</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">header_dict</span> <span class="o">=</span> <span class="n">plistlib</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">as_bytes</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">plistlib</span><span class="o">.</span><span class="n">FMT_XML</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">header_dict</span></div>
+
+
+<div class="viewcode-block" id="from_bytes"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.from_bytes">[docs]</a><span class="k">def</span> <span class="nf">from_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">big_endian</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    python2 doesn&#39;t have this function,</span>
+<span class="sd">    so rewrite it for backwards compatibility</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">big_endian</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">byte</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">num</span> <span class="o">+=</span> <span class="n">byte</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">offset</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">num</span></div>
+
+
+<div class="viewcode-block" id="get_run_number"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.get_run_number">[docs]</a><span class="k">def</span> <span class="nf">get_run_number</span><span class="p">(</span><span class="n">header_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; header_dict parse functions, ORCA specific &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">(</span><span class="n">header_dict</span><span class="p">[</span><span class="s2">&quot;ObjectInfo&quot;</span><span class="p">][</span><span class="s2">&quot;DataChain&quot;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="s2">&quot;Run Control&quot;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;Run Control&quot;</span><span class="p">][</span><span class="s2">&quot;RunNumber&quot;</span><span class="p">])</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No run number found in header!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_data_id"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.get_data_id">[docs]</a><span class="k">def</span> <span class="nf">get_data_id</span><span class="p">(</span><span class="n">header_dict</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">super_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    stored like this:</span>
+<span class="sd">    `header_dict[&quot;dataDescription&quot;][&quot;ORRunModel&quot;][&quot;Run&quot;][&quot;dataId&quot;]`</span>
+<span class="sd">    but integer needs to be bitshifted by 18</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">id_int</span> <span class="o">=</span> <span class="n">header_dict</span><span class="p">[</span><span class="s2">&quot;dataDescription&quot;</span><span class="p">][</span><span class="n">class_name</span><span class="p">][</span><span class="n">super_name</span><span class="p">][</span><span class="s2">&quot;dataId&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">id_int</span> <span class="o">&gt;&gt;</span> <span class="mi">18</span></div>
+
+
+<div class="viewcode-block" id="flip_data_ids"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.flip_data_ids">[docs]</a><span class="k">def</span> <span class="nf">flip_data_ids</span><span class="p">(</span><span class="n">header_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns an inverted dictionary such that:</span>
+<span class="sd">    Could be extended somehow to give you all the supers associated with a given class name (maybe like)</span>
+<span class="sd">    flipped[dataId] = [class_key, [super1, super2, ...]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">flipped</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="c1"># header_dict[&quot;dataDescription&quot;][class_name][super_name][&quot;dataId&quot;]</span>
+    <span class="k">for</span> <span class="n">class_key</span> <span class="ow">in</span> <span class="n">header_dict</span><span class="p">[</span><span class="s2">&quot;dataDescription&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">super_keys_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">super_key</span> <span class="ow">in</span> <span class="n">header_dict</span><span class="p">[</span><span class="s2">&quot;dataDescription&quot;</span><span class="p">][</span><span class="n">class_key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">super_keys_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">super_key</span><span class="p">)</span>
+            <span class="n">ID_val</span> <span class="o">=</span> <span class="p">(</span><span class="n">header_dict</span><span class="p">[</span><span class="s2">&quot;dataDescription&quot;</span><span class="p">][</span><span class="n">class_key</span><span class="p">][</span><span class="n">super_key</span><span class="p">]</span>
+                      <span class="p">[</span><span class="s2">&quot;dataId&quot;</span><span class="p">])</span> <span class="o">&gt;&gt;</span> <span class="mi">18</span>
+            <span class="n">flipped</span><span class="p">[</span><span class="n">ID_val</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">class_key</span><span class="p">,</span> <span class="n">super_keys_list</span><span class="p">]</span>
+
+    <span class="c1"># this one just gives a single super             flipped[dataId] = [class_key, super_key]</span>
+    <span class="c1"># for class_key in header_dict[&quot;dataDescription&quot;].keys():</span>
+    <span class="c1">#     super_keys_list = header_dict[&quot;dataDescription&quot;][class_key].keys()</span>
+    <span class="c1">#     ID_val = (header_dict[&quot;dataDescription&quot;][class_key][super_keys_list[0]][&quot;dataId&quot;])&gt;&gt;18</span>
+    <span class="c1">#     flipped[ID_val] = [class_key,super_keys_list]</span>
+
+    <span class="k">return</span> <span class="n">flipped</span></div>
+
+
+<div class="viewcode-block" id="get_id_to_decoder_name_dict"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.get_id_to_decoder_name_dict">[docs]</a><span class="k">def</span> <span class="nf">get_id_to_decoder_name_dict</span><span class="p">(</span><span class="n">header_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a dictionary that goes:</span>
+<span class="sd">    `dict[dataID] = &quot;decoderName&quot;`</span>
+<span class="sd">    e.g: d[5] = &#39;ORSIS3302DecoderForEnergy&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">id2dn_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">header_dict</span><span class="p">[</span><span class="s1">&#39;dataDescription&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">class_key</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">super_key</span> <span class="ow">in</span> <span class="n">dd</span><span class="p">[</span><span class="n">class_key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">dataID</span> <span class="o">=</span> <span class="p">(</span><span class="n">dd</span><span class="p">[</span><span class="n">class_key</span><span class="p">][</span><span class="n">super_key</span><span class="p">][</span><span class="s1">&#39;dataId&#39;</span><span class="p">])</span> <span class="o">&gt;&gt;</span> <span class="mi">18</span>
+            <span class="n">decoder_name</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="n">class_key</span><span class="p">][</span><span class="n">super_key</span><span class="p">][</span><span class="s1">&#39;decoder&#39;</span><span class="p">]</span>
+            <span class="n">id2dn_dict</span><span class="p">[</span><span class="n">dataID</span><span class="p">]</span> <span class="o">=</span> <span class="n">decoder_name</span>
+    <span class="k">return</span> <span class="n">id2dn_dict</span></div>
+
+
+<div class="viewcode-block" id="get_object_info"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.get_object_info">[docs]</a><span class="k">def</span> <span class="nf">get_object_info</span><span class="p">(</span><span class="n">header_dict</span><span class="p">,</span> <span class="n">orca_class_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns a list with all info from the header for each card with name</span>
+<span class="sd">    orca_class_name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">object_info_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">crates</span> <span class="o">=</span> <span class="n">header_dict</span><span class="p">[</span><span class="s2">&quot;ObjectInfo&quot;</span><span class="p">][</span><span class="s2">&quot;Crates&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">crate</span> <span class="ow">in</span> <span class="n">crates</span><span class="p">:</span>
+        <span class="n">cards</span> <span class="o">=</span> <span class="n">crate</span><span class="p">[</span><span class="s2">&quot;Cards&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="n">cards</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">card</span><span class="p">[</span><span class="s2">&quot;Class Name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">orca_class_name</span><span class="p">:</span>
+                <span class="n">card</span><span class="p">[</span><span class="s2">&quot;Crate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crate</span><span class="p">[</span><span class="s2">&quot;CrateNumber&quot;</span><span class="p">]</span>
+                <span class="n">object_info_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">object_info_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;OrcaDecoder::get_object_info(): Warning: no object info&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">object_info_list</span></div>
+
+
+<div class="viewcode-block" id="get_next_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.get_next_packet">[docs]</a><span class="k">def</span> <span class="nf">get_next_packet</span><span class="p">(</span><span class="n">f_in</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the next packet, and some basic information about it</span>
+<span class="sd">    Takes the file pointer as input</span>
+<span class="sd">    Outputs:</span>
+<span class="sd">    - event_data: a byte array of the data produced by the card (could be header + data)</span>
+<span class="sd">    - data_id: This is the identifier for the type of data-taker (i.e. Gretina4M, etc)</span>
+<span class="sd">    - crate: the crate number for the packet</span>
+<span class="sd">    - card: the card number for the packet</span>
+<span class="sd">    # number of bytes to read in = 8 (2x 32-bit words, 4 bytes each)</span>
+<span class="sd">    # The read is set up to do two 32-bit integers, rather than bytes or shorts</span>
+<span class="sd">    # This matches the bitwise arithmetic used elsewhere best, and is easy to implement</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># event header is 8 bytes (2 longs)</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">f_in</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to read in the event orca header.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Assuming we&#39;re getting an array of bytes:</span>
+    <span class="c1"># record_length   = (head[0] + (head[1]&lt;&lt;8) + ((head[2]&amp;0x3)&lt;&lt;16))</span>
+    <span class="c1"># data_id         = (head[2] &gt;&gt; 2) + (head[3]&lt;&lt;8)</span>
+    <span class="c1"># card            = (head[6] &amp; 0x1f)</span>
+    <span class="c1"># crate           = (head[6]&gt;&gt;5) + head[7]&amp;0x1</span>
+    <span class="c1"># reserved        = (head[4] + (head[5]&lt;&lt;8))</span>
+
+    <span class="c1"># Using an array of uint32</span>
+    <span class="n">record_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">head</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x3FFFF</span><span class="p">))</span>
+    <span class="n">data_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">head</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">18</span><span class="p">))</span>
+    <span class="c1"># reserved =int( (head[1] &amp;0xFFFF))</span>
+
+    <span class="c1"># /* ========== read in the rest of the event data ========== */</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># record_length is in longs, read gives bytes</span>
+        <span class="n">event_data</span> <span class="o">=</span> <span class="n">f_in</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">record_length</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  No more data...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">EOFError</span>
+
+    <span class="k">return</span> <span class="n">event_data</span><span class="p">,</span> <span class="n">data_id</span></div>
+
+
+<div class="viewcode-block" id="get_ccc"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.get_ccc">[docs]</a><span class="k">def</span> <span class="nf">get_ccc</span><span class="p">(</span><span class="n">crate</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">crate</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">card</span> <span class="o">&amp;</span> <span class="mh">0x1f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">channel</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_crate"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.get_crate">[docs]</a><span class="k">def</span> <span class="nf">get_crate</span><span class="p">(</span><span class="n">ccc</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">ccc</span> <span class="o">&gt;&gt;</span> <span class="mi">9</span></div>
+
+
+<div class="viewcode-block" id="get_card"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.get_card">[docs]</a><span class="k">def</span> <span class="nf">get_card</span><span class="p">(</span><span class="n">ccc</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">ccc</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1f</span></div>
+
+
+<div class="viewcode-block" id="get_channel"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.get_channel">[docs]</a><span class="k">def</span> <span class="nf">get_channel</span><span class="p">(</span><span class="n">ccc</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">ccc</span> <span class="o">&amp;</span> <span class="mh">0xf</span></div>
+
+
+<span class="c1"># Import orca_digitizers so that the list of OrcaDecoder.__subclasses__ gets populated</span>
+<span class="c1"># Do it here so that orca_digitizers can import the functions above here</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">orca_digitizers</span>
+
+<div class="viewcode-block" id="process_orca"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orcadaq.process_orca">[docs]</a><span class="k">def</span> <span class="nf">process_orca</span><span class="p">(</span><span class="n">daq_filename</span><span class="p">,</span> <span class="n">raw_file_pattern</span><span class="p">,</span> <span class="n">n_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">ch_groups_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convert ORCA DAQ data to &quot;raw&quot; lh5</span>
+
+<span class="sd">    ch_groups_dict: keyed by decoder_name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lh5_store</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Store</span><span class="p">()</span>
+
+    <span class="n">f_in</span> <span class="o">=</span> <span class="n">open_orca</span><span class="p">(</span><span class="n">daq_filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">f_in</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t find the file </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">daq_filename</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># parse the header. save the length so we can jump past it later</span>
+    <span class="n">reclen</span><span class="p">,</span> <span class="n">header_nbytes</span><span class="p">,</span> <span class="n">header_dict</span> <span class="o">=</span> <span class="n">parse_header</span><span class="p">(</span><span class="n">daq_filename</span><span class="p">)</span>
+
+    <span class="c1"># figure out the total size</span>
+    <span class="n">SEEK_END</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">f_in</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">SEEK_END</span><span class="p">)</span>
+    <span class="n">file_size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">f_in</span><span class="o">.</span><span class="n">tell</span><span class="p">())</span>
+    <span class="n">f_in</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># rewind</span>
+    <span class="n">file_size_MB</span> <span class="o">=</span> <span class="n">file_size</span> <span class="o">/</span> <span class="mf">1e6</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total file size: </span><span class="si">{:.3f}</span><span class="s2"> MB&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_size_MB</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run number:&quot;</span><span class="p">,</span> <span class="n">get_run_number</span><span class="p">(</span><span class="n">header_dict</span><span class="p">))</span>
+
+
+    <span class="c1"># Build the dict used in the inner loop for passing data packets to decoders</span>
+    <span class="n">decoders</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># First build a list of all decoder names that might be in the data</span>
+    <span class="c1"># This is a dict of names keyed off of data_id</span>
+    <span class="n">id2dn_dict</span> <span class="o">=</span> <span class="n">get_id_to_decoder_name_dict</span><span class="p">(</span><span class="n">header_dict</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data IDs present in ORCA file header are:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">data_id</span> <span class="ow">in</span> <span class="n">id2dn_dict</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">data_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">id2dn_dict</span><span class="p">[</span><span class="n">data_id</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Invert the previous list, to get a list of decoder ids keyed off of</span>
+    <span class="c1"># decoder names</span>
+    <span class="n">dn2id_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span><span class="n">data_id</span> <span class="k">for</span> <span class="n">data_id</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">id2dn_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="c1"># By default we decode all data for which we have decoders. If the user</span>
+    <span class="c1"># provides a ch_group_dict, we will only decode data from decoders keyed in</span>
+    <span class="c1"># the dict. </span>
+    <span class="n">decode_all_data</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">decoders_to_run</span> <span class="o">=</span> <span class="n">dn2id_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ch_groups_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+        <span class="n">decode_all_data</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">decoders_to_run</span> <span class="o">=</span> <span class="n">ch_groups_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="c1"># Now get the actual requested decoders</span>
+    <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">OrcaDecoder</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
+        <span class="n">decoder</span> <span class="o">=</span> <span class="n">sub</span><span class="p">()</span> <span class="c1"># instantiate the class</span>
+        <span class="k">if</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decoder_name</span> <span class="ow">in</span> <span class="n">decoders_to_run</span><span class="p">:</span>
+            <span class="n">decoder</span><span class="o">.</span><span class="n">dataID</span> <span class="o">=</span> <span class="n">dn2id_dict</span><span class="p">[</span><span class="n">decoder</span><span class="o">.</span><span class="n">decoder_name</span><span class="p">]</span>
+            <span class="n">decoder</span><span class="o">.</span><span class="n">set_header_dict</span><span class="p">(</span><span class="n">header_dict</span><span class="p">)</span>
+            <span class="n">decoders</span><span class="p">[</span><span class="n">decoder</span><span class="o">.</span><span class="n">dataID</span><span class="p">]</span> <span class="o">=</span> <span class="n">decoder</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">decoders</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No decoders. Exiting...&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pygama will run these decoders:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">data_id</span><span class="p">,</span> <span class="n">dec</span> <span class="ow">in</span> <span class="n">decoders</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="n">dec</span><span class="o">.</span><span class="n">decoder_name</span><span class="o">+</span> <span class="s2">&quot;, id =&quot;</span><span class="p">,</span> <span class="n">data_id</span><span class="p">)</span>
+
+    <span class="c1"># Now cull the decoders_to_run list</span>
+    <span class="n">new_dtr</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">decoder_name</span> <span class="ow">in</span> <span class="n">decoders_to_run</span><span class="p">:</span>
+        <span class="n">data_id</span> <span class="o">=</span> <span class="n">dn2id_dict</span><span class="p">[</span><span class="n">decoder_name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">data_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">decoders</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;warning: no decoder exists for&quot;</span><span class="p">,</span> <span class="n">decoder_name</span><span class="p">,</span> <span class="s2">&quot;... will skip its data.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">new_dtr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decoder_name</span><span class="p">)</span>
+    <span class="n">decoders_to_run</span> <span class="o">=</span> <span class="n">new_dtr</span>
+    
+    <span class="c1"># prepare ch groups</span>
+    <span class="k">if</span> <span class="n">ch_groups_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ch_groups_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">decoder_name</span> <span class="ow">in</span> <span class="n">decoders_to_run</span><span class="p">:</span>
+            <span class="n">ch_groups</span> <span class="o">=</span> <span class="n">create_dummy_ch_group</span><span class="p">()</span>
+            <span class="n">ch_groups_dict</span><span class="p">[</span><span class="n">decoder_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch_groups</span>
+            <span class="n">grp_path_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">decoder_name</span><span class="si">}</span><span class="s1">/raw&#39;</span>
+            <span class="n">set_outputs</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">,</span> <span class="n">out_file_template</span><span class="o">=</span><span class="n">raw_file_pattern</span><span class="p">,</span> <span class="n">grp_path_template</span><span class="o">=</span><span class="n">grp_path_template</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">decoder_name</span><span class="p">,</span> <span class="n">ch_groups</span> <span class="ow">in</span> <span class="n">ch_groups_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">expand_ch_groups</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">)</span>
+            <span class="n">set_outputs</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">,</span> <span class="n">out_file_template</span><span class="o">=</span><span class="n">raw_file_pattern</span><span class="p">,</span> <span class="n">grp_path_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{system}</span><span class="s1">/</span><span class="si">{group_name}</span><span class="s1">/raw&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Set up tables for data</span>
+    <span class="n">ch_tables_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">data_id</span><span class="p">,</span> <span class="n">dec</span> <span class="ow">in</span> <span class="n">decoders</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">decoder_name</span> <span class="o">=</span> <span class="n">id2dn_dict</span><span class="p">[</span><span class="n">data_id</span><span class="p">]</span>
+        <span class="n">ch_groups</span> <span class="o">=</span> <span class="n">ch_groups_dict</span><span class="p">[</span><span class="n">decoder_name</span><span class="p">]</span>
+        <span class="n">ch_tables_dict</span><span class="p">[</span><span class="n">data_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">build_tables</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">dec</span><span class="p">)</span>
+    <span class="n">max_tbl_size</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="c1"># -- scan over raw data --</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Beginning daq-to-raw processing ...&quot;</span><span class="p">)</span>
+
+    <span class="n">packet_id</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># number of events decoded</span>
+    <span class="n">unrecognized_data_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># skip the header using reclen from before</span>
+    <span class="c1"># reclen is in number of longs, and we want to skip a number of bytes</span>
+    <span class="n">f_in</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">reclen</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># start scanning</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">packet_id</span> <span class="o">&lt;</span> <span class="n">n_max</span> <span class="ow">and</span> <span class="n">f_in</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">file_size</span><span class="p">):</span>
+        <span class="n">packet_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">packet_id</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">update_progress</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">f_in</span><span class="o">.</span><span class="n">tell</span><span class="p">())</span> <span class="o">/</span> <span class="n">file_size</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">packet</span><span class="p">,</span> <span class="n">data_id</span> <span class="o">=</span> <span class="n">get_next_packet</span><span class="p">(</span><span class="n">f_in</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to get the next event ... Exception:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">decode_all_data</span> <span class="ow">and</span> <span class="n">data_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">decoders</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">data_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unrecognized_data_ids</span><span class="p">:</span>
+                <span class="n">unrecognized_data_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_id</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">data_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">decoders</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="n">decoder</span> <span class="o">=</span> <span class="n">decoders</span><span class="p">[</span><span class="n">data_id</span><span class="p">]</span>
+        
+        <span class="c1"># Clear the tables if the next read could overflow them.</span>
+        <span class="c1"># Only have to check this when the max table size is within</span>
+        <span class="c1"># max_n_rows_per_packet of being full.</span>
+        <span class="k">if</span> <span class="n">max_tbl_size</span> <span class="o">+</span> <span class="n">decoder</span><span class="o">.</span><span class="n">max_n_rows_per_packet</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">buffer_size</span><span class="p">:</span>
+            <span class="n">ch_groups</span> <span class="o">=</span> <span class="n">ch_groups_dict</span><span class="p">[</span><span class="n">id2dn_dict</span><span class="p">[</span><span class="n">data_id</span><span class="p">]]</span>
+            <span class="n">max_tbl_size</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">group_info</span> <span class="ow">in</span> <span class="n">ch_groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">tbl</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">tbl</span><span class="o">.</span><span class="n">is_full</span><span class="p">():</span> 
+                    <span class="n">group_path</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;group_path&#39;</span><span class="p">]</span>
+                    <span class="n">out_file</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span>
+                    <span class="n">lh5_store</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">tbl</span><span class="p">,</span> <span class="n">group_path</span><span class="p">,</span> <span class="n">out_file</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span>
+                    <span class="n">tbl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">tbl</span><span class="o">.</span><span class="n">loc</span> <span class="o">&gt;</span> <span class="n">max_tbl_size</span><span class="p">:</span> <span class="n">max_tbl_size</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">loc</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">max_tbl_size</span> <span class="o">+=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">max_n_rows_per_packet</span><span class="p">()</span>
+
+        <span class="n">tables</span> <span class="o">=</span> <span class="n">ch_tables_dict</span><span class="p">[</span><span class="n">data_id</span><span class="p">]</span>
+        <span class="n">decoder</span><span class="o">.</span><span class="n">decode_packet</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">tables</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">,</span> <span class="n">header_dict</span><span class="p">)</span>
+
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done. Last packet ID:&quot;</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">)</span>
+    <span class="n">f_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># final write to file</span>
+    <span class="k">for</span> <span class="n">dec_name</span><span class="p">,</span> <span class="n">ch_groups</span> <span class="ow">in</span> <span class="n">ch_groups_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">group_info</span> <span class="ow">in</span> <span class="n">ch_groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">tbl</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">tbl</span><span class="o">.</span><span class="n">loc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="n">group_path</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;group_path&#39;</span><span class="p">]</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span>
+            <span class="n">lh5_store</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">tbl</span><span class="p">,</span> <span class="n">group_path</span><span class="p">,</span> <span class="n">out_file</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;last write&#39;</span><span class="p">)</span>
+            <span class="n">tbl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">update_progress</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unrecognized_data_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING, Found the following unknown data IDs:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">data_id</span> <span class="ow">in</span> <span class="n">unrecognized_data_ids</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_id</span><span class="p">,</span> <span class="n">id2dn_dict</span><span class="p">[</span><span class="n">data_id</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hopefully they weren&#39;t important!</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Wrote RAW File:</span><span class="se">\n</span><span class="s2">    </span><span class="si">{}</span><span class="se">\n</span><span class="s2">FILE INFO:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">raw_file_pattern</span><span class="p">))</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

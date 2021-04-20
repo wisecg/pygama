@@ -1,0 +1,548 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.analysis.histograms &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.analysis.histograms</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.analysis.histograms</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">pygama convenience functions for 1D histograms.</span>
+
+<span class="sd">1D hists in pygama require 3 things available from all implementations</span>
+<span class="sd">of 1D histograms of numerical data in python: hist, bins, and var:</span>
+<span class="sd">- hist: an array of histogram values</span>
+<span class="sd">- bins: an array of bin edges</span>
+<span class="sd">- var: an array of variances in each bin</span>
+<span class="sd">If var is not provided, pygama assuems that the hist contains &quot;counts&quot; with</span>
+<span class="sd">variance = counts (Poisson stats)</span>
+
+<span class="sd">These are just convenience functions, provided for your convenience. Hopefully</span>
+<span class="sd">they will help you if you need to do something trickier than is provided (e.g.</span>
+<span class="sd">2D hists).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pygama.utils</span> <span class="k">as</span> <span class="nn">pgu</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">rcParams</span>
+
+
+<div class="viewcode-block" id="get_hist"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.histograms.get_hist">[docs]</a><span class="k">def</span> <span class="nf">get_hist</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; return hist, bins, var after binning data</span>
+
+<span class="sd">    This is just a wrapper for numpy.histogram, with optional weights for each</span>
+<span class="sd">    element and proper computing of variances.</span>
+
+<span class="sd">    Note: there are no overflow / underflow bins.</span>
+
+<span class="sd">    Available binning methods:</span>
+
+<span class="sd">      - Default (no binning arguments) : 100 bins over an auto-detected range</span>
+<span class="sd">      - bins=N, range=(x_lo, x_hi) : N bins over the specified range (or leave</span>
+<span class="sd">        range=None for auto-detected range)</span>
+<span class="sd">      - bins=[str] : use one of np.histogram&#39;s automatic binning algorithms</span>
+<span class="sd">      - bins=bin_edges_array : array lower bin edges, supports non-uniform binning</span>
+<span class="sd">      - dx=dx, range=(x_lo, x_hi): bins of width dx over the specified range.</span>
+<span class="sd">        Note: dx overrides the bins argument!</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : array like</span>
+<span class="sd">        The array of data to be histogrammed</span>
+<span class="sd">    bins: int, array, or str (optional)</span>
+<span class="sd">        int: the number of bins to be used in the histogram</span>
+<span class="sd">        array: an array of bin edges to use </span>
+<span class="sd">        str: the name of the np.histogram automatic binning algorithm to use</span>
+<span class="sd">        If not provided, np.histogram&#39;s default auto-binning routine is used</span>
+<span class="sd">    range : tuple (float, float) (optional)</span>
+<span class="sd">        (x_lo, x_high) is the tuple of low and high x values to uses for the</span>
+<span class="sd">        very ends of the bin range. If not provided, np.histogram chooses the</span>
+<span class="sd">        ends based on the data in data</span>
+<span class="sd">    dx : float (optional)</span>
+<span class="sd">        Specifies the bin width. Overrides &quot;bins&quot; if both arguments are present</span>
+<span class="sd">    wts : float or array like (optional)</span>
+<span class="sd">        Array of weights for each bin. For example, if you want to divide all</span>
+<span class="sd">        bins by a time T to get the bin contents in count rate, set wts = 1/T.</span>
+<span class="sd">        Variances will be computed for each bin that appropriately account for</span>
+<span class="sd">        each data point&#39;s weighting.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    hist, bins, var : tuple (array, array, array)</span>
+<span class="sd">        hist : the values in each bin of the histogram</span>
+<span class="sd">        bins : an array of bin edges: bins[i] is the lower edge of the ith bin.</span>
+<span class="sd">               Note: it includes the upper edge of the last bin and does not</span>
+<span class="sd">               include underflow or overflow bins. So len(bins) = len(hist) + 1</span>
+<span class="sd">        var : array of variances in each bin of the histogram</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="mi">100</span> <span class="c1"># override np.histogram default of just 10</span>
+
+    <span class="k">if</span> <span class="n">dx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dx</span><span class="p">)</span>
+
+    <span class="c1"># bins includes left edge of first bin and right edge of all other bins</span>
+    <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">wts</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">wts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+        <span class="c1"># no weights: var = hist</span>
+        <span class="k">return</span> <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">hist</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># get the variances by binning with double the weight</span>
+        <span class="n">var</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">wts</span><span class="o">*</span><span class="n">wts</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span></div>
+
+
+<div class="viewcode-block" id="get_bin_centers"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.histograms.get_bin_centers">[docs]</a><span class="k">def</span> <span class="nf">get_bin_centers</span><span class="p">(</span><span class="n">bins</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns an array of bin centers from an input array of bin edges.</span>
+<span class="sd">    Works for non-uniform binning. Note: a new array is allocated</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mf">2.</span></div>
+
+
+<div class="viewcode-block" id="get_bin_widths"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.histograms.get_bin_widths">[docs]</a><span class="k">def</span> <span class="nf">get_bin_widths</span><span class="p">(</span><span class="n">bins</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns an array of bin widths from an input array of bin edges.</span>
+<span class="sd">    Works for non-uniform binning.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="find_bin"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.histograms.find_bin">[docs]</a><span class="k">def</span> <span class="nf">find_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the index of the bin containing x</span>
+<span class="sd">    Returns -1 for underflow, and len(bins) for overflow</span>
+<span class="sd">    For uniform bins, jumps directly to the appropriate index.</span>
+<span class="sd">    For non-uniform bins, binary search is used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># first handle overflow / underflow</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="mi">0</span> <span class="c1"># i.e. overflow</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">bins</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="c1"># we are definitely in range, and there are at least 2 bin edges, one below</span>
+    <span class="c1"># and one above x. try assuming uniform bins</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">x</span><span class="o">-</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">dx</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">:</span> <span class="k">return</span> <span class="n">index</span>
+
+    <span class="c1"># bins are non-uniform: find by binary search</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="range_slice"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.histograms.range_slice">[docs]</a><span class="k">def</span> <span class="nf">range_slice</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">i_min</span> <span class="o">=</span> <span class="n">find_bin</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+    <span class="n">i_max</span> <span class="o">=</span> <span class="n">find_bin</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">var</span> <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="n">i_min</span><span class="p">:</span><span class="n">i_max</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">hist</span><span class="p">[</span><span class="n">i_min</span><span class="p">:</span><span class="n">i_max</span><span class="p">],</span> <span class="n">bins</span><span class="p">[</span><span class="n">i_min</span><span class="p">:</span><span class="n">i_max</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">var</span></div>
+
+
+
+<div class="viewcode-block" id="get_fwhm"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.histograms.get_fwhm">[docs]</a><span class="k">def</span> <span class="nf">get_fwhm</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dmx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bl</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dbl</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bins_over_f&#39;</span><span class="p">,</span> <span class="n">n_slope</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estimate the FWHM of data in a histogram</span>
+
+<span class="sd">    See get_fwfm for parameters and return values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">hist</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;note: this function has been updated to require bins rather&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;than bin_centers. Don&#39;t trust this result&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">get_fwfm</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">dmx</span><span class="p">,</span> <span class="n">bl</span><span class="p">,</span> <span class="n">dbl</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">n_slope</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_fwfm"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.histograms.get_fwfm">[docs]</a><span class="k">def</span> <span class="nf">get_fwfm</span><span class="p">(</span><span class="n">fraction</span><span class="p">,</span> <span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dmx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bl</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dbl</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bins_over_f&#39;</span><span class="p">,</span> <span class="n">n_slope</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estimate the full width at some fraction of the max of data in a histogram</span>
+
+<span class="sd">    Typically used by sending slices around a peak. Searches about argmax(hist)</span>
+<span class="sd">    for the peak to fall by [fraction] from mx to bl</span>
+
+<span class="sd">    Paramaters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fraction : float</span>
+<span class="sd">        The fractional amplitude at which to evaluate the full width</span>
+<span class="sd">    hist : array-like</span>
+<span class="sd">        The histogram data array containing the peak</span>
+<span class="sd">    bin_centers : array-like</span>
+<span class="sd">        An array of bin centers for the histogram</span>
+<span class="sd">    var : array-like (optional)</span>
+<span class="sd">        An array of histogram variances. Used with the &#39;fit_slopes&#39; method</span>
+<span class="sd">    mx : float or tuple(float, float) (optional)</span>
+<span class="sd">        The value to use for the max of the peak. If None, np.amax(hist) is</span>
+<span class="sd">        used. </span>
+<span class="sd">    dmx : float (optional)</span>
+<span class="sd">        The uncertainty in mx</span>
+<span class="sd">    bl : float or tuple (float, float) (optional)</span>
+<span class="sd">        Used to specify an offset from which to estimate the FWFM. </span>
+<span class="sd">    dbl : float (optional)</span>
+<span class="sd">        The uncertainty in the bl</span>
+<span class="sd">    method : string</span>
+<span class="sd">        &#39;bins_over_f&#39; : the simplest method: just take the diffence in the bin</span>
+<span class="sd">            centers that are over [fraction] of max. Only works for high stats and </span>
+<span class="sd">            FWFM/bin_width &gt;&gt; 1</span>
+<span class="sd">        &#39;interpolate&#39; : interpolate between the bins that cross the [fration]</span>
+<span class="sd">            line.  Works well for high stats and a reasonable number of bins.</span>
+<span class="sd">            Uncertainty incorporates var, if provided.</span>
+<span class="sd">        &#39;fit_slopes&#39; : fit over n_slope bins in the vicinity of the FWFM and</span>
+<span class="sd">            interpolate to get the fractional crossing point. Works okay even</span>
+<span class="sd">            when stats are moderate but requires enough bins that dx traversed</span>
+<span class="sd">            by n_slope bins is approximately linear. Incorporates bin variances</span>
+<span class="sd">            in fit and final uncertainties if provided.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fwfm, dfwfm : float, float</span>
+<span class="sd">        fwfm: the full width at [fraction] of the maximum above bl</span>
+<span class="sd">        dfwfm: the uncertainty in fwfm</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pygama.analysis.histograms as pgh</span>
+<span class="sd">    &gt;&gt;&gt; from numpy.random import normal</span>
+<span class="sd">    &gt;&gt;&gt; hist, bins, var = pgh.get_hist(normal(size=10000), bins=100, range=(-5,5))</span>
+<span class="sd">    &gt;&gt;&gt; pgh.get_fwfm(0.5, hist, bins, var, method=&#39;bins_over_f&#39;)</span>
+<span class="sd">    (2.2, 0.15919638684132664) # may vary</span>
+
+<span class="sd">    &gt;&gt;&gt; pgh.get_fwfm(0.5, hist, bins, var, method=&#39;interpolate&#39;)</span>
+<span class="sd">    (2.2041666666666666, 0.09790931254396479) # may vary</span>
+
+<span class="sd">    &gt;&gt;&gt; pgh.get_fwfm(0.5, hist, bins, var, method=&#39;fit_slopes&#39;)</span>
+<span class="sd">    (2.3083363869003466, 0.10939486522749278) # may vary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># find bins over [fraction]</span>
+    <span class="k">if</span> <span class="n">mx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+        <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dmx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+            <span class="n">dmx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">hist</span><span class="p">)])</span>
+    <span class="n">idxs_over_f</span> <span class="o">=</span> <span class="n">hist</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">bl</span> <span class="o">+</span> <span class="n">fraction</span> <span class="o">*</span> <span class="n">mx</span><span class="p">)</span>
+
+    <span class="c1"># argmax will return the index of the first occurence of a maximum</span>
+    <span class="c1"># so we can use it to find the first and last time idxs_over_f is &quot;True&quot;</span>
+    <span class="n">bin_lo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">idxs_over_f</span><span class="p">)</span>
+    <span class="n">bin_hi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxs_over_f</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">idxs_over_f</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">bin_centers</span> <span class="o">=</span> <span class="n">get_bin_centers</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="c1"># precalc dheight: uncertainty in height used as the threshold</span>
+    <span class="n">dheight2</span> <span class="o">=</span> <span class="p">(</span><span class="n">fraction</span><span class="o">*</span><span class="n">dmx</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">fraction</span><span class="p">)</span><span class="o">*</span><span class="n">dbl</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;bins_over_f&#39;</span><span class="p">:</span>
+        <span class="c1"># the simplest method: just take the diffence in the bin centers</span>
+        <span class="n">fwfm</span> <span class="o">=</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_hi</span><span class="p">]</span> <span class="o">-</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_lo</span><span class="p">]</span>
+
+        <span class="c1"># compute rough uncertainty as [bin width] (+) [dheight / slope]</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_lo</span><span class="p">]</span> <span class="o">-</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_lo</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_lo</span><span class="p">]</span> <span class="o">-</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_lo</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dfwfm2</span> <span class="o">=</span> <span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dheight2</span> <span class="o">*</span> <span class="p">(</span><span class="n">dx</span><span class="o">/</span><span class="n">dy</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_hi</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_hi</span><span class="p">]</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_hi</span><span class="p">]</span> <span class="o">-</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_hi</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dfwfm2</span> <span class="o">+=</span> <span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dheight2</span> <span class="o">*</span> <span class="p">(</span><span class="n">dx</span><span class="o">/</span><span class="n">dy</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">return</span> <span class="n">fwfm</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dfwfm2</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;interpolate&#39;</span><span class="p">:</span>
+        <span class="c1"># interpolate between the two bins that cross the [fraction] line</span>
+        <span class="c1"># works well for high stats </span>
+        <span class="k">if</span> <span class="n">bin_lo</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">bin_hi</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;get_fwhm: can&#39;t interpolate (</span><span class="si">{</span><span class="n">bin_lo</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">bin_hi</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">val_f</span> <span class="o">=</span> <span class="n">bl</span> <span class="o">+</span> <span class="n">fraction</span><span class="o">*</span><span class="p">(</span><span class="n">mx</span><span class="o">-</span><span class="n">bl</span><span class="p">)</span>
+
+        <span class="c1"># x_lo</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_lo</span><span class="p">]</span> <span class="o">-</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_lo</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dhf</span> <span class="o">=</span> <span class="n">val_f</span> <span class="o">-</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_lo</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dh</span> <span class="o">=</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_lo</span><span class="p">]</span> <span class="o">-</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_lo</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">x_lo</span> <span class="o">=</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_lo</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span> <span class="o">*</span> <span class="n">dhf</span><span class="o">/</span><span class="n">dh</span>
+        <span class="c1"># uncertainty</span>
+        <span class="n">dx2_lo</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+            <span class="n">dx2_lo</span> <span class="o">=</span> <span class="p">(</span><span class="n">dhf</span><span class="o">/</span><span class="n">dh</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">var</span><span class="p">[</span><span class="n">bin_lo</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">dh</span><span class="o">-</span><span class="n">dhf</span><span class="p">)</span><span class="o">/</span><span class="n">dh</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">var</span><span class="p">[</span><span class="n">bin_lo</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">dx2_lo</span> <span class="o">*=</span> <span class="p">(</span><span class="n">dx</span><span class="o">/</span><span class="n">dh</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">dDdh</span> <span class="o">=</span> <span class="o">-</span><span class="n">dx</span><span class="o">/</span><span class="n">dh</span>
+
+        <span class="c1"># x_hi</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_hi</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_hi</span><span class="p">]</span>
+        <span class="n">dhf</span> <span class="o">=</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_hi</span><span class="p">]</span> <span class="o">-</span> <span class="n">val_f</span>
+        <span class="n">dh</span> <span class="o">=</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_hi</span><span class="p">]</span> <span class="o">-</span> <span class="n">hist</span><span class="p">[</span><span class="n">bin_hi</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">x_hi</span> <span class="o">=</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">bin_hi</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span> <span class="o">*</span> <span class="n">dhf</span><span class="o">/</span><span class="n">dh</span> 
+        <span class="c1"># uncertainty</span>
+        <span class="n">dx2_hi</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+            <span class="n">dx2_hi</span> <span class="o">=</span> <span class="p">(</span><span class="n">dhf</span><span class="o">/</span><span class="n">dh</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">var</span><span class="p">[</span><span class="n">bin_hi</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">dh</span><span class="o">-</span><span class="n">dhf</span><span class="p">)</span><span class="o">/</span><span class="n">dh</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">var</span><span class="p">[</span><span class="n">bin_hi</span><span class="p">]</span>
+            <span class="n">dx2_hi</span> <span class="o">*=</span> <span class="p">(</span><span class="n">dx</span><span class="o">/</span><span class="n">dh</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">dDdh</span> <span class="o">+=</span> <span class="n">dx</span><span class="o">/</span><span class="n">dh</span>
+
+        <span class="k">return</span> <span class="n">x_hi</span> <span class="o">-</span> <span class="n">x_lo</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx2_lo</span> <span class="o">+</span> <span class="n">dx2_hi</span> <span class="o">+</span> <span class="n">dDdh</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dheight2</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;fit_slopes&#39;</span><span class="p">:</span>
+        <span class="c1"># evaluate the [fraction] point on a line fit to n_slope bins near the crossing.</span>
+        <span class="c1"># works okay even when stats are moderate</span>
+        <span class="n">val_f</span> <span class="o">=</span> <span class="n">bl</span> <span class="o">+</span> <span class="n">fraction</span><span class="o">*</span><span class="p">(</span><span class="n">mx</span><span class="o">-</span><span class="n">bl</span><span class="p">)</span>
+
+        <span class="c1"># x_lo</span>
+        <span class="n">i_0</span> <span class="o">=</span> <span class="n">bin_lo</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">n_slope</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">i_n</span> <span class="o">=</span> <span class="n">i_0</span> <span class="o">+</span> <span class="n">n_slope</span>
+        <span class="n">wts</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="n">i_0</span><span class="p">:</span><span class="n">i_n</span><span class="p">])</span>
+        <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">bin_centers</span><span class="p">[</span><span class="n">i_0</span><span class="p">:</span><span class="n">i_n</span><span class="p">],</span> <span class="n">hist</span><span class="p">[</span><span class="n">i_0</span><span class="p">:</span><span class="n">i_n</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">wts</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="s1">&#39;unscaled&#39;</span><span class="p">)</span>
+        <span class="n">x_lo</span> <span class="o">=</span> <span class="p">(</span><span class="n">val_f</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="n">m</span>
+        <span class="c1">#uncertainty</span>
+        <span class="n">dxl2</span> <span class="o">=</span> <span class="n">cov</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">m</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">cov</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dheight2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">val_f</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">cov</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">val_f</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="n">m</span>
+        <span class="n">dxl2</span> <span class="o">*=</span> <span class="n">x_lo</span><span class="o">**</span><span class="mi">2</span>
+
+        <span class="c1"># x_hi</span>
+        <span class="n">i_0</span> <span class="o">=</span> <span class="n">bin_hi</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">n_slope</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">i_n</span> <span class="o">=</span> <span class="n">i_0</span> <span class="o">+</span> <span class="n">n_slope</span>
+        <span class="n">wts</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="n">i_0</span><span class="p">:</span><span class="n">i_n</span><span class="p">])</span>
+        <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">bin_centers</span><span class="p">[</span><span class="n">i_0</span><span class="p">:</span><span class="n">i_n</span><span class="p">],</span> <span class="n">hist</span><span class="p">[</span><span class="n">i_0</span><span class="p">:</span><span class="n">i_n</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">wts</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="s1">&#39;unscaled&#39;</span><span class="p">)</span>
+        <span class="n">x_hi</span> <span class="o">=</span> <span class="p">(</span><span class="n">val_f</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="n">m</span>
+        <span class="c1">#uncertainty</span>
+        <span class="n">dxh2</span> <span class="o">=</span> <span class="n">cov</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">m</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">cov</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dheight2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">val_f</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">cov</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">val_f</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="n">m</span>
+        <span class="n">dxh2</span> <span class="o">*=</span> <span class="n">x_hi</span><span class="o">**</span><span class="mi">2</span>
+
+        <span class="k">return</span> <span class="n">x_hi</span> <span class="o">-</span> <span class="n">x_lo</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dxl2</span> <span class="o">+</span> <span class="n">dxh2</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;get_fwhm: unrecognized method </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="plot_hist"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.histograms.plot_hist">[docs]</a><span class="k">def</span> <span class="nf">plot_hist</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">show_stats</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stats_hloc</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">stats_vloc</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    plot a step histogram, with optional error bars</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># the concat calls get the steps to draw correctly at the range boundaries</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">bins</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="mi">0</span><span class="p">],</span> <span class="n">hist</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="n">where</span><span class="o">=</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">get_bin_centers</span><span class="p">(</span><span class="n">bins</span><span class="p">),</span> <span class="n">hist</span><span class="p">,</span>
+                     <span class="n">xerr</span><span class="o">=</span><span class="n">get_bin_widths</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">),</span>
+                     <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">show_stats</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">bin_centers</span> <span class="o">=</span> <span class="n">get_bin_centers</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">N</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;can&#39;t compute sigma for N =&quot;</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">hist</span><span class="o">*</span><span class="n">bin_centers</span><span class="p">)</span><span class="o">/</span><span class="n">N</span>
+        <span class="n">x2ave</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">hist</span><span class="o">*</span><span class="n">bin_centers</span><span class="o">*</span><span class="n">bin_centers</span><span class="p">)</span><span class="o">/</span><span class="n">N</span>
+        <span class="n">stddev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x2ave</span> <span class="o">-</span> <span class="n">mean</span><span class="o">*</span><span class="n">mean</span><span class="p">))</span>
+        <span class="n">dmean</span> <span class="o">=</span> <span class="n">stddev</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+
+        <span class="n">mean</span><span class="p">,</span> <span class="n">dmean</span> <span class="o">=</span> <span class="n">pgu</span><span class="o">.</span><span class="n">get_formatted_stats</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">dmean</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="s1">&#39;$\mu=</span><span class="si">%s</span><span class="s1"> \pm </span><span class="si">%s</span><span class="s1">$</span><span class="se">\n</span><span class="s1">$\sigma=</span><span class="si">%#.3g</span><span class="s1">$&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">dmean</span><span class="p">,</span> <span class="n">stddev</span><span class="p">)</span>
+        <span class="n">stats_fontsize</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;legend.fontsize&#39;</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">stats_hloc</span><span class="p">,</span> <span class="n">stats_vloc</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="n">stats_fontsize</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_gaussian_guess"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.histograms.get_gaussian_guess">[docs]</a><span class="k">def</span> <span class="nf">get_gaussian_guess</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    given a hist, gives guesses for mu, sigma, and amplitude</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">hist</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;note: this function has been updated to require bins rather&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;than bin_centers. Don&#39;t trust this result&quot;</span><span class="p">)</span>
+
+    <span class="n">max_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+    <span class="n">guess_e</span> <span class="o">=</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="n">max_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">bins</span><span class="p">[</span><span class="n">max_idx</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span> <span class="c1"># bin center</span>
+    <span class="n">guess_amp</span> <span class="o">=</span> <span class="n">hist</span><span class="p">[</span><span class="n">max_idx</span><span class="p">]</span>
+
+    <span class="c1"># find 50% amp bounds on both sides for a FWHM guess</span>
+    <span class="n">guess_sigma</span> <span class="o">=</span> <span class="n">get_fwhm</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.355</span>  <span class="c1"># FWHM to sigma</span>
+    <span class="n">guess_area</span> <span class="o">=</span> <span class="n">guess_amp</span> <span class="o">*</span> <span class="n">guess_sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">guess_e</span><span class="p">,</span> <span class="n">guess_sigma</span><span class="p">,</span> <span class="n">guess_area</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

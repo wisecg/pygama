@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.io.ch_group &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.io.ch_group</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.io.ch_group</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pygama</span> <span class="kn">import</span> <span class="n">lh5</span>
+
+<div class="viewcode-block" id="expand_ch_groups"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.ch_group.expand_ch_groups">[docs]</a><span class="k">def</span> <span class="nf">expand_ch_groups</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Expand a ch_group from its json shorthand</span>
+
+<span class="sd">    ch_groups: a dictionary whose keys are the names of channel groupings,</span>
+<span class="sd">        and whose values have the following fields:</span>
+<span class="sd">        ch_list (list): a list of channels and channel ranges associated</span>
+<span class="sd">            with this group</span>
+<span class="sd">        system (str, optional): name of the (sub)system to which this group</span>
+<span class="sd">            belongs. Used to set e.g. the name of the output file or group path,</span>
+<span class="sd">            etc.</span>
+
+<span class="sd">    In json we allow a shorthand where the group name and system name can</span>
+<span class="sd">    include a {ch:xxx} format specifier, indicating that each channel in</span>
+<span class="sd">    ch_list should be given its own group with the corresponding name. In</span>
+<span class="sd">    this function, we expand this formatting to give a list of</span>
+<span class="sd">    properly-named groups with the right channel specified in each.</span>
+
+<span class="sd">    In json we also allow ch_list to have entries that are 2-integer lists</span>
+<span class="sd">    corresponding to the first and last channels in a continguous range of</span>
+<span class="sd">    channels that belong in the group. In this function we expand those</span>
+<span class="sd">    ranges to give a properly formated list of ints.</span>
+
+<span class="sd">    Note: the intent is that channels in the same group get written to the</span>
+<span class="sd">    same table, and that groups in the same system get written out to the</span>
+<span class="sd">    same file. </span>
+
+<span class="sd">    Note 2: during run time, a ch group&#39;s info can be updated with things like</span>
+<span class="sd">    the lh5 table to which this channel&#39;s data gets written, the name of the</span>
+<span class="sd">    output file, etc.</span>
+
+<span class="sd">    Example valid json:</span>
+<span class="sd">    &quot;FlashCamEventDecoder&quot; : {</span>
+<span class="sd">      &quot;g{ch:0&gt;3d}&quot; : {</span>
+<span class="sd">        &quot;ch_list&quot; : [ [24,64] ],</span>
+<span class="sd">        &quot;system&quot; : &quot;geds&quot;</span>
+<span class="sd">      },</span>
+<span class="sd">      &quot;spms&quot; : {</span>
+<span class="sd">        &quot;ch_list&quot; : [ [6,23] ],</span>
+<span class="sd">        &quot;system&quot; : &quot;spms&quot;</span>
+<span class="sd">      },</span>
+<span class="sd">      &quot;puls&quot; : {</span>
+<span class="sd">        &quot;ch_list&quot; : [ 0 ],</span>
+<span class="sd">        &quot;system&quot; : &quot;auxs&quot;</span>
+<span class="sd">      },</span>
+<span class="sd">      &quot;muvt&quot; : {</span>
+<span class="sd">        &quot;ch_list&quot; : [ 1, 5 ],</span>
+<span class="sd">        &quot;system&quot; : &quot;auxs&quot;</span>
+<span class="sd">      }</span>
+<span class="sd">    }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get the original list of keys because we are going to change the keys</span>
+    <span class="c1"># of ch_groups inside the next list. Note: we have to convert from</span>
+    <span class="c1"># dict_keys to list here otherwise the loop complains about changing</span>
+    <span class="c1"># the dictionary during iteration</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ch_groups</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">group</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: got dummy group (no name) in non-dummy ch_groups&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">ch_groups</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="c1"># changes to info will change ch_groups[group]</span>
+        <span class="c1"># make sure we have a channel list</span>
+        <span class="k">if</span> <span class="s1">&#39;ch_list&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ch_group&#39;</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="s1">&#39;missing channel specification&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># find and expand any ranges in the ch_list</span>
+        <span class="c1"># do in a while loop with a controlled index since we are modifying</span>
+        <span class="c1"># the length of the list inside the loop (be careful)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_list&#39;</span><span class="p">]):</span>
+            <span class="n">ch_range</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_list&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1"># expand any 2-int lists</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ch_range</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ch_range</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_list&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">ch_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ch_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="n">ch_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">ch_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># any other entry should be an int!</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ch_range</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span> 
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ch_group&#39;</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="s1">&#39;has malformed channel list:&#39;</span><span class="p">,</span> <span class="n">ch_range</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">ch_range</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ch_range</span><span class="p">))</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="c1"># Expand groups if group name contains a ch-based formatter</span>
+        <span class="k">if</span> <span class="s1">&#39;{ch:&#39;</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span> 
+            <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_list&#39;</span><span class="p">]:</span>
+                <span class="n">expanded_group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ch</span><span class="o">=</span><span class="n">ch</span><span class="p">)</span>
+                <span class="n">ch_groups</span><span class="p">[</span><span class="n">expanded_group</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">ch_groups</span><span class="p">[</span><span class="n">expanded_group</span><span class="p">][</span><span class="s1">&#39;ch_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span> <span class="n">ch</span> <span class="p">];</span>
+                <span class="k">if</span> <span class="s1">&#39;{ch:&#39;</span> <span class="ow">in</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">]:</span>
+                    <span class="n">expanded_system</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ch</span><span class="o">=</span><span class="n">ch</span><span class="p">)</span>
+                    <span class="n">ch_groups</span><span class="p">[</span><span class="n">expanded_group</span><span class="p">][</span><span class="s1">&#39;system&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expanded_system</span>
+            <span class="n">ch_groups</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">group</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_list_of"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.ch_group.get_list_of">[docs]</a><span class="k">def</span> <span class="nf">get_list_of</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">ch_groups</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a list of values for key in ch_groups[groups]</span>
+
+<span class="sd">    key (str): a key of the ch_groups[groups] dict</span>
+<span class="sd">    ch_groups (dict): a group-name-indexed dict whose values are</span>
+<span class="sd">        dictionaries of group information (see expand_ch_groups)</span>
+
+<span class="sd">    Example: get_list_of(&#39;system&#39;, ch_groups)</span>
+<span class="sd">        If ch_groups is the one specified in the json in the expand_ch_groups</span>
+<span class="sd">        example, this will return the list [ &#39;geds&#39;, &#39;spms&#39;, &#39;auxs&#39; ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ch_info</span> <span class="ow">in</span> <span class="n">ch_groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ch_info</span> <span class="ow">and</span> <span class="n">ch_info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span> 
+            <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ch_info</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">values</span></div>
+
+
+
+<div class="viewcode-block" id="build_tables"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.ch_group.build_tables">[docs]</a><span class="k">def</span> <span class="nf">build_tables</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">init_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; build tables and associated I/O info for the channel groups.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ch_groups : dict</span>
+<span class="sd">    buffer_size : int</span>
+<span class="sd">    init_obj : object with initialize_lh5_table() function</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ch_to_tbls : dict or Table</span>
+<span class="sd">        A channel-indexed dictionary of tables for quick look-up, or if passed a</span>
+<span class="sd">        dummy group (no group name), return the one table made.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ch_to_tbls</span> <span class="o">=</span> <span class="p">{}</span> 
+
+    <span class="c1"># set up a table for each group</span>
+    <span class="k">for</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">group_info</span> <span class="ow">in</span> <span class="n">ch_groups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="n">tbl</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="n">buffer_size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">init_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># for dummy ch_group</span>
+            <span class="c1"># Note: all ch in ch_list will be written to the same table. So it</span>
+            <span class="c1"># should suffice to initials for first channel in the list</span>
+            <span class="k">if</span> <span class="s1">&#39;ch_list&#39;</span> <span class="ow">in</span> <span class="n">group_info</span><span class="p">:</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;ch_list&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">init_obj</span><span class="o">.</span><span class="n">initialize_lh5_table</span><span class="p">(</span><span class="n">tbl</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+
+        <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tbl</span>
+
+        <span class="k">if</span> <span class="n">group_name</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: got dummy group (no name) in non-dummy ch_groups&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">tbl</span>
+
+        <span class="c1"># cache the table to a ch-indexed dict for quick look-up</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;ch_list&#39;</span><span class="p">]:</span> <span class="n">ch_to_tbls</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">=</span> <span class="n">tbl</span>
+
+    <span class="k">return</span> <span class="n">ch_to_tbls</span></div>
+
+
+<div class="viewcode-block" id="set_outputs"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.ch_group.set_outputs">[docs]</a><span class="k">def</span> <span class="nf">set_outputs</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">,</span> <span class="n">out_file_template</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grp_path_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{group_name}</span><span class="s1">&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Set up output filenames and/or group paths for the channel group</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    out_file_template : str or dict</span>
+<span class="sd">        Value(s) for attribute &quot;out_file&quot; when not provided explicitly by the user.</span>
+<span class="sd">        If a string, use it for the out_file attribute for all ch groups</span>
+<span class="sd">        If a dict, the out_file must be keyed by the ch_group&#39;s &quot;system&quot;</span>
+<span class="sd">        You can use {system} in the template and the system name will be added.</span>
+
+<span class="sd">    group_path_template : str or dict (optional)</span>
+<span class="sd">        If attribute &quot;group_path&quot; is not provided explicitly by the user,</span>
+<span class="sd">        ch_groups are stored by default in path {group_name} inside their output</span>
+<span class="sd">        files. You can use {group_name} as well as {system} and the</span>
+<span class="sd">        corresponding group info will be filled in for you.  If a dict, the</span>
+<span class="sd">        grp_path_template is keyed by the ch_group&#39;s name Example:</span>
+<span class="sd">        grp_path_template=&#39;/data/{system}/{group_name}/raw&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">group_info</span> <span class="ow">in</span> <span class="n">ch_groups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="c1"># set the output file name and group path</span>
+        <span class="n">format_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;group_name&#39;</span> <span class="p">:</span> <span class="n">group_name</span> <span class="p">}</span>
+        <span class="k">if</span> <span class="s1">&#39;system&#39;</span> <span class="ow">in</span> <span class="n">group_info</span><span class="p">:</span> <span class="n">format_dict</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">format_dict</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="n">oft</span> <span class="o">=</span> <span class="n">out_file_template</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">oft</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;system&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_info</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error, group&#39;</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="s1">&#39;needs a &quot;system&quot; to key output filenames&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">oft</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error, no output filename found for system:&#39;</span><span class="p">,</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span> <span class="n">oft</span> <span class="o">=</span> <span class="n">out_file_template</span><span class="p">[</span><span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">]]</span>
+        <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">oft</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">format_dict</span><span class="p">)</span>
+
+        <span class="n">gpt</span> <span class="o">=</span> <span class="n">grp_path_template</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gpt</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span> <span class="n">gpt</span> <span class="o">=</span> <span class="n">group_path_template</span><span class="p">[</span><span class="n">group_name</span><span class="p">]</span>
+        <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;group_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gpt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">format_dict</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="create_dummy_ch_group"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.ch_group.create_dummy_ch_group">[docs]</a><span class="k">def</span> <span class="nf">create_dummy_ch_group</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span> <span class="s1">&#39;&#39;</span> <span class="p">:</span> <span class="p">{}</span> <span class="p">}</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

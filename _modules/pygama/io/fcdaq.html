@@ -1,0 +1,721 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.io.fcdaq &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.io.fcdaq</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.io.fcdaq</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.io_base</span> <span class="kn">import</span> <span class="n">DataDecoder</span>
+<span class="kn">from</span> <span class="nn">pygama</span> <span class="kn">import</span> <span class="n">lh5</span>
+<span class="kn">from</span> <span class="nn">.ch_group</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="FlashCamEventDecoder"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.fcdaq.FlashCamEventDecoder">[docs]</a><span class="k">class</span> <span class="nc">FlashCamEventDecoder</span><span class="p">(</span><span class="n">DataDecoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    decode FlashCam digitizer event data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># these are read for every event (decode_event)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;packet_id&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># packet index in file</span>
+               <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+             <span class="p">},</span>
+            <span class="s1">&#39;ievt&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># index of event</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># time since epoch</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;float64&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;runtime&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># time since beginning of file</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;float64&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;numtraces&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># number of triggered adc channels</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;tracelist&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># list of triggered adc channels</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int16&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;array&lt;1&gt;{array&lt;1&gt;</span><span class="si">{real}</span><span class="s1">}&#39;</span><span class="p">,</span> <span class="c1"># vector of vectors</span>
+              <span class="s1">&#39;length_guess&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;baseline&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># fpga baseline</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint16&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="p">{</span>  <span class="c1"># fpga energy</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint16&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;channel&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># right now, index of the trigger (trace)</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;ts_pps&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># PPS timestamp in sec</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;ts_ticks&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># clock ticks</span>
+            <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+              <span class="p">},</span>
+            <span class="s1">&#39;ts_maxticks&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># max clock ticks</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;to_mu_sec&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># the offset in sec between the master and unix</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int64&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;to_mu_usec&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># the offset in usec between master and unix</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;to_master_sec&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># the calculated sec which must be added to the master</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int64&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;to_dt_mu_usec&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># the delta time between master and unix in usec</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;to_abs_mu_usec&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># the abs(time) between master and unix in usec</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;to_start_sec&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># startsec</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int64&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;to_start_usec&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># startusec</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;dr_start_pps&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># start pps of the next dead window</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;dr_start_ticks&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># start ticks of the next dead window</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;dr_stop_pps&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># stop pps of the next dead window</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;dr_stop_ticks&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># stop ticks of the next dead window</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;dr_maxticks&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># maxticks of the dead window</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;deadtime&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># current dead time calculated from deadregion (dr) fields. Give the total dead time if summed up.</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;float64&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;wf_max&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># ultra-simple np.max energy estimation</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint16&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;wf_std&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># ultra-simple np.std noise estimation</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;float32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;waveform&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># digitizer data</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint16&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;waveform&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="mi">65532</span><span class="p">,</span> <span class="c1"># max value. override this before initializing buffers to save RAM</span>
+              <span class="s1">&#39;sample_period&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span> <span class="c1"># override if a different clock rate is used</span>
+              <span class="s1">&#39;sample_period_units&#39;</span><span class="p">:</span> <span class="s1">&#39;ns&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;t0_units&#39;</span><span class="p">:</span> <span class="s1">&#39;ns&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="c1"># these are read for every file (set_file_config)</span>
+        <span class="c1"># FIXME: push into a file header object?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;nsamples&#39;</span><span class="p">,</span> <span class="c1"># samples per channel</span>
+            <span class="s1">&#39;nadcs&#39;</span><span class="p">,</span> <span class="c1"># number of adc channels</span>
+            <span class="s1">&#39;ntriggers&#39;</span><span class="p">,</span> <span class="c1"># number of triggertraces</span>
+            <span class="s1">&#39;telid&#39;</span><span class="p">,</span> <span class="c1"># id of telescope</span>
+            <span class="s1">&#39;adcbits&#39;</span><span class="p">,</span> <span class="c1"># bit range of the adc channels</span>
+            <span class="s1">&#39;sumlength&#39;</span><span class="p">,</span> <span class="c1"># length of the fpga integrator</span>
+            <span class="s1">&#39;blprecision&#39;</span><span class="p">,</span> <span class="c1"># precision of the fpga baseline</span>
+            <span class="s1">&#39;mastercards&#39;</span><span class="p">,</span> <span class="c1"># number of attached mastercards</span>
+            <span class="s1">&#39;triggercards&#39;</span><span class="p">,</span> <span class="c1"># number of attached triggercards</span>
+            <span class="s1">&#39;adccards&#39;</span><span class="p">,</span> <span class="c1"># number of attached fadccards</span>
+            <span class="s1">&#39;gps&#39;</span><span class="p">,</span> <span class="c1"># gps mode (0: not used, 1: external pps and 10MHz)</span>
+        <span class="p">]</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="FlashCamEventDecoder.get_decoded_values"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.fcdaq.FlashCamEventDecoder.get_decoded_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_decoded_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># same for all channels</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span></div>
+
+
+<div class="viewcode-block" id="FlashCamEventDecoder.set_file_config"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.fcdaq.FlashCamEventDecoder.set_file_config">[docs]</a>    <span class="k">def</span> <span class="nf">set_file_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcio</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        access FCIOConfig members once when each file is opened</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_config</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span><span class="nb">getattr</span><span class="p">(</span><span class="n">fcio</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_names</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_config</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="FlashCamEventDecoder.get_file_config_struct"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.fcdaq.FlashCamEventDecoder.get_file_config_struct">[docs]</a>    <span class="k">def</span> <span class="nf">get_file_config_struct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get an lh5 struct containing the file config info</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">fcio_config</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Struct</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">scalar</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Scalar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="n">fcio_config</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">scalar</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fcio_config</span></div>
+
+
+
+<div class="viewcode-block" id="FlashCamEventDecoder.decode_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.fcdaq.FlashCamEventDecoder.decode_packet">[docs]</a>    <span class="k">def</span> <span class="nf">decode_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcio</span><span class="p">,</span> <span class="n">lh5_tables</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        access FCIOEvent members for each event in the raw file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ievt</span>      <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">eventnumber</span> <span class="c1"># the eventnumber since the beginning of the file</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">eventtime</span>   <span class="c1"># the time since epoch in seconds</span>
+        <span class="n">runtime</span>   <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">runtime</span>     <span class="c1"># the time since the beginning of the file in seconds</span>
+        <span class="n">eventsamples</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">nsamples</span>   <span class="c1"># number of sample per trace</span>
+        <span class="n">numtraces</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">numtraces</span>   <span class="c1"># number of triggered adcs</span>
+        <span class="n">tracelist</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">tracelist</span>   <span class="c1"># list of triggered adcs</span>
+        <span class="n">traces</span>    <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">traces</span>      <span class="c1"># the full traces for the event: (nadcs, nsamples)</span>
+        <span class="n">baselines</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">baseline</span>    <span class="c1"># the fpga baseline values for each channel in LSB</span>
+        <span class="n">energies</span>  <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">daqenergy</span>   <span class="c1"># the fpga energy values for each channel in LSB</span>
+        <span class="n">ts_pps</span>         <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timestamp_pps</span>
+        <span class="n">ts_ticks</span>       <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timestamp_ticks</span>
+        <span class="n">ts_maxticks</span>    <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timestamp_maxticks</span>
+        <span class="n">to_mu_sec</span>      <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timeoffset_mu_sec</span>
+        <span class="n">to_mu_usec</span>     <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timeoffset_mu_usec</span>
+        <span class="n">to_master_sec</span>  <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timeoffset_master_sec</span>
+        <span class="n">to_dt_mu_usec</span>  <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timeoffset_dt_mu_usec</span>
+        <span class="n">to_abs_mu_usec</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timeoffset_abs_mu_usec</span>
+        <span class="n">to_start_sec</span>   <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timeoffset_start_sec</span>
+        <span class="n">to_start_usec</span>  <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">timeoffset_start_usec</span>
+        <span class="n">dr_start_pps</span>   <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">deadregion_start_pps</span>
+        <span class="n">dr_start_ticks</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">deadregion_start_ticks</span>
+        <span class="n">dr_stop_pps</span>    <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">deadregion_stop_pps</span>
+        <span class="n">dr_stop_ticks</span>  <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">deadregion_stop_ticks</span>
+        <span class="n">dr_maxticks</span>    <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">deadregion_maxticks</span>
+        <span class="n">deadtime</span>       <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">deadtime</span>
+
+        <span class="c1"># all channels are read out simultaneously for each event</span>
+        <span class="k">for</span> <span class="n">iwf</span> <span class="ow">in</span> <span class="n">tracelist</span><span class="p">:</span>
+            <span class="n">tbl</span> <span class="o">=</span> <span class="n">lh5_tables</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tbl</span><span class="p">,</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Table</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">iwf</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lh5_tables</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">iwf</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">iwf</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">iwf</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">continue</span>
+                <span class="n">tbl</span> <span class="o">=</span> <span class="n">lh5_tables</span><span class="p">[</span><span class="n">iwf</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">eventsamples</span> <span class="o">!=</span> <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;FlashCamEventDecoder Warning: event wf length was&#39;</span><span class="p">,</span>
+                      <span class="n">eventsamples</span><span class="p">,</span> <span class="s1">&#39;when&#39;</span><span class="p">,</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">],</span> <span class="s1">&#39;were expected&#39;</span><span class="p">)</span>
+            <span class="n">ii</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">loc</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;channel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">iwf</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;packet_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">packet_id</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;ievt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span>  <span class="n">ievt</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span>  <span class="n">timestamp</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;runtime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span>  <span class="n">runtime</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;numtraces&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span>  <span class="n">numtraces</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;tracelist&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_vector</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">tracelist</span><span class="p">)</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;baseline&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">baselines</span><span class="p">[</span><span class="n">iwf</span><span class="p">]</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">energies</span><span class="p">[</span><span class="n">iwf</span><span class="p">]</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;ts_pps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>         <span class="o">=</span> <span class="n">ts_pps</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;ts_ticks&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>       <span class="o">=</span> <span class="n">ts_ticks</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;ts_maxticks&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>    <span class="o">=</span> <span class="n">ts_maxticks</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;to_mu_sec&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>      <span class="o">=</span> <span class="n">to_mu_sec</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;to_mu_usec&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>     <span class="o">=</span> <span class="n">to_mu_usec</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;to_master_sec&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>  <span class="o">=</span> <span class="n">to_master_sec</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;to_dt_mu_usec&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>  <span class="o">=</span> <span class="n">to_dt_mu_usec</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;to_abs_mu_usec&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_abs_mu_usec</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;to_start_sec&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>   <span class="o">=</span> <span class="n">to_start_sec</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;to_start_usec&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>  <span class="o">=</span> <span class="n">to_start_usec</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;dr_start_pps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>   <span class="o">=</span> <span class="n">dr_start_pps</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;dr_start_ticks&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">dr_start_ticks</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;dr_stop_pps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>    <span class="o">=</span> <span class="n">dr_stop_pps</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;dr_stop_ticks&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>  <span class="o">=</span> <span class="n">dr_stop_ticks</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;dr_maxticks&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>    <span class="o">=</span> <span class="n">dr_maxticks</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;deadtime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>       <span class="o">=</span> <span class="n">deadtime</span>
+            <span class="n">waveform</span> <span class="o">=</span> <span class="n">traces</span><span class="p">[</span><span class="n">iwf</span><span class="p">]</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;wf_max&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">waveform</span><span class="p">)</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;wf_std&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">waveform</span><span class="p">)</span>
+            <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">waveform</span>
+            <span class="n">tbl</span><span class="o">.</span><span class="n">push_row</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="mi">36</span><span class="o">*</span><span class="mi">4</span> <span class="o">+</span> <span class="n">numtraces</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eventsamples</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span></div></div>
+
+
+<div class="viewcode-block" id="FlashCamStatusDecoder"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.fcdaq.FlashCamStatusDecoder">[docs]</a><span class="k">class</span> <span class="nc">FlashCamStatusDecoder</span><span class="p">(</span><span class="n">DataDecoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    decode FlashCam digitizer status data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># 0: Errors occured, 1: no errors</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;statustime&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># fc250 seconds, microseconds, dummy, startsec startusec</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;float32&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;cputime&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># CPU seconds, microseconds, dummy, startsec startusec</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;float64&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;startoffset&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># fc250 seconds, microseconds, dummy, startsec startusec</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;float32&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;cards&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># Total number of cards (number of status data to follow)</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># Size of each status data</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;int32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;environment&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># FC card-wise environment status</span>
+              <span class="c1"># Array contents:</span>
+              <span class="c1"># [0-4] Temps in mDeg</span>
+              <span class="c1"># [5-10] Voltages in mV</span>
+              <span class="c1"># 11 main current in mA</span>
+              <span class="c1"># 12 humidity in o/oo</span>
+              <span class="c1"># [13-14] Temps from adc cards in mDeg</span>
+              <span class="c1"># FIXME: change to a table?</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;array_of_equalsized_arrays&lt;1,1&gt;</span><span class="si">{real}</span><span class="s1">&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;totalerrors&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="c1"># FC card-wise list DAQ errors during data taking</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;enverrors&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;ctierrors&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;linkerrors&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;othererrors&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;array_of_equalsized_arrays&lt;1,1&gt;</span><span class="si">{real}</span><span class="s1">&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="c1"># these are read for every file (set_file_config)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;nsamples&#39;</span><span class="p">,</span> <span class="c1"># samples per channel</span>
+            <span class="s1">&#39;nadcs&#39;</span><span class="p">,</span> <span class="c1"># number of adc channels</span>
+            <span class="s1">&#39;ntriggers&#39;</span><span class="p">,</span> <span class="c1"># number of triggertraces</span>
+            <span class="s1">&#39;telid&#39;</span><span class="p">,</span> <span class="c1"># id of telescope</span>
+            <span class="s1">&#39;adcbits&#39;</span><span class="p">,</span> <span class="c1"># bit range of the adc channels</span>
+            <span class="s1">&#39;sumlength&#39;</span><span class="p">,</span> <span class="c1"># length of the fpga integrator</span>
+            <span class="s1">&#39;blprecision&#39;</span><span class="p">,</span> <span class="c1"># precision of the fpga baseline</span>
+            <span class="s1">&#39;mastercards&#39;</span><span class="p">,</span> <span class="c1"># number of attached mastercards</span>
+            <span class="s1">&#39;triggercards&#39;</span><span class="p">,</span> <span class="c1"># number of attached triggercards</span>
+            <span class="s1">&#39;adccards&#39;</span><span class="p">,</span> <span class="c1"># number of attached fadccards</span>
+            <span class="s1">&#39;gps&#39;</span><span class="p">,</span> <span class="c1"># gps mode (0: not used, 1: external pps and 10MHz)</span>
+        <span class="p">]</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FlashCamStatusDecoder.set_file_config"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.fcdaq.FlashCamStatusDecoder.set_file_config">[docs]</a>    <span class="k">def</span> <span class="nf">set_file_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcio</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        access FCIOConfig members once when each file is opened</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_config</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span><span class="nb">getattr</span><span class="p">(</span><span class="n">fcio</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_names</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="FlashCamStatusDecoder.decode_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.fcdaq.FlashCamStatusDecoder.decode_packet">[docs]</a>    <span class="k">def</span> <span class="nf">decode_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcio</span><span class="p">,</span> <span class="n">lh5_table</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        access FC status (temp., log, ...)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># aliases for brevity</span>
+        <span class="n">tbl</span> <span class="o">=</span> <span class="n">lh5_table</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">loc</span>
+
+        <span class="c1"># status -- 0: Errors occured, 1: no errors</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">status</span>
+
+        <span class="c1"># times</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;statustime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">statustime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">fcio</span><span class="o">.</span><span class="n">statustime</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mf">1e6</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;cputime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>    <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">statustime</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">fcio</span><span class="o">.</span><span class="n">statustime</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">1e6</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;startoffset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">statustime</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="n">fcio</span><span class="o">.</span><span class="n">statustime</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">/</span><span class="mf">1e6</span>
+
+        <span class="c1"># Total number of cards (number of status data to follow)</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;cards&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">cards</span>
+
+        <span class="c1"># Size of each status data</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c1"># FC card-wise environment status (temp., volt., hum., ...)</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;environment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">environment</span>
+
+        <span class="c1"># FC card-wise list DAQ errors during data taking</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;totalerrors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">totalerrors</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;linkerrors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">linkerrors</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;ctierrors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">ctierrors</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;enverrors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">enverrors</span>
+        <span class="n">tbl</span><span class="p">[</span><span class="s1">&#39;othererrors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">othererrors</span>
+
+        <span class="n">tbl</span><span class="o">.</span><span class="n">push_row</span><span class="p">()</span>
+
+        <span class="c1"># sizeof(fcio_status)</span>
+        <span class="k">return</span> <span class="mi">302132</span></div></div>
+
+
+<div class="viewcode-block" id="process_flashcam"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.fcdaq.process_flashcam">[docs]</a><span class="k">def</span> <span class="nf">process_flashcam</span><span class="p">(</span><span class="n">daq_file</span><span class="p">,</span> <span class="n">raw_files</span><span class="p">,</span> <span class="n">n_max</span><span class="p">,</span> <span class="n">ch_groups_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">8192</span><span class="p">,</span> <span class="n">chans</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">f_out</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    decode FlashCam data, using the fcutils package to handle file access,</span>
+<span class="sd">    and the FlashCam DataTaker to save the results and write to output.</span>
+
+<span class="sd">    `raw_files` can be a string, or a dict with a label for each file:</span>
+<span class="sd">      `{&#39;geds&#39;:&#39;filename_geds.lh5&#39;, &#39;muvt&#39;:&#39;filename_muvt.lh5}`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">fcutils</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_files</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">single_output</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">f_out</span> <span class="o">=</span> <span class="n">raw_files</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">single_output</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">f_out</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">raw_files</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">single_output</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">fcio</span> <span class="o">=</span> <span class="n">fcutils</span><span class="o">.</span><span class="n">fcio</span><span class="p">(</span><span class="n">daq_file</span><span class="p">)</span>
+
+    <span class="c1"># set up event decoder</span>
+    <span class="n">event_decoder</span> <span class="o">=</span> <span class="n">FlashCamEventDecoder</span><span class="p">()</span>
+    <span class="n">event_decoder</span><span class="o">.</span><span class="n">set_file_config</span><span class="p">(</span><span class="n">fcio</span><span class="p">)</span>
+    <span class="n">event_tables</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># build ch_groups and set up tables</span>
+    <span class="n">ch_groups</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ch_groups_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;FlashCamEventDecoder&#39;</span> <span class="ow">in</span> <span class="n">ch_groups_dict</span><span class="p">):</span>
+        <span class="c1"># get ch_groups</span>
+        <span class="n">ch_groups</span> <span class="o">=</span> <span class="n">ch_groups_dict</span><span class="p">[</span><span class="s1">&#39;FlashCamEventDecoder&#39;</span><span class="p">]</span>
+        <span class="n">expand_ch_groups</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Config not found.  Single-table mode&#39;</span><span class="p">)</span>
+        <span class="n">ch_groups</span> <span class="o">=</span> <span class="n">create_dummy_ch_group</span><span class="p">()</span>
+
+    <span class="c1"># set up ch_group-to-output-file-and-group info</span>
+    <span class="k">if</span> <span class="n">single_output</span><span class="p">:</span>
+        <span class="n">set_outputs</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">,</span> <span class="n">out_file_template</span><span class="o">=</span><span class="n">f_out</span><span class="p">,</span> <span class="n">grp_path_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{group_name}</span><span class="s1">/raw&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">set_outputs</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">,</span> <span class="n">out_file_template</span><span class="o">=</span><span class="n">raw_files</span><span class="p">,</span> <span class="n">grp_path_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{group_name}</span><span class="s1">/raw&#39;</span><span class="p">)</span>
+
+    <span class="c1"># set up tables</span>
+    <span class="n">event_tables</span> <span class="o">=</span> <span class="n">build_tables</span><span class="p">(</span><span class="n">ch_groups</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">event_decoder</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Output group : output file&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">group_info</span> <span class="ow">in</span> <span class="n">ch_groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">group_path</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;group_path&#39;</span><span class="p">]</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">group_path</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">out_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># dictionary with the unique file names as keys</span>
+    <span class="n">file_info</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">group_info</span> <span class="ow">in</span> <span class="n">ch_groups</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># set up status decoder (this is &#39;auxs&#39; output)</span>
+    <span class="n">status_decoder</span> <span class="o">=</span> <span class="n">FlashCamStatusDecoder</span><span class="p">()</span>
+    <span class="n">status_decoder</span><span class="o">.</span><span class="n">set_file_config</span><span class="p">(</span><span class="n">fcio</span><span class="p">)</span>
+    <span class="n">status_tbl</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="n">buffer_size</span><span class="p">)</span>
+    <span class="n">status_decoder</span><span class="o">.</span><span class="n">initialize_lh5_table</span><span class="p">(</span><span class="n">status_tbl</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">status_filename</span> <span class="o">=</span> <span class="n">f_out</span> <span class="k">if</span> <span class="n">single_output</span> <span class="k">else</span> <span class="n">raw_files</span><span class="p">[</span><span class="s1">&#39;auxs&#39;</span><span class="p">]</span>
+      <span class="n">config_filename</span> <span class="o">=</span> <span class="n">f_out</span> <span class="k">if</span> <span class="n">single_output</span> <span class="k">else</span> <span class="n">raw_files</span><span class="p">[</span><span class="s1">&#39;auxs&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="n">status_filename</span> <span class="o">=</span> <span class="s2">&quot;fcio_status&quot;</span>
+      <span class="n">config_filename</span> <span class="o">=</span> <span class="s2">&quot;fcio_config&quot;</span>
+
+    <span class="c1"># Set up the store</span>
+    <span class="c1"># TODO: add overwrite capability</span>
+    <span class="n">lh5_store</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Store</span><span class="p">()</span>
+
+    <span class="c1"># write fcio_config</span>
+    <span class="n">fcio_config</span> <span class="o">=</span> <span class="n">event_decoder</span><span class="o">.</span><span class="n">get_file_config_struct</span><span class="p">()</span>
+    <span class="n">lh5_store</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">fcio_config</span><span class="p">,</span> <span class="s1">&#39;fcio_config&#39;</span><span class="p">,</span> <span class="n">config_filename</span><span class="p">)</span>
+
+    <span class="c1"># loop over raw data packets</span>
+    <span class="n">i_debug</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">packet_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">rc</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">bytes_processed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">file_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">daq_file</span><span class="p">)</span>
+    <span class="n">max_numtraces</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">rc</span> <span class="ow">and</span> <span class="n">packet_id</span> <span class="o">&lt;</span> <span class="n">n_max</span><span class="p">:</span>
+        <span class="n">rc</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">get_record</span><span class="p">()</span>
+
+        <span class="c1"># Skip non-interesting records</span>
+        <span class="c1"># FIXME: push to a buffer of skipped packets?</span>
+        <span class="k">if</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="k">continue</span>
+
+        <span class="n">packet_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">packet_id</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># FIXME: is cast to float necessary?</span>
+            <span class="n">pct_done</span> <span class="o">=</span> <span class="n">bytes_processed</span> <span class="o">/</span> <span class="n">file_size</span>
+            <span class="k">if</span> <span class="n">n_max</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="ow">and</span> <span class="n">n_max</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">pct_done</span> <span class="o">=</span> <span class="n">packet_id</span> <span class="o">/</span> <span class="n">n_max</span>
+            <span class="n">update_progress</span><span class="p">(</span><span class="n">pct_done</span><span class="p">)</span>
+
+        <span class="c1"># Status record</span>
+        <span class="k">if</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">bytes_processed</span> <span class="o">+=</span> <span class="n">status_decoder</span><span class="o">.</span><span class="n">decode_packet</span><span class="p">(</span><span class="n">fcio</span><span class="p">,</span> <span class="n">status_tbl</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status_tbl</span><span class="o">.</span><span class="n">is_full</span><span class="p">():</span>
+                <span class="n">lh5_store</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">status_tbl</span><span class="p">,</span> <span class="s1">&#39;fcio_status&#39;</span><span class="p">,</span> <span class="n">status_filename</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="n">status_tbl</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+                <span class="n">status_tbl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="c1"># Event or SparseEvent record</span>
+        <span class="k">if</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">group_info</span> <span class="ow">in</span> <span class="n">ch_groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">tbl</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">]</span>
+                <span class="c1"># Check that the tables are large enough</span>
+                <span class="c1"># TODO: don&#39;t need to check this every event, only if sum(numtraces) &gt;= buffer_size</span>
+                <span class="k">if</span> <span class="n">tbl</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">fcio</span><span class="o">.</span><span class="n">numtraces</span> <span class="ow">and</span> <span class="n">fcio</span><span class="o">.</span><span class="n">numtraces</span> <span class="o">&gt;</span> <span class="n">max_numtraces</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;warning: tbl.size =&#39;</span><span class="p">,</span> <span class="n">tbl</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="s1">&#39;but fcio.numtraces =&#39;</span><span class="p">,</span> <span class="n">fcio</span><span class="o">.</span><span class="n">numtraces</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;may overflow. suggest increasing tbl.size&#39;</span><span class="p">)</span>
+                    <span class="n">max_numtraces</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">numtraces</span>
+                <span class="c1"># Pre-emptively clear tables if it might be necessary</span>
+                <span class="k">if</span> <span class="n">tbl</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="n">tbl</span><span class="o">.</span><span class="n">loc</span> <span class="o">&lt;</span> <span class="n">fcio</span><span class="o">.</span><span class="n">numtraces</span><span class="p">:</span> <span class="c1"># might overflow</span>
+                    <span class="n">group_path</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;group_path&#39;</span><span class="p">]</span>
+                    <span class="n">out_file</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span>
+                    <span class="n">lh5_store</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">tbl</span><span class="p">,</span> <span class="n">group_path</span><span class="p">,</span> <span class="n">out_file</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">out_file</span> <span class="ow">in</span> <span class="n">file_info</span><span class="p">:</span> <span class="n">file_info</span><span class="p">[</span><span class="n">out_file</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">tbl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+            <span class="c1"># Looks okay: just decode</span>
+            <span class="n">bytes_processed</span> <span class="o">+=</span> <span class="n">event_decoder</span><span class="o">.</span><span class="n">decode_packet</span><span class="p">(</span><span class="n">fcio</span><span class="p">,</span> <span class="n">event_tables</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">)</span>
+
+            <span class="c1"># i_debug += 1</span>
+            <span class="c1"># if i_debug == 10:</span>
+            <span class="c1">#    print(&quot;breaking early&quot;)</span>
+            <span class="c1">#    break # debug, deleteme</span>
+
+    <span class="c1"># end of loop, write to file once more</span>
+    <span class="k">for</span> <span class="n">group_info</span> <span class="ow">in</span> <span class="n">ch_groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">tbl</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">tbl</span><span class="o">.</span><span class="n">loc</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">group_path</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;group_path&#39;</span><span class="p">]</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="n">group_info</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span>
+            <span class="n">lh5_store</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">tbl</span><span class="p">,</span> <span class="n">group_path</span><span class="p">,</span> <span class="n">out_file</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="n">tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">out_file</span> <span class="ow">in</span> <span class="n">file_info</span><span class="p">:</span> <span class="n">file_info</span><span class="p">[</span><span class="n">out_file</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">tbl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">status_tbl</span><span class="o">.</span><span class="n">loc</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">lh5_store</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">status_tbl</span><span class="p">,</span> <span class="s1">&#39;stat&#39;</span><span class="p">,</span> <span class="n">status_filename</span><span class="p">,</span>
+                               <span class="n">n_rows</span><span class="o">=</span><span class="n">status_tbl</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span>
+        <span class="n">status_tbl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="c1"># alert user to any files not actually saved in the end</span>
+    <span class="k">for</span> <span class="n">out_file</span><span class="p">,</span> <span class="n">is_saved</span> <span class="ow">in</span> <span class="n">file_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_saved</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Not saving file since no data were found:&#39;</span><span class="p">,</span> <span class="n">out_file</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">update_progress</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">packet_id</span><span class="p">,</span> <span class="s1">&#39;packets decoded&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">event_decoder</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning - daq_to_raw skipped some channels in file&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ch</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">event_decoder</span><span class="o">.</span><span class="n">skipped_channels</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  ch&quot;</span><span class="p">,</span> <span class="n">ch</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s2">&quot;hits&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bytes_processed</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

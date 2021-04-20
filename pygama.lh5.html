@@ -1,0 +1,688 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.lh5 package &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="pygama.io package" href="pygama.io.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing pygama</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pygama.html">Package API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pygama.analysis.html">pygama.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.dsp.html">pygama.dsp package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.io.html">pygama.io package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pygama.lh5 package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5.array">pygama.lh5.array module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5.arrayofequalsizedarrays">pygama.lh5.arrayofequalsizedarrays module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5.fixedsizearray">pygama.lh5.fixedsizearray module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5.lh5_utils">pygama.lh5.lh5_utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5.scalar">pygama.lh5.scalar module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5.store">pygama.lh5.store module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5.struct">pygama.lh5.struct module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5.table">pygama.lh5.table module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5.vectorofvectors">pygama.lh5.vectorofvectors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.lh5">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#pygama-git-module">pygama.git module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama.utils">pygama.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="pygama.html">pygama package</a> &raquo;</li>
+        
+      <li>pygama.lh5 package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/pygama.lh5.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pygama-lh5-package">
+<h1>pygama.lh5 package<a class="headerlink" href="#pygama-lh5-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygama.lh5.array">
+<span id="pygama-lh5-array-module"></span><h2>pygama.lh5.array module<a class="headerlink" href="#module-pygama.lh5.array" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.lh5.array.Array">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.lh5.array.</span></code><code class="sig-name descname"><span class="pre">Array</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nda</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/array.html#Array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.array.Array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Holds an ndarray and attributes</p>
+<dl class="py method">
+<dt id="pygama.lh5.array.Array.__len__">
+<code class="sig-name descname"><span class="pre">__len__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/array.html#Array.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.array.Array.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides __len__ for this array-like class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.array.Array.dataype_name">
+<code class="sig-name descname"><span class="pre">dataype_name</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/array.html#Array.dataype_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.array.Array.dataype_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name for this object's lh5 datatype attribute</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.array.Array.form_datatype">
+<code class="sig-name descname"><span class="pre">form_datatype</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/array.html#Array.form_datatype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.array.Array.form_datatype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return this object's lh5 datatype attribute string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.array.Array.resize">
+<code class="sig-name descname"><span class="pre">resize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/array.html#Array.resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.array.Array.resize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resize the array to new_size (int)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.lh5.arrayofequalsizedarrays">
+<span id="pygama-lh5-arrayofequalsizedarrays-module"></span><h2>pygama.lh5.arrayofequalsizedarrays module<a class="headerlink" href="#module-pygama.lh5.arrayofequalsizedarrays" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.lh5.arrayofequalsizedarrays.ArrayOfEqualSizedArrays">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.lh5.arrayofequalsizedarrays.</span></code><code class="sig-name descname"><span class="pre">ArrayOfEqualSizedArrays</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nda</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/arrayofequalsizedarrays.html#ArrayOfEqualSizedArrays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.arrayofequalsizedarrays.ArrayOfEqualSizedArrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.lh5.array.Array" title="pygama.lh5.array.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.lh5.array.Array</span></code></a></p>
+<p>An array of equal-sized arrays</p>
+<p>Arrays of equal size within a file but could be different from application
+to application. Canonical example: array of same-length waveforms.</p>
+<p>If shape is not &quot;1D array of arrays of shape given by axes 1-N&quot; (of nda)
+then specify the dimensionality split in the constructor.</p>
+<dl class="py method">
+<dt id="pygama.lh5.arrayofequalsizedarrays.ArrayOfEqualSizedArrays.__len__">
+<code class="sig-name descname"><span class="pre">__len__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/arrayofequalsizedarrays.html#ArrayOfEqualSizedArrays.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.arrayofequalsizedarrays.ArrayOfEqualSizedArrays.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides __len__ for this array-like class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.arrayofequalsizedarrays.ArrayOfEqualSizedArrays.dataype_name">
+<code class="sig-name descname"><span class="pre">dataype_name</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/arrayofequalsizedarrays.html#ArrayOfEqualSizedArrays.dataype_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.arrayofequalsizedarrays.ArrayOfEqualSizedArrays.dataype_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name for this object's lh5 datatype attribute</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.arrayofequalsizedarrays.ArrayOfEqualSizedArrays.form_datatype">
+<code class="sig-name descname"><span class="pre">form_datatype</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/arrayofequalsizedarrays.html#ArrayOfEqualSizedArrays.form_datatype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.arrayofequalsizedarrays.ArrayOfEqualSizedArrays.form_datatype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return this object's lh5 datatype attribute string</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.lh5.fixedsizearray">
+<span id="pygama-lh5-fixedsizearray-module"></span><h2>pygama.lh5.fixedsizearray module<a class="headerlink" href="#module-pygama.lh5.fixedsizearray" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.lh5.fixedsizearray.FixedSizeArray">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.lh5.fixedsizearray.</span></code><code class="sig-name descname"><span class="pre">FixedSizeArray</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nda</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/fixedsizearray.html#FixedSizeArray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.fixedsizearray.FixedSizeArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.lh5.array.Array" title="pygama.lh5.array.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.lh5.array.Array</span></code></a></p>
+<p>An array of fixed-size arrays</p>
+<p>Arrays with guaranteed shape along axes &gt; 0: for example, an array of
+vectors will always length 3 on axis 1, and it will never change from
+application to application.  This data type is used for optimized memory
+handling on some platforms. We are not that sophisticated so we are just
+storing this identification for .lh5 validity, i.e. for now this class is
+just an alias for Array, but keeps track of the datatype name.</p>
+<dl class="py method">
+<dt id="pygama.lh5.fixedsizearray.FixedSizeArray.dataype_name">
+<code class="sig-name descname"><span class="pre">dataype_name</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/fixedsizearray.html#FixedSizeArray.dataype_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.fixedsizearray.FixedSizeArray.dataype_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name for this object's lh5 datatype attribute</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.lh5.lh5_utils">
+<span id="pygama-lh5-lh5-utils-module"></span><h2>pygama.lh5.lh5_utils module<a class="headerlink" href="#module-pygama.lh5.lh5_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pygama.lh5.lh5_utils.get_lh5_element_type">
+<code class="sig-prename descclassname"><span class="pre">pygama.lh5.lh5_utils.</span></code><code class="sig-name descname"><span class="pre">get_lh5_element_type</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/lh5_utils.html#get_lh5_element_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.lh5_utils.get_lh5_element_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the lh5 element type of a scalar or array</p>
+<p>For use in the datatype attribute of lh5 objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<em>str</em><em> or </em><em>any object with a numpy dtype</em>) -- </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>el_type</strong> -- A string stating the determined element type of the object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.lh5.lh5_utils.parse_datatype">
+<code class="sig-prename descclassname"><span class="pre">pygama.lh5.lh5_utils.</span></code><code class="sig-name descname"><span class="pre">parse_datatype</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datatype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/lh5_utils.html#parse_datatype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.lh5_utils.parse_datatype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse datatype string and return type, dims, elements</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>datatype</strong> (<em>str</em>) -- a lh5-formatted datatype string</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><strong>(type, dims, elements)</strong> --</p>
+<dl class="simple">
+<dt>type<span class="classifier">str</span></dt><dd><p>the datatype name</p>
+</dd>
+<dt>dims<span class="classifier">tuple(ints) or None</span></dt><dd><p>if not None, a tuple of dimensions for the lh5 object. Note this is
+not the same as the np shape of the underlying data object. See the
+lh5 specification for more information. Also see
+ArrayOfEqualSizedArrays and Store.read_object() for example code</p>
+</dd>
+<dt>elements: str or list of str's</dt><dd><p>for numeric objects, the element type
+for struct-like  objects, the list of fields in the struct</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.lh5.scalar">
+<span id="pygama-lh5-scalar-module"></span><h2>pygama.lh5.scalar module<a class="headerlink" href="#module-pygama.lh5.scalar" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.lh5.scalar.Scalar">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.lh5.scalar.</span></code><code class="sig-name descname"><span class="pre">Scalar</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/scalar.html#Scalar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.scalar.Scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Holds just a value and some attributes (datatype, units, ...)</p>
+<p>#TODO: do scalars need proper numpy dtypes?</p>
+<dl class="py method">
+<dt id="pygama.lh5.scalar.Scalar.datatype_name">
+<code class="sig-name descname"><span class="pre">datatype_name</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/scalar.html#Scalar.datatype_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.scalar.Scalar.datatype_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name for this object's lh5 datatype attribute</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.scalar.Scalar.form_datatype">
+<code class="sig-name descname"><span class="pre">form_datatype</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/scalar.html#Scalar.form_datatype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.scalar.Scalar.form_datatype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return this object's lh5 datatype attribute string</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.lh5.store">
+<span id="pygama-lh5-store-module"></span><h2>pygama.lh5.store module<a class="headerlink" href="#module-pygama.lh5.store" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.lh5.store.Store">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.lh5.store.</span></code><code class="sig-name descname"><span class="pre">Store</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#Store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.Store" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="pygama.lh5.store.Store.get_buffer">
+<code class="sig-name descname"><span class="pre">get_buffer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#Store.get_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.Store.get_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an lh5 object appropriate for use as a pre-allocated buffer
+in a read loop. Sets size to size if object has a size.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.store.Store.gimme_file">
+<code class="sig-name descname"><span class="pre">gimme_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lh5_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#Store.gimme_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.Store.gimme_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.store.Store.gimme_group">
+<code class="sig-name descname"><span class="pre">gimme_group</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grp_attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#Store.gimme_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.Store.gimme_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.store.Store.ls">
+<code class="sig-name descname"><span class="pre">ls</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lh5_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#Store.ls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.Store.ls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a list of the group names in the lh5 file in the style of a
+Unix ls command. Supports wildcards.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.store.Store.read_n_rows">
+<code class="sig-name descname"><span class="pre">read_n_rows</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#Store.read_n_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.Store.read_n_rows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look up the number of rows in an Array-like object called name
+in lh5_file. Return None if it is a scalar/struct.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.store.Store.read_object">
+<code class="sig-name descname"><span class="pre">read_object</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9223372036854775807</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_buf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_buf_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#Store.read_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.Store.read_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read LH5 object data from a file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) -- Name of the lh5 object to be read (including its group path)</p></li>
+<li><p><strong>lh5_file</strong> (<em>str</em><em> or </em><em>h5py File object</em><em>, or </em><em>a list of either</em>) -- The file(s) containing the object to be read oad out. If a list of
+files, array-like object data will be contatenated into the output
+object</p></li>
+<li><p><strong>start_row</strong> (<em>int</em><em> (</em><em>optional</em><em>)</em>) -- Starting entry for the object read (for array-like objects). For a
+list of files, only applies to the first file.</p></li>
+<li><p><strong>n_rows</strong> (<em>int</em><em> (</em><em>optional</em><em>)</em>) -- The maximum number of rows to read (for array-like objects). The
+actual number of rows read will be returned as one of the return
+values (see below)</p></li>
+<li><p><strong>idx</strong> (<em>index array</em><em> or </em><em>index tuple</em><em>, or </em><em>a list of index arrays/tuples</em><em> (</em><em>optional</em><em>)</em>) -- For numpy-style &quot;fancying indexing&quot; for the read. Used to read out
+rows that pass some selection criteria. Only selection along the 1st
+axis is supported, so tuple arguments must be one-tuples.  If n_rows
+is not false, idx will be truncated to n_rows before reading. To use
+with a list of files, can pass in a list of idx's (one for each
+file) or use a long contiguous list (e.g. built from a previous
+identical read). If used in conjunction with start_row and n_rows,
+will be sliced to obey those constraints, where n_rows is
+interpreted as the (max) number of -selected- values (in idx) to be
+read out.</p></li>
+<li><p><strong>field_mask</strong> (<em>dict</em><em> or </em><em>defaultdict { str : bool }</em><em> (</em><em>optional</em><em>)</em>) -- For tables and structs, determines which fields get written out.
+Only applies to immediate fields of the requested objects. If a dict
+is used, a defaultdict will be made with the default set to the
+opposite of the first element in the dict. This way if one specifies
+a few fields at &quot;false&quot;, all but those fields will be read out,
+while if one specifies just a few fields as &quot;true&quot;, only those
+fields will be read out.</p></li>
+<li><p><strong>obj_buf</strong> (<em>lh5 object</em><em> (</em><em>optional</em><em>)</em>) -- Read directly into memory provided in obj_buf. Note: the buffer will
+be expanded to accommodate the data requested. To maintain the
+buffer length, send in n_rows = len(obj_buf)</p></li>
+<li><p><strong>obj_buf_start</strong> (<em>int</em><em> (</em><em>optional</em><em>)</em>) -- Start location in obj_buf for read. For concatenating data to
+array-like objects</p></li>
+<li><p><strong>verbosity</strong> (<em>bool</em><em> (</em><em>optional</em><em>)</em>) -- Turn on verbosity for debugging</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>(object, n_rows_read)</strong> -- object is the read-out object
+n_rows_read is the number of rows successfully read out. Essential
+for arrays when the amount of data is smaller than the object
+buffer.  For scalars and structs n_rows_read will be &quot;1&quot;. For tables
+it is redundant with table.loc</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.store.Store.write_object">
+<code class="sig-name descname"><span class="pre">write_object</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#Store.write_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.Store.write_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write an object into an lh5_file</p>
+<p>obj should be a LH5 object.</p>
+<p>Set append to true for non-scalar objects if you want to append along
+axis 0 (the first dimension) (or axis 0 of non-scalar subfields of
+structs)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.lh5.store.load_dfs">
+<code class="sig-prename descclassname"><span class="pre">pygama.lh5.store.</span></code><code class="sig-name descname"><span class="pre">load_dfs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#load_dfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.load_dfs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a pandas dataframe from lh5 data</p>
+<p>Given a list of files (can use wildcards), a list of lh5 columns, and
+optionally the group path, return a pandas DataFrame with all values for
+each parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>load_nda for parameter specification</strong> (<em>See</em>) -- </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df</strong> -- Contains columns for each parameter in par_list, and rows containing all
+data for the associated parameters concatenated over all files in f_list</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.lh5.store.load_nda">
+<code class="sig-prename descclassname"><span class="pre">pygama.lh5.store.</span></code><code class="sig-name descname"><span class="pre">load_nda</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/store.html#load_nda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.store.load_nda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a dictionary of ndarrays from lh5 data</p>
+<p>Given a list of files, a list of lh5 table parameters, and an optional group
+path, return a numpy array with all values for each parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f_list</strong> (<em>str</em><em> or </em><em>list of str's</em>) -- A list of files. Can contain wildcards</p></li>
+<li><p><strong>par_list</strong> (<em>list of str's</em>) -- A list of parameters to read from each file</p></li>
+<li><p><strong>lh5_group</strong> (<em>str</em><em> (</em><em>optional</em><em>)</em>) -- Optional group path within which to find the specified parameters</p></li>
+<li><p><strong>idx_list</strong> (<em>list of index arrays</em>) -- For fancy-indexed reads. Must be one idx array for each file in f_list</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) -- Print info on loaded data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>par_data</strong> -- A dictionary of the parameter data keyed by the elements of par_list.
+Each entry contains the data for the specified parameter concatenated
+over all files in f_list</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.lh5.struct">
+<span id="pygama-lh5-struct-module"></span><h2>pygama.lh5.struct module<a class="headerlink" href="#module-pygama.lh5.struct" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.lh5.struct.Struct">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.lh5.struct.</span></code><code class="sig-name descname"><span class="pre">Struct</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/struct.html#Struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.struct.Struct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+<p>A dictionary with an optional set of attributes.</p>
+<p>After instantiation, add fields using add_field() to keep datatype updated,
+or call update_datatype() after adding.</p>
+<dl class="py method">
+<dt id="pygama.lh5.struct.Struct.add_field">
+<code class="sig-name descname"><span class="pre">add_field</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/struct.html#Struct.add_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.struct.Struct.add_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.struct.Struct.datatype_name">
+<code class="sig-name descname"><span class="pre">datatype_name</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/struct.html#Struct.datatype_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.struct.Struct.datatype_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name for this object's lh5 datatype attribute</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.struct.Struct.form_datatype">
+<code class="sig-name descname"><span class="pre">form_datatype</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/struct.html#Struct.form_datatype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.struct.Struct.form_datatype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return this object's lh5 datatype attribute string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.struct.Struct.update_datatype">
+<code class="sig-name descname"><span class="pre">update_datatype</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/struct.html#Struct.update_datatype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.struct.Struct.update_datatype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.lh5.table">
+<span id="pygama-lh5-table-module"></span><h2>pygama.lh5.table module<a class="headerlink" href="#module-pygama.lh5.table" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.lh5.table.Table">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.lh5.table.</span></code><code class="sig-name descname"><span class="pre">Table</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/table.html#Table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.table.Table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.lh5.struct.Struct" title="pygama.lh5.struct.Struct"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.lh5.struct.Struct</span></code></a></p>
+<p>A special struct of array or subtable &quot;columns&quot; of equal length.</p>
+<p>Holds onto an internal read/write location &quot;loc&quot; that is useful in managing
+table I/O using functions like push_row(), is_full(), and clear()</p>
+<dl class="py method">
+<dt id="pygama.lh5.table.Table.__len__">
+<code class="sig-name descname"><span class="pre">__len__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/table.html#Table.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.table.Table.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides __len__ for this array-like class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.table.Table.add_field">
+<code class="sig-name descname"><span class="pre">add_field</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_obj_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_warn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/table.html#Table.add_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.table.Table.add_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.table.Table.clear">
+<code class="sig-name descname"><span class="pre">clear</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None.</span>&#160; <span class="pre">Remove</span> <span class="pre">all</span> <span class="pre">items</span> <span class="pre">from</span> <span class="pre">D.</span><a class="reference internal" href="_modules/pygama/lh5/table.html#Table.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.table.Table.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.table.Table.datatype_name">
+<code class="sig-name descname"><span class="pre">datatype_name</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/table.html#Table.datatype_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.table.Table.datatype_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name for this object's lh5 datatype attribute</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.table.Table.get_dataframe">
+<code class="sig-name descname"><span class="pre">get_dataframe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/table.html#Table.get_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.table.Table.get_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a pandase dataframe containing each of the columns given. If no
+columns are given, get include all fields as columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.table.Table.is_full">
+<code class="sig-name descname"><span class="pre">is_full</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/table.html#Table.is_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.table.Table.is_full" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.table.Table.push_row">
+<code class="sig-name descname"><span class="pre">push_row</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/table.html#Table.push_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.table.Table.push_row" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.table.Table.resize">
+<code class="sig-name descname"><span class="pre">resize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_warn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/table.html#Table.resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.table.Table.resize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.lh5.vectorofvectors">
+<span id="pygama-lh5-vectorofvectors-module"></span><h2>pygama.lh5.vectorofvectors module<a class="headerlink" href="#module-pygama.lh5.vectorofvectors" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.lh5.vectorofvectors.VectorOfVectors">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.lh5.vectorofvectors.</span></code><code class="sig-name descname"><span class="pre">VectorOfVectors</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flattened_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cumulative_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/vectorofvectors.html#VectorOfVectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.vectorofvectors.VectorOfVectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A variable-length array of variable-length arrays</p>
+<p>For now only a 1D vector of 1D vectors is supported. Internal representation
+is as two ndarrays, one to store the flattened data contiguosly and one to
+store the cumulative sum of lengths of each vector.</p>
+<dl class="py method">
+<dt id="pygama.lh5.vectorofvectors.VectorOfVectors.__len__">
+<code class="sig-name descname"><span class="pre">__len__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/vectorofvectors.html#VectorOfVectors.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.vectorofvectors.VectorOfVectors.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides __len__ for this array-like class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.vectorofvectors.VectorOfVectors.datatype_name">
+<code class="sig-name descname"><span class="pre">datatype_name</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/vectorofvectors.html#VectorOfVectors.datatype_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.vectorofvectors.VectorOfVectors.datatype_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name for this object's lh5 datatype attribute</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.vectorofvectors.VectorOfVectors.form_datatype">
+<code class="sig-name descname"><span class="pre">form_datatype</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/vectorofvectors.html#VectorOfVectors.form_datatype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.vectorofvectors.VectorOfVectors.form_datatype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return this object's lh5 datatype attribute string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.vectorofvectors.VectorOfVectors.resize">
+<code class="sig-name descname"><span class="pre">resize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/vectorofvectors.html#VectorOfVectors.resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.vectorofvectors.VectorOfVectors.resize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.lh5.vectorofvectors.VectorOfVectors.set_vector">
+<code class="sig-name descname"><span class="pre">set_vector</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nda</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/lh5/vectorofvectors.html#VectorOfVectors.set_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.lh5.vectorofvectors.VectorOfVectors.set_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert vector nda at location i_vec.</p>
+<p>self.flattened_data is doubled in length until nda can be appended to it.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.lh5">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pygama.lh5" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="pygama.io.html" class="btn btn-neutral float-left" title="pygama.io package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

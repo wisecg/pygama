@@ -1,0 +1,900 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.lh5.store &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.lh5.store</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.lh5.store</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">bisect</span> <span class="kn">import</span> <span class="n">bisect_left</span>
+
+<span class="kn">from</span> <span class="nn">.lh5_utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.scalar</span> <span class="kn">import</span> <span class="n">Scalar</span>
+<span class="kn">from</span> <span class="nn">.struct</span> <span class="kn">import</span> <span class="n">Struct</span>
+<span class="kn">from</span> <span class="nn">.table</span> <span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span> <span class="nn">.array</span> <span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">.fixedsizearray</span> <span class="kn">import</span> <span class="n">FixedSizeArray</span>
+<span class="kn">from</span> <span class="nn">.arrayofequalsizedarrays</span> <span class="kn">import</span> <span class="n">ArrayOfEqualSizedArrays</span>
+<span class="kn">from</span> <span class="nn">.vectorofvectors</span> <span class="kn">import</span> <span class="n">VectorOfVectors</span>
+
+<div class="viewcode-block" id="Store"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.Store">[docs]</a><span class="k">class</span> <span class="nc">Store</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_path</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">keep_open</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_path</span> <span class="o">=</span> <span class="n">base_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keep_open</span> <span class="o">=</span> <span class="n">keep_open</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="Store.gimme_file"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.Store.gimme_file">[docs]</a>    <span class="k">def</span> <span class="nf">gimme_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">):</span> <span class="k">return</span> <span class="n">lh5_file</span>
+        <span class="k">if</span> <span class="n">lh5_file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="n">lh5_file</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_path</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="n">full_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">lh5_file</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">full_path</span> <span class="o">=</span> <span class="n">lh5_file</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+            <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">directory</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span> 
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;file not found:&#39;</span><span class="p">,</span> <span class="n">full_path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">h5f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_open</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="n">lh5_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">h5f</span>
+        <span class="k">return</span> <span class="n">h5f</span></div>
+
+
+<div class="viewcode-block" id="Store.gimme_group"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.Store.gimme_group">[docs]</a>    <span class="k">def</span> <span class="nf">gimme_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">base_group</span><span class="p">,</span> <span class="n">grp_attrs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span> <span class="k">return</span> <span class="n">group</span>
+        <span class="k">if</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">base_group</span><span class="p">:</span> <span class="k">return</span> <span class="n">base_group</span><span class="p">[</span><span class="n">group</span><span class="p">]</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">base_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">grp_attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">group</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grp_attrs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">group</span></div>
+
+
+<div class="viewcode-block" id="Store.ls"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.Store.ls">[docs]</a>    <span class="k">def</span> <span class="nf">ls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">,</span> <span class="n">lh5_group</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print a list of the group names in the lh5 file in the style of a</span>
+<span class="sd">        Unix ls command. Supports wildcards.&quot;&quot;&quot;</span>
+        <span class="c1"># To use recursively, make lh5_file a h5group instead of a string</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">lh5_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gimme_file</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">lh5_group</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">lh5_group</span><span class="o">=</span><span class="s1">&#39;*&#39;</span>
+            
+        <span class="n">splitpath</span> <span class="o">=</span> <span class="n">lh5_group</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">matchingkeys</span> <span class="o">=</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">lh5_file</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">splitpath</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">splitpath</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">matchingkeys</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">matchingkeys</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">path</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">splitpath</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+            
+<div class="viewcode-block" id="Store.get_buffer"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.Store.get_buffer">[docs]</a>    <span class="k">def</span> <span class="nf">get_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an lh5 object appropriate for use as a pre-allocated buffer</span>
+<span class="sd">        in a read loop. Sets size to size if object has a size.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span><span class="p">,</span> <span class="n">n_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_object</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;resize&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">new_size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
+<div class="viewcode-block" id="Store.read_object"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.Store.read_object">[docs]</a>    <span class="k">def</span> <span class="nf">read_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">,</span> <span class="n">start_row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">field_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">obj_buf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">obj_buf_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read LH5 object data from a file</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Name of the lh5 object to be read (including its group path)</span>
+<span class="sd">        lh5_file : str or h5py File object, or a list of either</span>
+<span class="sd">            The file(s) containing the object to be read oad out. If a list of</span>
+<span class="sd">            files, array-like object data will be contatenated into the output</span>
+<span class="sd">            object</span>
+<span class="sd">        start_row : int (optional)</span>
+<span class="sd">            Starting entry for the object read (for array-like objects). For a</span>
+<span class="sd">            list of files, only applies to the first file.</span>
+<span class="sd">        n_rows : int (optional)</span>
+<span class="sd">            The maximum number of rows to read (for array-like objects). The</span>
+<span class="sd">            actual number of rows read will be returned as one of the return</span>
+<span class="sd">            values (see below)</span>
+<span class="sd">        idx : index array or index tuple, or a list of index arrays/tuples (optional)</span>
+<span class="sd">            For numpy-style &quot;fancying indexing&quot; for the read. Used to read out</span>
+<span class="sd">            rows that pass some selection criteria. Only selection along the 1st</span>
+<span class="sd">            axis is supported, so tuple arguments must be one-tuples.  If n_rows</span>
+<span class="sd">            is not false, idx will be truncated to n_rows before reading. To use</span>
+<span class="sd">            with a list of files, can pass in a list of idx&#39;s (one for each</span>
+<span class="sd">            file) or use a long contiguous list (e.g. built from a previous</span>
+<span class="sd">            identical read). If used in conjunction with start_row and n_rows,</span>
+<span class="sd">            will be sliced to obey those constraints, where n_rows is</span>
+<span class="sd">            interpreted as the (max) number of -selected- values (in idx) to be</span>
+<span class="sd">            read out.</span>
+<span class="sd">        field_mask : dict or defaultdict { str : bool } (optional)</span>
+<span class="sd">            For tables and structs, determines which fields get written out.</span>
+<span class="sd">            Only applies to immediate fields of the requested objects. If a dict</span>
+<span class="sd">            is used, a defaultdict will be made with the default set to the</span>
+<span class="sd">            opposite of the first element in the dict. This way if one specifies</span>
+<span class="sd">            a few fields at &quot;false&quot;, all but those fields will be read out,</span>
+<span class="sd">            while if one specifies just a few fields as &quot;true&quot;, only those</span>
+<span class="sd">            fields will be read out.</span>
+<span class="sd">        obj_buf : lh5 object (optional)</span>
+<span class="sd">            Read directly into memory provided in obj_buf. Note: the buffer will</span>
+<span class="sd">            be expanded to accommodate the data requested. To maintain the</span>
+<span class="sd">            buffer length, send in n_rows = len(obj_buf)</span>
+<span class="sd">        obj_buf_start : int (optional)</span>
+<span class="sd">            Start location in obj_buf for read. For concatenating data to</span>
+<span class="sd">            array-like objects</span>
+<span class="sd">        verbosity : bool (optional)</span>
+<span class="sd">            Turn on verbosity for debugging</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (object, n_rows_read) : tuple</span>
+<span class="sd">            object is the read-out object</span>
+<span class="sd">            n_rows_read is the number of rows successfully read out. Essential</span>
+<span class="sd">            for arrays when the amount of data is smaller than the object</span>
+<span class="sd">            buffer.  For scalars and structs n_rows_read will be &quot;1&quot;. For tables</span>
+<span class="sd">            it is redundant with table.loc</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#TODO: Ian&#39;s idea: add an iterator so one can do something like</span>
+        <span class="c1">#      for data in lh5iterator(file, chunksize, nentries, ...):</span>
+        <span class="c1">#          proc.execute()</span>
+
+        <span class="c1"># Handle list-of-files recursively</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">n_rows_read</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">h5f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="c1"># a list of lists: must be one per file</span>
+                    <span class="n">idx_i</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+                    <span class="c1"># make idx a proper tuple if it&#39;s not one already</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span> <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">idx</span><span class="p">,)</span>
+                    <span class="c1"># idx is a long continuous array</span>
+                    <span class="n">n_rows_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_n_rows</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">h5f</span><span class="p">)</span>
+                    <span class="c1"># find the length of the subset of idx that contains indices</span>
+                    <span class="c1"># that are less than n_rows_i</span>
+                    <span class="n">n_rows_to_read_i</span> <span class="o">=</span> <span class="n">bisect_left</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_rows_i</span><span class="p">)</span>
+                    <span class="c1"># now split idx into idx_i and the remainder</span>
+                    <span class="n">idx_i</span> <span class="o">=</span> <span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="n">n_rows_to_read_i</span><span class="p">],)</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">n_rows_to_read_i</span><span class="p">:]</span><span class="o">-</span><span class="n">n_rows_i</span><span class="p">,)</span>
+                <span class="k">else</span><span class="p">:</span> <span class="n">idx_i</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">n_rows_i</span> <span class="o">=</span> <span class="n">n_rows</span><span class="o">-</span><span class="n">n_rows_read</span>
+                <span class="n">obj_buf</span><span class="p">,</span> <span class="n">n_rows_read_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_object</span><span class="p">(</span><span class="n">name</span><span class="p">,</span>
+                                                          <span class="n">lh5_file</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                          <span class="n">start_row</span><span class="o">=</span><span class="n">start_row</span><span class="p">,</span>
+                                                          <span class="n">n_rows</span><span class="o">=</span><span class="n">n_rows_i</span><span class="p">,</span>
+                                                          <span class="n">idx</span><span class="o">=</span><span class="n">idx_i</span><span class="p">,</span>
+                                                          <span class="n">field_mask</span><span class="o">=</span><span class="n">field_mask</span><span class="p">,</span>
+                                                          <span class="n">obj_buf</span><span class="o">=</span><span class="n">obj_buf</span><span class="p">,</span>
+                                                          <span class="n">obj_buf_start</span><span class="o">=</span><span class="n">obj_buf_start</span><span class="p">,</span>
+                                                          <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span><span class="p">)</span>
+                <span class="n">n_rows_read</span> <span class="o">+=</span> <span class="n">n_rows_read_i</span>
+                <span class="k">if</span> <span class="n">n_rows_read</span> <span class="o">&gt;=</span> <span class="n">n_rows</span> <span class="ow">or</span> <span class="n">obj_buf</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">obj_buf</span><span class="p">,</span> <span class="n">n_rows_read</span>
+                <span class="n">start_row</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">obj_buf_start</span> <span class="o">+=</span> <span class="n">n_rows_read_i</span>
+            <span class="k">return</span> <span class="n">obj_buf</span><span class="p">,</span> <span class="n">n_rows_read</span>
+
+        <span class="c1"># start read from single file. fail if the object is not found</span>
+        <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;reading&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;from&quot;</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">)</span>
+
+        <span class="c1"># get the file from the store</span>
+        <span class="n">h5f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gimme_file</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">h5f</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Store:&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;not in&quot;</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+
+        <span class="c1"># make idx a proper tuple if it&#39;s not one already</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">idx</span><span class="p">,)</span>
+
+        <span class="c1"># get the object&#39;s datatype</span>
+        <span class="k">if</span> <span class="s1">&#39;datatype&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Store:&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;in file&#39;</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">,</span> <span class="s1">&#39;is missing the datatype attribute&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="n">datatype</span> <span class="o">=</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;datatype&#39;</span><span class="p">]</span>
+        <span class="n">datatype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">elements</span> <span class="o">=</span> <span class="n">parse_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span>
+
+        <span class="c1"># Scalar</span>
+        <span class="c1"># scalars are dim-0 datasets</span>
+        <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;scalar&#39;</span><span class="p">:</span> 
+            <span class="n">value</span> <span class="o">=</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">][()]</span>
+            <span class="k">if</span> <span class="n">elements</span> <span class="o">==</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span> <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">obj_buf</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">obj_buf</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">obj_buf</span><span class="p">,</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="n">Scalar</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">),</span> <span class="mi">1</span>
+
+
+        <span class="c1"># Struct</span>
+        <span class="c1"># recursively build a struct, return as a dictionary</span>
+        <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;struct&#39;</span><span class="p">:</span>
+
+            <span class="c1"># ignore obj_buf.</span>
+            <span class="c1"># TODO: could append new fields or overwrite/concat to existing</span>
+            <span class="c1"># fields. If implemented, get_buffer() above should probably also</span>
+            <span class="c1"># (optionally?) prep buffers for each field</span>
+            <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;obj_buf not implemented for structs.  Returning new object&quot;</span><span class="p">)</span>
+
+            <span class="c1"># build field_mask</span>
+            <span class="k">if</span> <span class="n">field_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">default</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">field_mask</span><span class="p">[</span><span class="n">field_mask</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">default</span><span class="p">,</span> <span class="n">field_mask</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;bad field_mask of type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+
+            <span class="c1"># loop over fields and read</span>
+            <span class="n">obj_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">field_mask</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span> <span class="k">continue</span>
+                <span class="c1"># TODO: it&#39;s strange to pass start_row, n_rows, idx to struct</span>
+                <span class="c1"># fields. If they all had shared indexing, they should be in a</span>
+                <span class="c1"># table... Maybe should emit a warning? Or allow them to be</span>
+                <span class="c1"># dicts keyed by field name?</span>
+                <span class="n">obj_dict</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_object</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">field</span><span class="p">,</span> 
+                                                      <span class="n">h5f</span><span class="p">,</span> 
+                                                      <span class="n">start_row</span><span class="o">=</span><span class="n">start_row</span><span class="p">,</span> 
+                                                      <span class="n">n_rows</span><span class="o">=</span><span class="n">n_rows</span><span class="p">,</span> 
+                                                      <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+                                                      <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span><span class="p">)</span>
+            <span class="c1"># modify datatype in attrs if a field_mask was used</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">field_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">selected_fields</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">field_mask</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span> <span class="n">selected_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;datatype&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="s1">&#39;struct&#39;</span> <span class="o">+</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">selected_fields</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+            <span class="k">return</span> <span class="n">Struct</span><span class="p">(</span><span class="n">obj_dict</span><span class="o">=</span><span class="n">obj_dict</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">),</span> <span class="mi">1</span>
+
+        <span class="c1"># Below here is all array-like types. So trim idx if needed</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># chop off indices &lt; start_row</span>
+            <span class="n">i_first_valid</span> <span class="o">=</span> <span class="n">bisect_left</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">start_row</span><span class="p">)</span>
+            <span class="n">idxa</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i_first_valid</span><span class="p">:]</span>
+            <span class="c1"># don&#39;t readout more than n_rows indices</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">idxa</span><span class="p">[:</span><span class="n">n_rows</span><span class="p">],)</span> <span class="c1"># works even if n_rows &gt; len(idxa)</span>
+
+        <span class="c1"># Table</span>
+        <span class="c1"># read a table into a dataframe</span>
+        <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;table&#39;</span><span class="p">:</span>
+            <span class="n">col_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># build field_mask</span>
+            <span class="k">if</span> <span class="n">field_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">default</span> <span class="o">=</span> <span class="ow">not</span> <span class="p">(</span><span class="n">field_mask</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">field_mask</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]])</span>
+                <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">default</span><span class="p">,</span> <span class="n">field_mask</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;bad field_mask of type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+
+            <span class="c1"># read out each of the fields</span>
+            <span class="n">rows_read</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">field_mask</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="p">:</span> <span class="k">continue</span>
+                <span class="n">fld_buf</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_buf</span><span class="p">,</span> <span class="n">Table</span><span class="p">)</span> <span class="ow">or</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj_buf</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;obj_buf for Table&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> 
+                              <span class="s2">&quot;not formatted correctly. returning new object&quot;</span><span class="p">)</span>
+                        <span class="n">obj_buf</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">else</span><span class="p">:</span> <span class="n">fld_buf</span> <span class="o">=</span> <span class="n">obj_buf</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                <span class="n">col_dict</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">n_rows_read</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_object</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">field</span><span class="p">,</span> 
+                                                                <span class="n">h5f</span><span class="p">,</span> 
+                                                                <span class="n">start_row</span><span class="o">=</span><span class="n">start_row</span><span class="p">,</span> 
+                                                                <span class="n">n_rows</span><span class="o">=</span><span class="n">n_rows</span><span class="p">,</span>
+                                                                <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+                                                                <span class="n">obj_buf</span><span class="o">=</span><span class="n">fld_buf</span><span class="p">,</span>
+                                                                <span class="n">obj_buf_start</span><span class="o">=</span><span class="n">obj_buf_start</span><span class="p">,</span>
+                                                                <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">obj_buf_start</span><span class="o">+</span><span class="n">n_rows_read</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_buf</span><span class="p">):</span>
+                    <span class="n">obj_buf</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">obj_buf_start</span><span class="o">+</span><span class="n">n_rows_read</span><span class="p">,</span> <span class="n">do_warn</span><span class="o">=</span><span class="p">(</span><span class="n">verbosity</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">))</span>
+                <span class="n">rows_read</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_rows_read</span><span class="p">)</span>
+            <span class="c1"># warn if all columns don&#39;t read in the same number of rows</span>
+            <span class="n">n_rows_read</span> <span class="o">=</span> <span class="n">rows_read</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">rows_read</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">n_rows_read</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;got strange n_rows_read&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">n_rows_read</span><span class="p">,</span> <span class="s1">&#39;was expected&#39;</span><span class="p">)</span>
+
+            <span class="c1"># modify datatype in attrs if a field_mask was used</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">field_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">selected_fields</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">field_mask</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span> <span class="n">selected_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;datatype&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="s1">&#39;table&#39;</span> <span class="o">+</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">selected_fields</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+
+            <span class="c1"># fields have been read out, now return a table</span>
+            <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+                <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">col_dict</span><span class="o">=</span><span class="n">col_dict</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+                <span class="c1"># set (write) loc to end of tree</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">loc</span> <span class="o">=</span> <span class="n">n_rows_read</span>
+                <span class="k">return</span> <span class="n">table</span><span class="p">,</span> <span class="n">n_rows_read</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We have read all fields into the object buffer. Run</span>
+                <span class="c1"># checks: All columns should be the same size. So update</span>
+                <span class="c1"># table&#39;s size as necessary, warn if any mismatches are found</span>
+                <span class="n">obj_buf</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">do_warn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="c1"># set (write) loc to end of tree</span>
+                <span class="n">obj_buf</span><span class="o">.</span><span class="n">loc</span> <span class="o">=</span> <span class="n">obj_buf_start</span><span class="o">+</span><span class="n">n_rows_read</span>
+                <span class="c1">#check attributes</span>
+                <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">obj_buf</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;warning: attrs mismatch&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;obj_buf.attrs:&#39;</span><span class="p">,</span> <span class="n">obj_buf</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;h5f[&#39;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;].attrs:&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">obj_buf</span><span class="p">,</span> <span class="n">n_rows_read</span>
+
+        <span class="c1"># VectorOfVectors</span>
+        <span class="c1"># read out vector of vectors of different size</span>
+        <span class="k">if</span> <span class="n">elements</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;array&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_buf</span><span class="p">,</span> <span class="n">VectorOfVectors</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;obj_buf for&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;not a VectorOfVectors. returning new object&quot;</span><span class="p">)</span>
+                    <span class="n">obj_buf</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;warning: fancy indexed readout not implemented for vector of vectors, ignoring idx&quot;</span><span class="p">)</span>
+                <span class="c1"># TODO: implement idx: first pull out all of cumulative length,</span>
+                <span class="c1"># use it to build an idx for the data_array, then rebuild</span>
+                <span class="c1"># cumulative length</span>
+
+            <span class="c1"># read out cumulative_length</span>
+            <span class="n">cumulen_buf</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">obj_buf</span><span class="o">.</span><span class="n">cumulative_length</span>
+            <span class="n">cumulative_length</span><span class="p">,</span> <span class="n">n_rows_read</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_object</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;/cumulative_length&#39;</span><span class="p">,</span> 
+                                                              <span class="n">h5f</span><span class="p">,</span> 
+                                                              <span class="n">start_row</span><span class="o">=</span><span class="n">start_row</span><span class="p">,</span> 
+                                                              <span class="n">n_rows</span><span class="o">=</span><span class="n">n_rows</span><span class="p">,</span>
+                                                              <span class="n">obj_buf</span><span class="o">=</span><span class="n">cumulen_buf</span><span class="p">,</span>
+                                                              <span class="n">obj_buf_start</span><span class="o">=</span><span class="n">obj_buf_start</span><span class="p">,</span>
+                                                              <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span><span class="p">)</span>
+            <span class="c1"># get a view of just what was read out for cleaner code below</span>
+            <span class="n">this_cumulen_nda</span> <span class="o">=</span> <span class="n">cumulative_length</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">obj_buf_start</span><span class="p">:</span><span class="n">obj_buf_start</span><span class="o">+</span><span class="n">n_rows_read</span><span class="p">]</span>
+
+            <span class="c1"># determine the start_row and n_rows for the flattened_data readout</span>
+            <span class="n">da_start</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">start_row</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n_rows_read</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
+                <span class="c1"># need to read out the cumulen sample -before- the first sample</span>
+                <span class="c1"># read above in order to get the starting row of the first</span>
+                <span class="c1"># vector to read out in flattened_data</span>
+                <span class="n">da_start</span> <span class="o">=</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;/cumulative_length&#39;</span><span class="p">][</span><span class="n">start_row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># check limits for values that will be used subsequently</span>
+                <span class="k">if</span> <span class="n">this_cumulen_nda</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">da_start</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;warning: cumulative_length non-increasing between entries&quot;</span><span class="p">,</span> 
+                          <span class="n">start_row</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="n">start_row</span><span class="o">+</span><span class="n">n_rows_read</span><span class="p">,</span> <span class="s2">&quot;??&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">this_cumulen_nda</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">da_start</span><span class="p">,</span> <span class="n">start_row</span><span class="p">,</span> <span class="n">n_rows_read</span><span class="p">)</span>
+
+            <span class="c1"># determine the number of rows for the flattened_data readout</span>
+            <span class="n">da_nrows</span> <span class="o">=</span> <span class="n">this_cumulen_nda</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">n_rows_read</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+
+            <span class="c1"># Now done with this_cumulen_nda, so we can clean it up to be ready</span>
+            <span class="c1"># to match the in-memory version of flattened_data. Note: these</span>
+            <span class="c1"># operations on the view change the original array because they are</span>
+            <span class="c1"># numpy arrays, not lists.</span>
+            <span class="c1">#</span>
+            <span class="c1"># First we need to substract off the in-file offset for the start of</span>
+            <span class="c1"># read for flattened_data</span>
+            <span class="n">this_cumulen_nda</span> <span class="o">-=</span> <span class="n">da_start</span>
+
+            <span class="c1"># Then, if we started with a partially-filled buffer, add the</span>
+            <span class="c1"># appropriate offset for the start of the in-memory flattened</span>
+            <span class="c1"># data for this read.</span>
+            <span class="n">da_buf_start</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">obj_buf_start</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">da_buf_start</span> <span class="o">=</span> <span class="n">cumulative_length</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">obj_buf_start</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">this_cumulen_nda</span> <span class="o">+=</span> <span class="n">da_buf_start</span>
+
+            <span class="c1"># Now prepare the object buffer if necessary</span>
+            <span class="n">da_buf</span> <span class="o">=</span> <span class="kc">None</span> 
+            <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">da_buf</span> <span class="o">=</span> <span class="n">obj_buf</span><span class="o">.</span><span class="n">flattened_data</span>
+                <span class="c1"># grow da_buf if necessary to hold the data</span>
+                <span class="n">dab_size</span> <span class="o">=</span> <span class="n">da_buf_start</span> <span class="o">+</span> <span class="n">da_nrows</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">da_buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">dab_size</span><span class="p">:</span> <span class="n">da_buf</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">dab_size</span><span class="p">)</span>
+
+            <span class="c1"># now read</span>
+            <span class="n">flattened_data</span><span class="p">,</span> <span class="n">dummy_rows_read</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_object</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;/flattened_data&#39;</span><span class="p">,</span> 
+                                                               <span class="n">h5f</span><span class="p">,</span> 
+                                                               <span class="n">start_row</span><span class="o">=</span><span class="n">da_start</span><span class="p">,</span> 
+                                                               <span class="n">n_rows</span><span class="o">=</span><span class="n">da_nrows</span><span class="p">,</span>
+                                                               <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+                                                               <span class="n">obj_buf</span><span class="o">=</span><span class="n">da_buf</span><span class="p">,</span>
+                                                               <span class="n">obj_buf_start</span><span class="o">=</span><span class="n">da_buf_start</span><span class="p">,</span>
+                                                               <span class="n">verbosity</span><span class="o">=</span><span class="n">verbosity</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="n">obj_buf</span><span class="p">,</span> <span class="n">n_rows_read</span>
+            <span class="k">return</span> <span class="n">VectorOfVectors</span><span class="p">(</span><span class="n">flattened_data</span><span class="o">=</span><span class="n">flattened_data</span><span class="p">,</span> 
+                                   <span class="n">cumulative_length</span><span class="o">=</span><span class="n">cumulative_length</span><span class="p">,</span> 
+                                   <span class="n">attrs</span><span class="o">=</span><span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">),</span> <span class="n">n_rows_read</span>
+
+
+        <span class="c1"># Array</span>
+        <span class="c1"># FixedSizeArray</span>
+        <span class="c1"># ArrayOfEqualSizedArrays</span>
+        <span class="c1"># read out all arrays by slicing</span>
+        <span class="k">if</span> <span class="s1">&#39;array&#39;</span> <span class="ow">in</span> <span class="n">datatype</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_buf</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;obj_buf for&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;not an Array. returning new object&quot;</span><span class="p">)</span>
+                    <span class="n">obj_buf</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># compute the number of rows to read</span>
+            <span class="c1"># we culled idx above for start_row and n_rows, now we have to apply</span>
+            <span class="c1"># the constraint of the length of the dataset</span>
+            <span class="n">ds_n_rows</span> <span class="o">=</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ds_n_rows</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;warning: idx indexed past the end of the array in the file. Culling...&quot;</span><span class="p">)</span>
+                    <span class="n">n_rows_to_read</span> <span class="o">=</span> <span class="n">bisect_left</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ds_n_rows</span><span class="p">)</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="n">n_rows_to_read</span><span class="p">],)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;warning: idx empty after culling.&quot;</span><span class="p">)</span>
+                <span class="n">n_rows_to_read</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span> <span class="n">n_rows_to_read</span> <span class="o">=</span> <span class="n">ds_n_rows</span> <span class="o">-</span> <span class="n">start_row</span>
+            <span class="k">if</span> <span class="n">n_rows_to_read</span> <span class="o">&gt;</span> <span class="n">n_rows</span><span class="p">:</span> <span class="n">n_rows_to_read</span> <span class="o">=</span> <span class="n">n_rows</span>
+
+            <span class="c1"># prepare the selection for the read. Use idx if available</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">source_sel</span> <span class="o">=</span> <span class="n">idx</span>
+            <span class="k">else</span><span class="p">:</span> <span class="n">source_sel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">s_</span><span class="p">[</span><span class="n">start_row</span><span class="p">:</span><span class="n">start_row</span><span class="o">+</span><span class="n">n_rows_to_read</span><span class="p">]</span>
+
+            <span class="c1"># Now read the array</span>
+            <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">n_rows_to_read</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">buf_size</span> <span class="o">=</span> <span class="n">obj_buf_start</span> <span class="o">+</span> <span class="n">n_rows_to_read</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">buf_size</span><span class="p">:</span> <span class="n">obj_buf</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">buf_size</span><span class="p">)</span>
+                <span class="n">dest_sel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">s_</span><span class="p">[</span><span class="n">obj_buf_start</span><span class="p">:</span><span class="n">buf_size</span><span class="p">]</span>
+                <span class="c1"># NOTE: if your script fails on this line, it may be because you</span>
+                <span class="c1"># have to apply this patch to h5py (or update h5py, if it&#39;s</span>
+                <span class="c1"># fixed): https://github.com/h5py/h5py/issues/1792</span>
+                <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">read_direct</span><span class="p">(</span><span class="n">obj_buf</span><span class="o">.</span><span class="n">nda</span><span class="p">,</span> <span class="n">source_sel</span><span class="p">,</span> <span class="n">dest_sel</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span> 
+                <span class="k">if</span> <span class="n">n_rows</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+                    <span class="n">tmp_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">+</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                    <span class="n">nda</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">tmp_shape</span><span class="p">,</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span> <span class="n">nda</span> <span class="o">=</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">source_sel</span><span class="p">]</span>
+
+            <span class="c1"># special handling for bools</span>
+            <span class="k">if</span> <span class="n">elements</span> <span class="o">==</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span> <span class="n">nda</span> <span class="o">=</span> <span class="n">nda</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+
+            <span class="c1"># Finally, set attributes and return objects</span>
+            <span class="n">attrs</span><span class="o">=</span><span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span>
+            <span class="k">if</span> <span class="n">obj_buf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;array&#39;</span><span class="p">:</span> 
+                    <span class="k">return</span> <span class="n">Array</span><span class="p">(</span><span class="n">nda</span><span class="o">=</span><span class="n">nda</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">),</span> <span class="n">n_rows_to_read</span>
+                <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;fixedsize_array&#39;</span><span class="p">:</span> 
+                    <span class="k">return</span> <span class="n">FixedSizeArray</span><span class="p">(</span><span class="n">nda</span><span class="o">=</span><span class="n">nda</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">),</span> <span class="n">n_rows_to_read</span>
+                <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;array_of_equalsized_arrays&#39;</span><span class="p">:</span> 
+                    <span class="k">return</span> <span class="n">ArrayOfEqualSizedArrays</span><span class="p">(</span><span class="n">nda</span><span class="o">=</span><span class="n">nda</span><span class="p">,</span> 
+                                                   <span class="n">dims</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> 
+                                                   <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">),</span> <span class="n">n_rows_to_read</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">obj_buf</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;warning: attrs mismatch&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;obj_buf.attrs:&#39;</span><span class="p">,</span> <span class="n">obj_buf</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;h5f[&#39;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;].attrs:&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">obj_buf</span><span class="p">,</span> <span class="n">n_rows_to_read</span>
+
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Store: don</span><span class="se">\&#39;</span><span class="s1">t know how to read datatype&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Store.write_object"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.Store.write_object">[docs]</a>    <span class="k">def</span> <span class="nf">write_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">start_row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write an object into an lh5_file</span>
+
+<span class="sd">        obj should be a LH5 object. </span>
+
+<span class="sd">        Set append to true for non-scalar objects if you want to append along</span>
+<span class="sd">        axis 0 (the first dimension) (or axis 0 of non-scalar subfields of</span>
+<span class="sd">        structs)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lh5_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gimme_file</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span> <span class="k">if</span> <span class="n">append</span> <span class="k">else</span> <span class="s1">&#39;r+&#39;</span><span class="p">)</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gimme_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">)</span>
+
+        <span class="c1"># FIXME: fail if trying to overwrite an existing object without appending?</span>
+        <span class="c1"># FIXME: even in append mode, if you try to overwrite a ds, it will fail</span>
+        <span class="c1"># unless you delete the ds first</span>
+
+        <span class="c1"># struct or table</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Struct</span><span class="p">):</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gimme_group</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">grp_attrs</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> 
+                                  <span class="n">field</span><span class="p">,</span> 
+                                  <span class="n">lh5_file</span><span class="p">,</span> 
+                                  <span class="n">group</span><span class="p">,</span> 
+                                  <span class="n">start_row</span><span class="o">=</span><span class="n">start_row</span><span class="p">,</span>
+                                  <span class="n">n_rows</span><span class="o">=</span><span class="n">n_rows</span><span class="p">,</span>
+                                  <span class="n">append</span><span class="o">=</span><span class="n">append</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># scalars</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Scalar</span><span class="p">):</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(),</span> <span class="n">data</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+            <span class="k">return</span>
+
+ 
+        <span class="c1"># vector of vectors</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">VectorOfVectors</span><span class="p">):</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gimme_group</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">grp_attrs</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n_rows</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">n_rows</span> <span class="o">&gt;</span> <span class="n">obj</span><span class="o">.</span><span class="n">cumulative_length</span><span class="o">.</span><span class="n">nda</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_row</span><span class="p">:</span>
+                <span class="n">n_rows</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">cumulative_length</span><span class="o">.</span><span class="n">nda</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_row</span>
+
+            <span class="c1"># if appending we need to add an appropriate offset to the</span>
+            <span class="c1"># cumulative lengths as appropriate for the in-file object</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">append</span> <span class="ow">and</span> <span class="s1">&#39;cumulative_length&#39;</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
+                <span class="n">len_cl</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;cumulative_length&#39;</span><span class="p">])</span> 
+                <span class="k">if</span> <span class="n">len_cl</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;cumulative_length&#39;</span><span class="p">][</span><span class="n">len_cl</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># Add offset to obj.cumulative_length itself to avoid memory allocation. </span>
+            <span class="c1"># Then subtract it off after writing!</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">cumulative_length</span><span class="o">.</span><span class="n">nda</span> <span class="o">+=</span> <span class="n">offset</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">cumulative_length</span><span class="p">,</span>
+                              <span class="s1">&#39;cumulative_length&#39;</span><span class="p">,</span> 
+                              <span class="n">lh5_file</span><span class="p">,</span> 
+                              <span class="n">group</span><span class="p">,</span> 
+                              <span class="n">start_row</span><span class="o">=</span><span class="n">start_row</span><span class="p">,</span>
+                              <span class="n">n_rows</span><span class="o">=</span><span class="n">n_rows</span><span class="p">,</span>
+                              <span class="n">append</span><span class="o">=</span><span class="n">append</span><span class="p">)</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">cumulative_length</span><span class="o">.</span><span class="n">nda</span> <span class="o">-=</span> <span class="n">offset</span>
+
+            <span class="c1"># now write data array. Only write rows with data.</span>
+            <span class="n">da_start</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">start_row</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="n">cumulative_length</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">start_row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">da_n_rows</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">cumulative_length</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">n_rows</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">da_start</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">flattened_data</span><span class="p">,</span>
+                              <span class="s1">&#39;flattened_data&#39;</span><span class="p">,</span> 
+                              <span class="n">lh5_file</span><span class="p">,</span> 
+                              <span class="n">group</span><span class="p">,</span> 
+                              <span class="n">start_row</span><span class="o">=</span><span class="n">da_start</span><span class="p">,</span>
+                              <span class="n">n_rows</span><span class="o">=</span><span class="n">da_n_rows</span><span class="p">,</span>
+                              <span class="n">append</span><span class="o">=</span><span class="n">append</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># if we get this far, must be one of the Array types</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="n">n_rows</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">n_rows</span> <span class="o">&gt;</span> <span class="n">obj</span><span class="o">.</span><span class="n">nda</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_row</span><span class="p">:</span>
+                <span class="n">n_rows</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">nda</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_row</span>
+            <span class="n">nda</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">start_row</span><span class="p">:</span><span class="n">start_row</span><span class="o">+</span><span class="n">n_rows</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">nda</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span> <span class="n">nda</span> <span class="o">=</span> <span class="n">nda</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+            <span class="c1"># need to create dataset from ndarray the first time for speed</span>
+            <span class="c1"># creating an empty dataset and appending to that is super slow!</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">append</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
+                <span class="n">maxshape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nda</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="n">maxshape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">maxshape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">maxshape</span><span class="p">)</span>
+                <span class="n">ds</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">nda</span><span class="p">,</span> <span class="n">maxshape</span><span class="o">=</span><span class="n">maxshape</span><span class="p">)</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+                <span class="k">return</span>
+            
+            <span class="c1"># Now append</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">old_len</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">add_len</span> <span class="o">=</span> <span class="n">nda</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">old_len</span> <span class="o">+</span> <span class="n">add_len</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">ds</span><span class="p">[</span><span class="o">-</span><span class="n">add_len</span><span class="p">:]</span> <span class="o">=</span> <span class="n">nda</span>
+            <span class="k">return</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Store: do not know how to write&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;of type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="Store.read_n_rows"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.Store.read_n_rows">[docs]</a>    <span class="k">def</span> <span class="nf">read_n_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Look up the number of rows in an Array-like object called name</span>
+<span class="sd">        in lh5_file. Return None if it is a scalar/struct.&quot;&quot;&quot;</span>
+        <span class="c1"># this is basically a stripped down version of read_object</span>
+        <span class="n">h5f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gimme_file</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">h5f</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Store:&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;not in&quot;</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># get the datatype</span>
+        <span class="k">if</span> <span class="s1">&#39;datatype&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Store:&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;in file&#39;</span><span class="p">,</span> <span class="n">lh5_file</span><span class="p">,</span> <span class="s1">&#39;is missing the datatype attribute&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="n">datatype</span> <span class="o">=</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;datatype&#39;</span><span class="p">]</span>
+        <span class="n">datatype</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">elements</span> <span class="o">=</span> <span class="n">parse_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span>
+
+        <span class="c1"># scalars are dim-0 datasets</span>
+        <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;scalar&#39;</span><span class="p">:</span> 
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># recursively build a struct, return as a dictionary</span>
+        <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;struct&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        
+        <span class="c1"># read a table into a dataframe</span>
+        <span class="k">if</span> <span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;table&#39;</span><span class="p">:</span>
+            <span class="c1"># read out each of the fields</span>
+            <span class="n">rows_read</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+                <span class="n">fld_buf</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">n_rows_read</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_n_rows</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">field</span><span class="p">,</span> <span class="n">h5f</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">rows_read</span><span class="p">:</span> <span class="n">rows_read</span> <span class="o">=</span> <span class="n">n_rows_read</span>
+                <span class="k">elif</span> <span class="n">rows_read</span> <span class="o">!=</span> <span class="n">n_rows_read</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;got strange n_rows_read&#39;</span><span class="p">,</span> <span class="n">rows_read</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">n_rows_read</span><span class="p">,</span> <span class="s1">&#39;was expected&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">rows_read</span>
+        
+        <span class="c1"># read out vector of vectors of different size</span>
+        <span class="k">if</span> <span class="n">elements</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;array&#39;</span><span class="p">):</span>
+            <span class="n">cumulen_buf</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_n_rows</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;/cumulative_length&#39;</span><span class="p">,</span> <span class="n">h5f</span><span class="p">)</span>
+        
+        <span class="c1"># read out all arrays by slicing</span>
+        <span class="k">if</span> <span class="s1">&#39;array&#39;</span> <span class="ow">in</span> <span class="n">datatype</span><span class="p">:</span>
+            <span class="c1"># compute the number of rows to read</span>
+            <span class="k">return</span> <span class="n">h5f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Store: don</span><span class="se">\&#39;</span><span class="s1">t know how to read datatype&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="load_nda"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.load_nda">[docs]</a><span class="k">def</span> <span class="nf">load_nda</span><span class="p">(</span><span class="n">f_list</span><span class="p">,</span> <span class="n">par_list</span><span class="p">,</span> <span class="n">lh5_group</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">idx_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Build a dictionary of ndarrays from lh5 data</span>
+
+<span class="sd">    Given a list of files, a list of lh5 table parameters, and an optional group</span>
+<span class="sd">    path, return a numpy array with all values for each parameter.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    f_list : str or list of str&#39;s</span>
+<span class="sd">        A list of files. Can contain wildcards</span>
+<span class="sd">    par_list : list of str&#39;s</span>
+<span class="sd">        A list of parameters to read from each file</span>
+<span class="sd">    lh5_group : str (optional)</span>
+<span class="sd">        Optional group path within which to find the specified parameters</span>
+<span class="sd">    idx_list : list of index arrays</span>
+<span class="sd">        For fancy-indexed reads. Must be one idx array for each file in f_list</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print info on loaded data</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    par_data : dict</span>
+<span class="sd">        A dictionary of the parameter data keyed by the elements of par_list.</span>
+<span class="sd">        Each entry contains the data for the specified parameter concatenated</span>
+<span class="sd">        over all files in f_list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f_list</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">f_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_list</span><span class="p">]</span>
+    <span class="c1"># Expand wildcards</span>
+    <span class="n">f_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f_wc</span> <span class="ow">in</span> <span class="n">f_list</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="n">f_wc</span><span class="p">)))]</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;loading data for&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">f_list</span><span class="p">)</span>
+
+    <span class="n">sto</span> <span class="o">=</span> <span class="n">Store</span><span class="p">()</span>
+    <span class="n">par_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">par</span> <span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">par_list</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">f_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">par_list</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sto</span><span class="o">.</span><span class="n">read_object</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lh5_group</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">par</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="n">par_data</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">nda</span><span class="p">)</span>
+    <span class="n">par_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">par</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">par_data</span><span class="p">[</span><span class="n">par</span><span class="p">])</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">par_list</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">par_data</span></div>
+
+
+<div class="viewcode-block" id="load_dfs"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.store.load_dfs">[docs]</a><span class="k">def</span> <span class="nf">load_dfs</span><span class="p">(</span><span class="n">f_list</span><span class="p">,</span> <span class="n">par_list</span><span class="p">,</span> <span class="n">lh5_group</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">idx_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Build a pandas dataframe from lh5 data</span>
+
+<span class="sd">    Given a list of files (can use wildcards), a list of lh5 columns, and</span>
+<span class="sd">    optionally the group path, return a pandas DataFrame with all values for</span>
+<span class="sd">    each parameter.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    See load_nda for parameter specification</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df : pandas.DataFrame</span>
+<span class="sd">        Contains columns for each parameter in par_list, and rows containing all</span>
+<span class="sd">        data for the associated parameters concatenated over all files in f_list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span> <span class="n">load_nda</span><span class="p">(</span><span class="n">f_list</span><span class="p">,</span> <span class="n">par_list</span><span class="p">,</span> <span class="n">lh5_group</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span> <span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

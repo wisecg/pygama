@@ -1,0 +1,963 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.io package &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pygama.lh5 package" href="pygama.lh5.html" />
+    <link rel="prev" title="pygama.dsp package" href="pygama.dsp.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing pygama</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pygama.html">Package API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pygama.analysis.html">pygama.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.dsp.html">pygama.dsp package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pygama.io package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-io-mgdodecoder-module">pygama.io.MGDODecoder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.ch_group">pygama.io.ch_group module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.compassdaq">pygama.io.compassdaq module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.daq_to_raw">pygama.io.daq_to_raw module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.fcdaq">pygama.io.fcdaq module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.io_base">pygama.io.io_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.lh5">pygama.io.lh5 module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.llamadaq">pygama.io.llamadaq module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.orca_digitizers">pygama.io.orca_digitizers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.orcadaq">pygama.io.orcadaq module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.pollers">pygama.io.pollers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-io-raw-to-dsp-module">pygama.io.raw_to_dsp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io.wfcompress">pygama.io.wfcompress module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.io">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.lh5.html">pygama.lh5 package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#pygama-git-module">pygama.git module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama.utils">pygama.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="pygama.html">pygama package</a> &raquo;</li>
+        
+      <li>pygama.io package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/pygama.io.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pygama-io-package">
+<h1>pygama.io package<a class="headerlink" href="#pygama-io-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="pygama-io-mgdodecoder-module">
+<h2>pygama.io.MGDODecoder module<a class="headerlink" href="#pygama-io-mgdodecoder-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygama.io.ch_group">
+<span id="pygama-io-ch-group-module"></span><h2>pygama.io.ch_group module<a class="headerlink" href="#module-pygama.io.ch_group" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pygama.io.ch_group.build_tables">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.ch_group.</span></code><code class="sig-name descname"><span class="pre">build_tables</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ch_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/ch_group.html#build_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.ch_group.build_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>build tables and associated I/O info for the channel groups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ch_groups</strong> (<em>dict</em>) -- </p></li>
+<li><p><strong>buffer_size</strong> (<em>int</em>) -- </p></li>
+<li><p><strong>init_obj</strong> (<em>object with initialize_lh5_table</em><em>(</em><em>) </em><em>function</em>) -- </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ch_to_tbls</strong> -- A channel-indexed dictionary of tables for quick look-up, or if passed a
+dummy group (no group name), return the one table made.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict or <a class="reference internal" href="pygama.lh5.html#pygama.lh5.table.Table" title="pygama.lh5.table.Table">Table</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.ch_group.create_dummy_ch_group">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.ch_group.</span></code><code class="sig-name descname"><span class="pre">create_dummy_ch_group</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/ch_group.html#create_dummy_ch_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.ch_group.create_dummy_ch_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.ch_group.expand_ch_groups">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.ch_group.</span></code><code class="sig-name descname"><span class="pre">expand_ch_groups</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ch_groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/ch_group.html#expand_ch_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.ch_group.expand_ch_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expand a ch_group from its json shorthand</p>
+<dl>
+<dt>ch_groups: a dictionary whose keys are the names of channel groupings,</dt><dd><p>and whose values have the following fields:
+ch_list (list): a list of channels and channel ranges associated</p>
+<blockquote>
+<div><p>with this group</p>
+</div></blockquote>
+<dl class="simple">
+<dt>system (str, optional): name of the (sub)system to which this group</dt><dd><p>belongs. Used to set e.g. the name of the output file or group path,
+etc.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>In json we allow a shorthand where the group name and system name can
+include a {ch:xxx} format specifier, indicating that each channel in
+ch_list should be given its own group with the corresponding name. In
+this function, we expand this formatting to give a list of
+properly-named groups with the right channel specified in each.</p>
+<p>In json we also allow ch_list to have entries that are 2-integer lists
+corresponding to the first and last channels in a continguous range of
+channels that belong in the group. In this function we expand those
+ranges to give a properly formated list of ints.</p>
+<p>Note: the intent is that channels in the same group get written to the
+same table, and that groups in the same system get written out to the
+same file.</p>
+<p>Note 2: during run time, a ch group's info can be updated with things like
+the lh5 table to which this channel's data gets written, the name of the
+output file, etc.</p>
+<p>Example valid json:
+&quot;FlashCamEventDecoder&quot; : {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>&quot;g{ch:0&gt;3d}&quot;<span class="classifier">{</span></dt><dd><p>&quot;ch_list&quot; : [ [24,64] ],
+&quot;system&quot; : &quot;geds&quot;</p>
+</dd>
+</dl>
+<p>},
+&quot;spms&quot; : {</p>
+<blockquote>
+<div><p>&quot;ch_list&quot; : [ [6,23] ],
+&quot;system&quot; : &quot;spms&quot;</p>
+</div></blockquote>
+<p>},
+&quot;puls&quot; : {</p>
+<blockquote>
+<div><p>&quot;ch_list&quot; : [ 0 ],
+&quot;system&quot; : &quot;auxs&quot;</p>
+</div></blockquote>
+<p>},
+&quot;muvt&quot; : {</p>
+<blockquote>
+<div><p>&quot;ch_list&quot; : [ 1, 5 ],
+&quot;system&quot; : &quot;auxs&quot;</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.ch_group.get_list_of">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.ch_group.</span></code><code class="sig-name descname"><span class="pre">get_list_of</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/ch_group.html#get_list_of"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.ch_group.get_list_of" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of values for key in ch_groups[groups]</p>
+<p>key (str): a key of the ch_groups[groups] dict
+ch_groups (dict): a group-name-indexed dict whose values are</p>
+<blockquote>
+<div><p>dictionaries of group information (see expand_ch_groups)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Example: get_list_of('system', ch_groups)</dt><dd><p>If ch_groups is the one specified in the json in the expand_ch_groups
+example, this will return the list [ 'geds', 'spms', 'auxs' ]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.ch_group.set_outputs">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.ch_group.</span></code><code class="sig-name descname"><span class="pre">set_outputs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ch_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grp_path_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'{group_name}'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/ch_group.html#set_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.ch_group.set_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up output filenames and/or group paths for the channel group</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_file_template</strong> (<em>str</em><em> or </em><em>dict</em>) -- Value(s) for attribute &quot;out_file&quot; when not provided explicitly by the user.
+If a string, use it for the out_file attribute for all ch groups
+If a dict, the out_file must be keyed by the ch_group's &quot;system&quot;
+You can use {system} in the template and the system name will be added.</p></li>
+<li><p><strong>group_path_template</strong> (<em>str</em><em> or </em><em>dict</em><em> (</em><em>optional</em><em>)</em>) -- If attribute &quot;group_path&quot; is not provided explicitly by the user,
+ch_groups are stored by default in path {group_name} inside their output
+files. You can use {group_name} as well as {system} and the
+corresponding group info will be filled in for you.  If a dict, the
+grp_path_template is keyed by the ch_group's name Example:
+grp_path_template='/data/{system}/{group_name}/raw'</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.io.compassdaq">
+<span id="pygama-io-compassdaq-module"></span><h2>pygama.io.compassdaq module<a class="headerlink" href="#module-pygama.io.compassdaq" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.io.compassdaq.CAENDT57XX">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.compassdaq.</span></code><code class="sig-name descname"><span class="pre">CAENDT57XX</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/compassdaq.html#CAENDT57XX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.compassdaq.CAENDT57XX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.io_base.DataTaker" title="pygama.io.io_base.DataTaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.io_base.DataTaker</span></code></a></p>
+<p>decode CAENDT5725 or CAENDT5730 digitizer data.</p>
+<p>Setting the model_name will set the appropriate sample_rate
+Use the input_config function to set certain variables by passing
+a dictionary, this will most importantly assemble the file header used
+by CAEN CoMPASS to label output files.</p>
+<dl class="py method">
+<dt id="pygama.io.compassdaq.CAENDT57XX.assemble_data_row">
+<code class="sig-name descname"><span class="pre">assemble_data_row</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/compassdaq.html#CAENDT57XX.assemble_data_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.compassdaq.CAENDT57XX.assemble_data_row" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.compassdaq.CAENDT57XX.create_dataframe">
+<code class="sig-name descname"><span class="pre">create_dataframe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/compassdaq.html#CAENDT57XX.create_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.compassdaq.CAENDT57XX.create_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.compassdaq.CAENDT57XX.get_event">
+<code class="sig-name descname"><span class="pre">get_event</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_data_bytes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/compassdaq.html#CAENDT57XX.get_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.compassdaq.CAENDT57XX.get_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.compassdaq.CAENDT57XX.get_event_size">
+<code class="sig-name descname"><span class="pre">get_event_size</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/compassdaq.html#CAENDT57XX.get_event_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.compassdaq.CAENDT57XX.get_event_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.compassdaq.CAENDT57XX.input_config">
+<code class="sig-name descname"><span class="pre">input_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/compassdaq.html#CAENDT57XX.input_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.compassdaq.CAENDT57XX.input_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.compassdaq.process_compass">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.compassdaq.</span></code><code class="sig-name descname"><span class="pre">process_compass</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daq_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digitizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/compassdaq.html#process_compass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.compassdaq.process_compass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an input .bin file name as daq_filename from CAEN CoMPASS and outputs raw_filename
+daq_filename: input file name, string type
+raw_filename: output file name, string type
+digitizer: CAEN digitizer, Digitizer type
+options are uncalibrated or calibrated.  Select the one that was outputted by CoMPASS, string type
+output_dir: path to output directory string type</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.io.daq_to_raw">
+<span id="pygama-io-daq-to-raw-module"></span><h2>pygama.io.daq_to_raw module<a class="headerlink" href="#module-pygama.io.daq_to_raw" title="Permalink to this headline">¶</a></h2>
+<p>pygama tier 0 processing
+raw daq data --&gt; pandas dfs saved to hdf5 file (tier 1)</p>
+<dl class="py function">
+<dt id="pygama.io.daq_to_raw.daq_to_raw">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.daq_to_raw.</span></code><code class="sig-name descname"><span class="pre">daq_to_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daq_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_file_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subrun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systems</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/daq_to_raw.html#daq_to_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.daq_to_raw.daq_to_raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert DAQ files into LEGEND-HDF5 <cite>raw</cite> format.
+Takes an input file (daq_filename) and an output file (raw_file_pattern).</p>
+<p>If the list <cite>systems</cite> is supplied, the raw_file_pattern should be a string
+containing <cite>{sysn}</cite>, which is used to create a list of output files for
+each data taker.</p>
+<dl>
+<dt>Config options for daq_to_raw:</dt><dd><p>buffer_size (int): default length to use for tables
+ch_groups (dict): associates groups of channels to be in the same or</p>
+<blockquote>
+<div><p>a different output LH5 table. See ch_group.py</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.io.fcdaq">
+<span id="pygama-io-fcdaq-module"></span><h2>pygama.io.fcdaq module<a class="headerlink" href="#module-pygama.io.fcdaq" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.io.fcdaq.FlashCamEventDecoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.fcdaq.</span></code><code class="sig-name descname"><span class="pre">FlashCamEventDecoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/fcdaq.html#FlashCamEventDecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.fcdaq.FlashCamEventDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.io_base.DataDecoder" title="pygama.io.io_base.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.io_base.DataDecoder</span></code></a></p>
+<p>decode FlashCam digitizer event data.</p>
+<dl class="py method">
+<dt id="pygama.io.fcdaq.FlashCamEventDecoder.decode_packet">
+<code class="sig-name descname"><span class="pre">decode_packet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_tables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/fcdaq.html#FlashCamEventDecoder.decode_packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.fcdaq.FlashCamEventDecoder.decode_packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>access FCIOEvent members for each event in the raw file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.fcdaq.FlashCamEventDecoder.get_decoded_values">
+<code class="sig-name descname"><span class="pre">get_decoded_values</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/fcdaq.html#FlashCamEventDecoder.get_decoded_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.fcdaq.FlashCamEventDecoder.get_decoded_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get decoded values (optionally for a given channel)</p>
+<p>Must overload for your decoder if it has channel-specific decoded
+values. Note: implement channel = None returns a &quot;default&quot; decoded_values</p>
+<p>Otherwise, just returns self.decoded_values, which should be defined in
+the constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.fcdaq.FlashCamEventDecoder.get_file_config_struct">
+<code class="sig-name descname"><span class="pre">get_file_config_struct</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/fcdaq.html#FlashCamEventDecoder.get_file_config_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.fcdaq.FlashCamEventDecoder.get_file_config_struct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an lh5 struct containing the file config info</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.fcdaq.FlashCamEventDecoder.set_file_config">
+<code class="sig-name descname"><span class="pre">set_file_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/fcdaq.html#FlashCamEventDecoder.set_file_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.fcdaq.FlashCamEventDecoder.set_file_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>access FCIOConfig members once when each file is opened</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pygama.io.fcdaq.FlashCamStatusDecoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.fcdaq.</span></code><code class="sig-name descname"><span class="pre">FlashCamStatusDecoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/fcdaq.html#FlashCamStatusDecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.fcdaq.FlashCamStatusDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.io_base.DataDecoder" title="pygama.io.io_base.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.io_base.DataDecoder</span></code></a></p>
+<p>decode FlashCam digitizer status data.</p>
+<dl class="py method">
+<dt id="pygama.io.fcdaq.FlashCamStatusDecoder.decode_packet">
+<code class="sig-name descname"><span class="pre">decode_packet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/fcdaq.html#FlashCamStatusDecoder.decode_packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.fcdaq.FlashCamStatusDecoder.decode_packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>access FC status (temp., log, ...)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.fcdaq.FlashCamStatusDecoder.set_file_config">
+<code class="sig-name descname"><span class="pre">set_file_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/fcdaq.html#FlashCamStatusDecoder.set_file_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.fcdaq.FlashCamStatusDecoder.set_file_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>access FCIOConfig members once when each file is opened</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.fcdaq.process_flashcam">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.fcdaq.</span></code><code class="sig-name descname"><span class="pre">process_flashcam</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daq_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_groups_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8192</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/fcdaq.html#process_flashcam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.fcdaq.process_flashcam" title="Permalink to this definition">¶</a></dt>
+<dd><p>decode FlashCam data, using the fcutils package to handle file access,
+and the FlashCam DataTaker to save the results and write to output.</p>
+<dl class="simple">
+<dt><cite>raw_files</cite> can be a string, or a dict with a label for each file:</dt><dd><p><cite>{'geds':'filename_geds.lh5', 'muvt':'filename_muvt.lh5}</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.io.io_base">
+<span id="pygama-io-io-base-module"></span><h2>pygama.io.io_base module<a class="headerlink" href="#module-pygama.io.io_base" title="Permalink to this headline">¶</a></h2>
+<p>io_base.py</p>
+<p>base classes for decoding daq data into raw lh5 files</p>
+<dl class="py class">
+<dt id="pygama.io.io_base.DataDecoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.io_base.</span></code><code class="sig-name descname"><span class="pre">DataDecoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">garbage_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_size_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/io_base.html#DataDecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.io_base.DataDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Decodes DAQ stream data packets.</p>
+<p>The values that get decoded need to be described by a dict called
+'decoded_values' that helps determine how to set up the buffers and write
+them to file. See ORCAStruck3302 for an example.</p>
+<p>Subclasses should define a method for decoding data to a buffer like
+decode_packet(packet, data_buffer, packet_id, verbose=False)</p>
+<p>Garbage collection writes binary data as an array of uint32s to a
+variable-length array in the output file. If a problematic packet is found,
+call put_in_garbage(packet). User should set up an enum or bitbank of garbage
+codes to be stored along with the garbage packets.</p>
+<dl class="py method">
+<dt id="pygama.io.io_base.DataDecoder.get_decoded_values">
+<code class="sig-name descname"><span class="pre">get_decoded_values</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/io_base.html#DataDecoder.get_decoded_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.io_base.DataDecoder.get_decoded_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get decoded values (optionally for a given channel)</p>
+<p>Must overload for your decoder if it has channel-specific decoded
+values. Note: implement channel = None returns a &quot;default&quot; decoded_values</p>
+<p>Otherwise, just returns self.decoded_values, which should be defined in
+the constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.io_base.DataDecoder.initialize_lh5_table">
+<code class="sig-name descname"><span class="pre">initialize_lh5_table</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lh5_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/io_base.html#DataDecoder.initialize_lh5_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.io_base.DataDecoder.initialize_lh5_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>initialize and lh5 Table based on decoded_values
+channel is the channel according to ch_group</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.io_base.DataDecoder.put_in_garbage">
+<code class="sig-name descname"><span class="pre">put_in_garbage</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/io_base.html#DataDecoder.put_in_garbage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.io_base.DataDecoder.put_in_garbage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.io_base.DataDecoder.write_out_garbage">
+<code class="sig-name descname"><span class="pre">write_out_garbage</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/io_base.html#DataDecoder.write_out_garbage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.io_base.DataDecoder.write_out_garbage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pygama.io.io_base.DataTaker">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.io_base.</span></code><code class="sig-name descname"><span class="pre">DataTaker</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">garbage_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_size_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/io_base.html#DataTaker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.io_base.DataTaker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.io_base.DataDecoder" title="pygama.io.io_base.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.io_base.DataDecoder</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.io.lh5">
+<span id="pygama-io-lh5-module"></span><h2>pygama.io.lh5 module<a class="headerlink" href="#module-pygama.io.lh5" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygama.io.llamadaq">
+<span id="pygama-io-llamadaq-module"></span><h2>pygama.io.llamadaq module<a class="headerlink" href="#module-pygama.io.llamadaq" title="Permalink to this headline">¶</a></h2>
+<dl class="py exception">
+<dt id="pygama.io.llamadaq.BinaryReadException">
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.llamadaq.</span></code><code class="sig-name descname"><span class="pre">BinaryReadException</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">requestedNrOfBytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gotNrOfBytes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#BinaryReadException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.BinaryReadException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py method">
+<dt id="pygama.io.llamadaq.BinaryReadException.printMessage">
+<code class="sig-name descname"><span class="pre">printMessage</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#BinaryReadException.printMessage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.BinaryReadException.printMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pygama.io.llamadaq.LLAMAStruck3316">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.llamadaq.</span></code><code class="sig-name descname"><span class="pre">LLAMAStruck3316</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#LLAMAStruck3316"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.LLAMAStruck3316" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.io_base.DataTaker" title="pygama.io.io_base.DataTaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.io_base.DataTaker</span></code></a></p>
+<p>decode Struck 3316 digitizer data</p>
+<p>TODO:
+handle per-channel data (gain, ...)
+most metadata of Struck header (energy, ...)</p>
+<dl class="py method">
+<dt id="pygama.io.llamadaq.LLAMAStruck3316.decode_event">
+<code class="sig-name descname"><span class="pre">decode_event</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_data_bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fadcIndex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channelIndex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#LLAMAStruck3316.decode_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.LLAMAStruck3316.decode_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>see the llamaDAQ documentation for data word diagrams</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.llamadaq.LLAMAStruck3316.initialize">
+<code class="sig-name descname"><span class="pre">initialize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#LLAMAStruck3316.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.LLAMAStruck3316.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>sets certain global values from a run, like:
+sample_period: time difference btw 2 samples in ns
+gain: multiply the integer sample value with the gain to get the voltage in V
+Method has to be called before the actual decoding work starts !</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.llamadaq.LLAMAStruck3316.readMetadata">
+<code class="sig-name descname"><span class="pre">readMetadata</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#LLAMAStruck3316.readMetadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.LLAMAStruck3316.readMetadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pygama.io.llamadaq.llama_3316">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.llamadaq.</span></code><code class="sig-name descname"><span class="pre">llama_3316</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_binary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#llama_3316"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.llama_3316" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A parser file for the sis3316 able to decode header and events.
+The inputs are files produced by the llamaDAQ sis3316 readout program
+magic bytes: &quot;LArU&quot;</p>
+<dl class="py method">
+<dt id="pygama.io.llamadaq.llama_3316.parse_channelConfigs">
+<code class="sig-name descname"><span class="pre">parse_channelConfigs</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#llama_3316.parse_channelConfigs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.llama_3316.parse_channelConfigs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the metadata from the beginning of the file (the &quot;channel configuration&quot; part, directly after the file header).
+Creates a dictionary of the metadata for each FADC/channel combination, which is returned</p>
+<p>structure of channelConfigs:
+FADCindex      channelIndex
+A ------------- x ----------- metadata for FADC A channel x</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">y ----------- metadata for FADC A channel y</div>
+<div class="line">z ----------- metadata for FADC A channel z</div>
+</div>
+</div></blockquote>
+<dl>
+<dt>B ------------- k ----------- metadata for FADC B channel k</dt><dd><div class="line-block">
+<div class="line">l ----------- metadata for FADC B channel l</div>
+</div>
+</dd>
+</dl>
+<p>...</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.llamadaq.llama_3316.parse_fileheader">
+<code class="sig-name descname"><span class="pre">parse_fileheader</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#llama_3316.parse_fileheader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.llama_3316.parse_fileheader" title="Permalink to this definition">¶</a></dt>
+<dd><p>parses the fileheader of a SIS3316 file.
+The fileheader takes the first 4 32-bit words and includes:
+Magic bytes (&quot;LArU&quot;)
+version of the llamaDAQ program producing the output file
+nr of open channels
+length in bytes of channel configurations (information for every channel, following the file header)
+returns true, if magic bytes match, false if not</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.llamadaq.llama_3316.read_next_event">
+<code class="sig-name descname"><span class="pre">read_next_event</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channelConfigs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#llama_3316.read_next_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.llama_3316.read_next_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>This should be the main method to call when parsing the file for events.
+returns the current FADC index, the channel ID and the binary data of the event if a valid event is found
+Returns -1, -1, None when after the last event in the file.
+automatically goes to the next event in the file, calling __read_chunk_header and __read_next_event
+when appropriate.
+returns FADCindex, channelIndex, binaryEventData</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.llamadaq.process_llama_3316">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.llamadaq.</span></code><code class="sig-name descname"><span class="pre">process_llama_3316</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daq_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/llamadaq.html#process_llama_3316"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.llamadaq.process_llama_3316" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert llama DAQ data to pygama &quot;raw&quot; lh5</p>
+<p>Mario's implementation for the Struck SIS3316 digitizer.
+Requires the llamaDAQ program for producing compatible input files.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.io.orca_digitizers">
+<span id="pygama-io-orca-digitizers-module"></span><h2>pygama.io.orca_digitizers module<a class="headerlink" href="#module-pygama.io.orca_digitizers" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.io.orca_digitizers.ORCAGretina4M">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.orca_digitizers.</span></code><code class="sig-name descname"><span class="pre">ORCAGretina4M</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAGretina4M"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAGretina4M" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.orcadaq.OrcaDecoder" title="pygama.io.orcadaq.OrcaDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.orcadaq.OrcaDecoder</span></code></a></p>
+<p>Decoder for Majorana Gretina4M digitizer data</p>
+<p>NOTE: Tom Caldwell made some nice new summary slides on a 2019 LEGEND call
+<a class="reference external" href="https://indico.legend-exp.org/event/117/contributions/683/attachments/467/717/mjd_data_format.pdf">https://indico.legend-exp.org/event/117/contributions/683/attachments/467/717/mjd_data_format.pdf</a></p>
+<dl class="py method">
+<dt id="pygama.io.orca_digitizers.ORCAGretina4M.decode_packet">
+<code class="sig-name descname"><span class="pre">decode_packet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_tables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAGretina4M.decode_packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAGretina4M.decode_packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the header for an individual event</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.orca_digitizers.ORCAGretina4M.get_decoded_values">
+<code class="sig-name descname"><span class="pre">get_decoded_values</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAGretina4M.get_decoded_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAGretina4M.get_decoded_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get decoded values (optionally for a given channel)</p>
+<p>Must overload for your decoder if it has channel-specific decoded
+values. Note: implement channel = None returns a &quot;default&quot; decoded_values</p>
+<p>Otherwise, just returns self.decoded_values, which should be defined in
+the constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.orca_digitizers.ORCAGretina4M.is_multisampled">
+<code class="sig-name descname"><span class="pre">is_multisampled</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAGretina4M.is_multisampled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAGretina4M.is_multisampled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.orca_digitizers.ORCAGretina4M.max_n_rows_per_packet">
+<code class="sig-name descname"><span class="pre">max_n_rows_per_packet</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAGretina4M.max_n_rows_per_packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAGretina4M.max_n_rows_per_packet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.orca_digitizers.ORCAGretina4M.set_object_info">
+<code class="sig-name descname"><span class="pre">set_object_info</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAGretina4M.set_object_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAGretina4M.set_object_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overload to e.g. update decoded_values based on object_info.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pygama.io.orca_digitizers.ORCAStruck3302">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.orca_digitizers.</span></code><code class="sig-name descname"><span class="pre">ORCAStruck3302</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAStruck3302"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAStruck3302" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.orcadaq.OrcaDecoder" title="pygama.io.orcadaq.OrcaDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.orcadaq.OrcaDecoder</span></code></a></p>
+<p>ORCA decoder for Struck 3302 digitizer data</p>
+<dl class="py method">
+<dt id="pygama.io.orca_digitizers.ORCAStruck3302.decode_packet">
+<code class="sig-name descname"><span class="pre">decode_packet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_tables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAStruck3302.decode_packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAStruck3302.decode_packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>see README for the 32-bit data word diagram</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.orca_digitizers.ORCAStruck3302.get_decoded_values">
+<code class="sig-name descname"><span class="pre">get_decoded_values</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAStruck3302.get_decoded_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAStruck3302.get_decoded_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get decoded values (optionally for a given channel)</p>
+<p>Must overload for your decoder if it has channel-specific decoded
+values. Note: implement channel = None returns a &quot;default&quot; decoded_values</p>
+<p>Otherwise, just returns self.decoded_values, which should be defined in
+the constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.orca_digitizers.ORCAStruck3302.max_n_rows_per_packet">
+<code class="sig-name descname"><span class="pre">max_n_rows_per_packet</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAStruck3302.max_n_rows_per_packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAStruck3302.max_n_rows_per_packet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.orca_digitizers.ORCAStruck3302.set_object_info">
+<code class="sig-name descname"><span class="pre">set_object_info</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#ORCAStruck3302.set_object_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.ORCAStruck3302.set_object_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overload to e.g. update decoded_values based on object_info.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.io.orcadaq">
+<span id="pygama-io-orcadaq-module"></span><h2>pygama.io.orcadaq module<a class="headerlink" href="#module-pygama.io.orcadaq" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.io.orcadaq.OrcaDecoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">OrcaDecoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataID</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#OrcaDecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.OrcaDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.io_base.DataDecoder" title="pygama.io.io_base.DataDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.io_base.DataDecoder</span></code></a></p>
+<p>Base class for ORCA decoders.</p>
+<p>ORCA data packets have a dataID-to-decoder_name mapping so these decoders
+need to have self.decoder_name defined in __init__</p>
+<p>ORCA also stores an object_info dictionary in the header by 'class name&quot; so
+these decoders need to have self.orca_class_name defined in __init__</p>
+<p>ORCA also uses a uniform packet structure so put some boiler plate here so
+that all ORCA decoders can make use of it.</p>
+<dl class="py method">
+<dt id="pygama.io.orcadaq.OrcaDecoder.set_header_dict">
+<code class="sig-name descname"><span class="pre">set_header_dict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#OrcaDecoder.set_header_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.OrcaDecoder.set_header_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.orcadaq.OrcaDecoder.set_object_info">
+<code class="sig-name descname"><span class="pre">set_object_info</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#OrcaDecoder.set_object_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.OrcaDecoder.set_object_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overload to e.g. update decoded_values based on object_info.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.flip_data_ids">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">flip_data_ids</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#flip_data_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.flip_data_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an inverted dictionary such that:
+Could be extended somehow to give you all the supers associated with a given class name (maybe like)
+flipped[dataId] = [class_key, [super1, super2, ...]]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.from_bytes">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">from_bytes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">big_endian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#from_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.from_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>python2 doesn't have this function,
+so rewrite it for backwards compatibility</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.get_card">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">get_card</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#get_card"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.get_card" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.get_ccc">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">get_ccc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">card</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#get_ccc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.get_ccc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.get_channel">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">get_channel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#get_channel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.get_channel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.get_crate">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">get_crate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#get_crate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.get_crate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.get_data_id">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">get_data_id</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">super_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#get_data_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.get_data_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>stored like this:
+<cite>header_dict[&quot;dataDescription&quot;][&quot;ORRunModel&quot;][&quot;Run&quot;][&quot;dataId&quot;]</cite>
+but integer needs to be bitshifted by 18</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.get_id_to_decoder_name_dict">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">get_id_to_decoder_name_dict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#get_id_to_decoder_name_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.get_id_to_decoder_name_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary that goes:
+<cite>dict[dataID] = &quot;decoderName&quot;</cite>
+e.g: d[5] = 'ORSIS3302DecoderForEnergy'</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.get_next_packet">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">get_next_packet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#get_next_packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.get_next_packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the next packet, and some basic information about it
+Takes the file pointer as input
+Outputs:
+- event_data: a byte array of the data produced by the card (could be header + data)
+- data_id: This is the identifier for the type of data-taker (i.e. Gretina4M, etc)
+- crate: the crate number for the packet
+- card: the card number for the packet
+# number of bytes to read in = 8 (2x 32-bit words, 4 bytes each)
+# The read is set up to do two 32-bit integers, rather than bytes or shorts
+# This matches the bitwise arithmetic used elsewhere best, and is easy to implement</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.get_object_info">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">get_object_info</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orca_class_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#get_object_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.get_object_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list with all info from the header for each card with name
+orca_class_name.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.get_run_number">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">get_run_number</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#get_run_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.get_run_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>header_dict parse functions, ORCA specific</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.open_orca">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">open_orca</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orca_filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#open_orca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.open_orca" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.parse_header">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">parse_header</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orca_filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#parse_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.parse_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens the given file for binary read ('rb'), then grabs the first 8 bytes
+The first 4 bytes (1 long) of an orca data file are the total length in
+longs of the record
+The next 4 bytes (1 long) is the length of the header in bytes
+The header is then read in ...</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.orcadaq.process_orca">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.orcadaq.</span></code><code class="sig-name descname"><span class="pre">process_orca</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daq_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_file_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_groups_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orcadaq.html#process_orca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orcadaq.process_orca" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert ORCA DAQ data to &quot;raw&quot; lh5</p>
+<p>ch_groups_dict: keyed by decoder_name</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygama.io.pollers">
+<span id="pygama-io-pollers-module"></span><h2>pygama.io.pollers module<a class="headerlink" href="#module-pygama.io.pollers" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pygama.io.pollers.ISegHVDecoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.pollers.</span></code><code class="sig-name descname"><span class="pre">ISegHVDecoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/pollers.html#ISegHVDecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.pollers.ISegHVDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.io_base.DataTaker" title="pygama.io.io_base.DataTaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.io_base.DataTaker</span></code></a></p>
+<p>iSeg HV Card</p>
+<dl class="py method">
+<dt id="pygama.io.pollers.ISegHVDecoder.decode_event">
+<code class="sig-name descname"><span class="pre">decode_event</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_data_bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/pollers.html#ISegHVDecoder.decode_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.pollers.ISegHVDecoder.decode_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>see README for the 32-bit data word diagram</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pygama.io.pollers.MJDPreampDecoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pygama.io.pollers.</span></code><code class="sig-name descname"><span class="pre">MJDPreampDecoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/pollers.html#MJDPreampDecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.pollers.MJDPreampDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.io_base.DataTaker" title="pygama.io.io_base.DataTaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.io_base.DataTaker</span></code></a></p>
+<p>members:
+- decode_event (decodes raw data from an MJDPreAmp object)
+- format_data (returns a dict)
+- get_detectors_for_preamp (returns a dict)</p>
+<dl class="py method">
+<dt id="pygama.io.pollers.MJDPreampDecoder.decode_event">
+<code class="sig-name descname"><span class="pre">decode_event</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_data_bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/pollers.html#MJDPreampDecoder.decode_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.pollers.MJDPreampDecoder.decode_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>see README for the 32-bit data word diagram</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pygama.io.pollers.MJDPreampDecoder.get_detectors_for_preamp">
+<code class="sig-name descname"><span class="pre">get_detectors_for_preamp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">an_ID</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/pollers.html#MJDPreampDecoder.get_detectors_for_preamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.pollers.MJDPreampDecoder.get_detectors_for_preamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary that goes:
+dict[preamp_id] = [&quot;detectorName1&quot;, &quot;detectorName2&quot;...
+e.g: d[5] = ['P12345A','P12346B','', ... 'B8765']</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="pygama-io-raw-to-dsp-module">
+<h2>pygama.io.raw_to_dsp module<a class="headerlink" href="#pygama-io-raw-to-dsp-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygama.io.wfcompress">
+<span id="pygama-io-wfcompress-module"></span><h2>pygama.io.wfcompress module<a class="headerlink" href="#module-pygama.io.wfcompress" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pygama.io.wfcompress.compression">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.wfcompress.</span></code><code class="sig-name descname"><span class="pre">compression</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sig_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_len_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/wfcompress.html#compression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.wfcompress.compression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.wfcompress.decompression">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.wfcompress.</span></code><code class="sig-name descname"><span class="pre">decompression</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sig_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_len_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/wfcompress.html#decompression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.wfcompress.decompression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.wfcompress.empty">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.wfcompress.</span></code><code class="sig-name descname"><span class="pre">empty</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flattened_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cumulative_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/wfcompress.html#empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.wfcompress.empty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.wfcompress.nda_to_vect">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.wfcompress.</span></code><code class="sig-name descname"><span class="pre">nda_to_vect</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flattened_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cumulative_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/wfcompress.html#nda_to_vect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.wfcompress.nda_to_vect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pygama.io.wfcompress.vect_to_nda">
+<code class="sig-prename descclassname"><span class="pre">pygama.io.wfcompress.</span></code><code class="sig-name descname"><span class="pre">vect_to_nda</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flattened_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cumulative_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nda</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/wfcompress.html#vect_to_nda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.wfcompress.vect_to_nda" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pygama.io">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pygama.io" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="pygama.lh5.html" class="btn btn-neutral float-right" title="pygama.lh5 package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pygama.dsp.html" class="btn btn-neutral float-left" title="pygama.dsp package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,809 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.dsp.ProcessingChain &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.dsp.ProcessingChain</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.dsp.ProcessingChain</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">itertools</span> <span class="k">as</span> <span class="nn">it</span>
+<span class="kn">from</span> <span class="nn">scimath.units</span> <span class="kn">import</span> <span class="n">convert</span>
+<span class="kn">from</span> <span class="nn">scimath.units.api</span> <span class="kn">import</span> <span class="n">unit_parser</span>
+<span class="kn">from</span> <span class="nn">scimath.units.unit</span> <span class="kn">import</span> <span class="n">unit</span>
+
+<span class="kn">from</span> <span class="nn">pygama.dsp.units</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">ast_ops_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">ast</span><span class="o">.</span><span class="n">Add</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Sub</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Mult</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">,</span>
+                <span class="n">ast</span><span class="o">.</span><span class="n">Div</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">FloorDiv</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floor_divide</span><span class="p">,</span>
+                <span class="n">ast</span><span class="o">.</span><span class="n">USub</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">negative</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="ProcessingChain"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain">[docs]</a><span class="k">class</span> <span class="nc">ProcessingChain</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A ProcessingChain is used to efficiently perform a sequence of digital</span>
+<span class="sd">    signal processing (dsp) transforms. It contains a list of dsp functions and</span>
+<span class="sd">    a set of constant values and named variables contained in fixed memory</span>
+<span class="sd">    locations. When executing the ProcessingChain, processors will act on the</span>
+<span class="sd">    internal memory without allocating new memory in the process. Furthermore,</span>
+<span class="sd">    the memory is allocated in blocks, enabling vectorized processing of many</span>
+<span class="sd">    entries at once. To set up a ProcessingChain, use the following methods:</span>
+<span class="sd">    1) add_input_buffer: bind a named variable to an external numpy array to</span>
+<span class="sd">         read data from</span>
+<span class="sd">    2) add_processor: add a dsp function and bind its inputs to a set of named</span>
+<span class="sd">         variables and constant values</span>
+<span class="sd">    3) add_output_buffer: bind a named variable to an external numpy array to</span>
+<span class="sd">         write data into</span>
+<span class="sd">    When calling these methods, the ProcessingChain class will use available</span>
+<span class="sd">    information to allocate buffers to the correct sizes and data types. For</span>
+<span class="sd">    this reason, transforms will ideally implement the numpy ufunc class,</span>
+<span class="sd">    enabling broadcasting of array dimensions. If not enough information is</span>
+<span class="sd">    available to correctly allocate memory, it can be provided through the</span>
+<span class="sd">    named variable strings or by calling add_vector or add_scalar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block_width</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">buffer_len</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clock_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Named arguments:</span>
+<span class="sd">        - block_width: number of entries to simultaneously process.</span>
+<span class="sd">        - buffer_len: length of input and output buffers. Should be a multiple</span>
+<span class="sd">            of block_width</span>
+<span class="sd">        - clock_unit: period or frequency of the clock for all waveforms.</span>
+<span class="sd">            constant values with time units will be converted to this unit.</span>
+<span class="sd">        - verbosity: integer indicating the verbosity level:</span>
+<span class="sd">            0: Print nothing (except errors...)</span>
+<span class="sd">            1: Print basic warnings (default)</span>
+<span class="sd">            2: Print basic debug info</span>
+<span class="sd">            3: Print friggin&#39; everything!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Dictionary with numpy arrays containing input and output variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vars_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Ordered list of processors and a tuple containing the bound parameters</span>
+        <span class="c1"># as either constants or variables from vars_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proc_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proc_strs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># lists of tuple pairs of external buffers and internal buffers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__input_buffers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># strings of input transforms and variable names for printings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__output_buffers</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_block_width</span> <span class="o">=</span> <span class="n">block_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span> <span class="o">=</span> <span class="n">buffer_len</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clk</span> <span class="o">=</span> <span class="n">clock_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbosity</span> <span class="o">=</span> <span class="n">verbosity</span>
+        
+        
+<div class="viewcode-block" id="ProcessingChain.add_waveform"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.add_waveform">[docs]</a>    <span class="k">def</span> <span class="nf">add_waveform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add named variable containing a waveform block with fixed type and length&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__add_variable</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_width</span><span class="p">,</span> <span class="n">length</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ProcessingChain.add_scalar"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.add_scalar">[docs]</a>    <span class="k">def</span> <span class="nf">add_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add named variable containing a scalar block with fixed type&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__add_variable</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_width</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ProcessingChain.add_input_buffer"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.add_input_buffer">[docs]</a>    <span class="k">def</span> <span class="nf">add_input_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_len</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Link an input buffer to a variable. The buffer should be a numpy</span>
+<span class="sd">        ndarray with length that is a multiple of the buffer length, the block</span>
+<span class="sd">        width, and the named variable length. If any of these are unknown we</span>
+<span class="sd">        will try to deduce the right lengths. varname can be of the form:</span>
+<span class="sd">          &quot;varname(length, type)[range]&quot;</span>
+<span class="sd">        The optional (length, type) field is used to initialize a new variable.</span>
+<span class="sd">        The optional [range] field copies from the buffer into a subrange of the</span>
+<span class="sd">        array.</span>
+
+<span class="sd">        Optional keyword args:</span>
+<span class="sd">        - buffer_len: number of entries in buffer. This is needed if we cannot</span>
+<span class="sd">          figure it out from the shape (i.e. multi-dimensional buffer fed as</span>
+<span class="sd">          a one-dimensional array)</span>
+<span class="sd">        - dtype: data type used for the variable. Use this if the variable is</span>
+<span class="sd">          automatically allocated here, but with a different type from buff</span>
+<span class="sd">        - unit specifies a unit to convert the input from. Unit must have same type as clk, or be a ratio to multiply the input by</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__add_io_buffer</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">buffer_len</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProcessingChain.get_input_buffer"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.get_input_buffer">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_len</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the input buffer associated with varname. If there is no such</span>
+<span class="sd">        buffer, create one with a shape compatible with the input variable and</span>
+<span class="sd">        return it. The input varname has the form:</span>
+<span class="sd">          &quot;varname(length, type)[range]&quot;</span>
+<span class="sd">        The optional (length, type) field is used to initialize a new variable.</span>
+<span class="sd">        The optional [range] field copies a subrange of the named array into the</span>
+<span class="sd">        output buffer.</span>
+
+<span class="sd">        Optional keyword arguments:</span>
+<span class="sd">        - dtype can be used to specify the numpy data type of the buffer if it</span>
+<span class="sd">          should differ from that held in varname</span>
+<span class="sd">        - buffer_len specifies the buffer length, if it has not already been set</span>
+<span class="sd">        - unit specifies a unit to convert the input from. Unit must have same type as clk, or be a ratio to multiply the input by</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;(\w+)&#39;</span><span class="p">,</span> <span class="n">varname</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__input_buffers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__add_io_buffer</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">buffer_len</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__input_buffers</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ProcessingChain.add_output_buffer"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.add_output_buffer">[docs]</a>    <span class="k">def</span> <span class="nf">add_output_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_len</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Link an output buffer to a variable. The buffer should be a numpy</span>
+<span class="sd">        ndarray with length that is a multiple of the buffer length, the block</span>
+<span class="sd">        width, and the named variable length. If any of these are unknown we</span>
+<span class="sd">        will try to deduce the right lengths. varname can be of the form:</span>
+<span class="sd">          &quot;varname(length, type)[range]&quot;</span>
+<span class="sd">        The optional (length, type) field is used to initialize a new variable.</span>
+<span class="sd">        The optional [range] field copies a subrange of the named array into the</span>
+<span class="sd">        output buffer.</span>
+
+<span class="sd">        Optional keyword args:</span>
+<span class="sd">        - buffer_len: number of entries in buffer. This is needed if we cannot</span>
+<span class="sd">          figure it out from the shape (i.e. multi-dimensional buffer fed as</span>
+<span class="sd">          a one-dimensional array)</span>
+<span class="sd">        - dtype: data type used for the variable. Use this if the variable is</span>
+<span class="sd">          automatically allocated here, but with a different type from buff</span>
+<span class="sd">        - unit specifies a unit to convert the output into. Unit must have same type as clk, or be a ratio to divide the output by</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__add_io_buffer</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">buffer_len</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProcessingChain.get_output_buffer"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.get_output_buffer">[docs]</a>    <span class="k">def</span> <span class="nf">get_output_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer_len</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the output buffer associated with varname. If there is no such</span>
+<span class="sd">        buffer, create one with a shape compatible with the input variable and</span>
+<span class="sd">        return it. The input varname has the form:</span>
+<span class="sd">          &quot;varname(length, type)[range]&quot;</span>
+<span class="sd">        The optional (length, type) field is used to initialize a new variable.</span>
+<span class="sd">        The optional [range] field copies a subrange of the named array into the</span>
+<span class="sd">        output buffer.</span>
+
+<span class="sd">        Optional keyword arguments:</span>
+<span class="sd">        - dtype can be used to specify the numpy data type of the buffer if it</span>
+<span class="sd">          should differ from that held in varname</span>
+<span class="sd">        - buffer_len specifies the buffer length, if it has not already been set</span>
+<span class="sd">        - unit specifies a unit to convert the output into. Unit must have same type as clk, or be a ratio to divide the output by</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;(\w+)&#39;</span><span class="p">,</span> <span class="n">varname</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output_buffers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__add_io_buffer</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">buffer_len</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output_buffers</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ProcessingChain.add_processor"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.add_processor">[docs]</a>    <span class="k">def</span> <span class="nf">add_processor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new processor and bind it to a set of parameters.</span>
+<span class="sd">        - func should be a function implementing the numpy ufunc class. If not,</span>
+<span class="sd">          then the signature and types keyword arguments will be necessary.</span>
+<span class="sd">        - args is a list of names and constants. The names link to internal</span>
+<span class="sd">          numpy array variables that will be bound to the function. Names can</span>
+<span class="sd">          be given in the form:</span>
+<span class="sd">            &quot;varname(length, type)[range]&quot;</span>
+<span class="sd">          The optional (length, type) field is used to initialize a new variable</span>
+<span class="sd">          if necessary. The optional [range] field copies binds only a subrange</span>
+<span class="sd">          of the array to the function. Non-string constant values will be</span>
+<span class="sd">          converted to the right type and bound to the function. Constants with</span>
+<span class="sd">          scimath time units will be converted to the internal clock unit.</span>
+<span class="sd">        - keyword arguments include:</span>
+<span class="sd">          - signature: broadcasting signature for a ufunc. By default, use</span>
+<span class="sd">            func.signature</span>
+<span class="sd">          - types: a list of strings defining the types of arrays needed for</span>
+<span class="sd">            the func. By default, use func.types</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the signature and list of valid types for the function</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;signature&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">signature</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span> <span class="n">signature</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">signature</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">signature</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">signature</span> <span class="o">=</span> <span class="s1">&#39;-&gt;&#39;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">nin</span><span class="p">):</span> <span class="n">signature</span> <span class="o">=</span> <span class="s1">&#39;,()&#39;</span><span class="o">+</span><span class="n">signature</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">nout</span><span class="p">):</span> <span class="n">signature</span> <span class="o">=</span> <span class="n">signature</span><span class="o">+</span><span class="s1">&#39;(),&#39;</span>
+            <span class="n">signature</span> <span class="o">=</span> <span class="n">signature</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+        <span class="n">types</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;types&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">types</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span> <span class="n">types</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">types</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Could not find a type signature list for &quot;</span> <span class="o">+</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;. Please supply a valid list of types.&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">typestr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">types</span><span class="p">):</span>
+            <span class="n">types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">typestr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># make a list of parameters from *args. Replace any strings in the list</span>
+        <span class="c1"># with numpy objects from vars_dict, where able</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                <span class="n">param_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">param_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">param</span><span class="o">=</span><span class="n">param_val</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="c1"># Make sure arrays obey the broadcasting rules, and make a dictionary</span>
+        <span class="c1"># of the correct dimensions</span>
+        <span class="n">dims_list</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;\((.*?)\)&quot;</span><span class="p">,</span> <span class="n">signature</span><span class="p">)</span>
+        <span class="n">dims_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">outerdims</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># print(&#39;\nsetting param:&#39;, params[-1])</span>
+        <span class="c1"># print(&#39;dims list is:&#39;, dims_list)</span>
+        <span class="k">for</span> <span class="n">ipar</span><span class="p">,</span> <span class="n">dims</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dims_list</span><span class="p">):</span>
+            <span class="c1"># print(ipar, dims, params[ipar])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">ipar</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">fun_dims</span> <span class="o">=</span> <span class="n">outerdims</span> <span class="o">+</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span><span class="p">]</span>
+            <span class="n">arr_dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">ipar</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="c1">#check if arr_dims can be broadcast to match fun_dims</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fun_dims</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr_dims</span><span class="p">))):</span>
+                <span class="n">fd</span> <span class="o">=</span> <span class="n">fun_dims</span><span class="p">[</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">fun_dims</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">ad</span> <span class="o">=</span> <span class="n">arr_dims</span><span class="p">[</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">arr_dims</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                    <span class="c1"># Define the dimension or make sure it is consistent</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">ad</span> <span class="ow">or</span> <span class="n">dims_dict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">ad</span><span class="p">)</span><span class="o">!=</span><span class="n">ad</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Failed to broadcast array dimensions for &quot;</span><span class="o">+</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="o">+</span><span class="s2">&quot;. Could not find consistent value for dimension &quot;</span><span class="o">+</span><span class="n">fd</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">fd</span><span class="p">:</span>
+                    <span class="c1"># if we ran out of function dimensions, add a new outer dim</span>
+                    <span class="n">outerdims</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ad</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">ad</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="n">fd</span> <span class="o">!=</span> <span class="n">ad</span><span class="p">:</span>
+                    <span class="c1"># If dimensions disagree, either insert a broadcasted array dimension or raise an exception</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fun_dims</span><span class="p">)</span><span class="o">&gt;</span><span class="nb">len</span><span class="p">(</span><span class="n">arr_dims</span><span class="p">):</span>
+                        <span class="n">arr_dims</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr_dims</span><span class="p">)</span><span class="o">-</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">fun_dims</span><span class="p">)</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">arr_dims</span><span class="p">):</span>
+                        <span class="n">outerdims</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fun_dims</span><span class="p">)</span><span class="o">-</span><span class="n">i</span><span class="p">,</span> <span class="n">ad</span><span class="p">)</span>
+                        <span class="n">fun_dims</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fun_dims</span><span class="p">)</span><span class="o">-</span><span class="n">i</span><span class="p">,</span> <span class="n">ad</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Failed to broadcast array dimensions for &quot;</span><span class="o">+</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="o">+</span><span class="s2">&quot;. Input arrays do not have consistent outer dimensions.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># find type signatures that match type of array</span>
+            <span class="n">arr_type</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">ipar</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">char</span>
+            <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">type_sig</span> <span class="k">for</span> <span class="n">type_sig</span> <span class="ow">in</span> <span class="n">types</span> <span class="k">if</span> <span class="n">arr_type</span><span class="o">==</span><span class="n">type_sig</span><span class="p">[</span><span class="n">ipar</span><span class="p">]]</span>
+
+        <span class="c1"># Get the type signature we are using</span>
+        <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">types</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Could not find a type signature matching the types of the variables given for &quot;</span> <span class="o">+</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">types</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Found multiple compatible type signatures for this function:&quot;</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="s2">&quot;Using signature &quot;</span> <span class="o">+</span> <span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+        <span class="c1"># Reshape variable arrays to add broadcast dimensions and allocate new arrays as needed</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)),</span> <span class="n">params</span><span class="p">,</span> <span class="n">dims_list</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">outerdims</span> <span class="o">+</span> <span class="p">[</span><span class="n">dims_dict</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__add_var</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">arshape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">idim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">arshape</span><span class="p">[</span><span class="n">idim</span><span class="p">]</span><span class="o">!=</span><span class="n">shape</span><span class="p">[</span><span class="n">idim</span><span class="p">]:</span>
+                        <span class="n">arshape</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arshape</span><span class="p">)</span><span class="o">+</span><span class="n">idim</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">arshape</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+                    <span class="n">param</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clk</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+                    <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">param</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="c1"># Make strings of input variables/constants for later printing</span>
+        <span class="n">proc_strs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">proc_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">proc_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">proc_strs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">proc_strs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Added processor: &#39;</span> <span class="o">+</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">proc_strs</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Add the function and bound parameters to the list of processors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proc_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">params</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proc_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proc_strs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ProcessingChain.execute"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute the dsp chain on the entire input/output buffers&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span>
+        <span class="k">for</span> <span class="n">begin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_width</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">execute_block</span><span class="p">(</span><span class="n">begin</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProcessingChain.execute_block"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.execute_block">[docs]</a>    <span class="k">def</span> <span class="nf">execute_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute the dsp chain on a sub-set of the input/output buffers</span>
+<span class="sd">        starting at entry offset, with length equal to the internal block size.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">offset</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbosity</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__execute_procs</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__execute_procs_verbose</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProcessingChain.get_variable"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.ProcessingChain.ProcessingChain.get_variable">[docs]</a>    <span class="k">def</span> <span class="nf">get_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the numpy array holding the internal memory buffer used for a</span>
+<span class="sd">        named variable. The varname has the format</span>
+<span class="sd">          &quot;varname(length, type)[range]&quot;</span>
+<span class="sd">        The optional (length, type) field is used to initialize a new variable</span>
+<span class="sd">        if necessary. The optional [range] field fetches only a subrange</span>
+<span class="sd">        of the array to the function.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;eval&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">body</span><span class="p">)</span></div>
+
+    
+    <span class="k">def</span> <span class="nf">__parse_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        helper function for get_variable that recursively evaluates the AST tree</span>
+<span class="sd">        based on: https://stackoverflow.com/a/9558001.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Num</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">node</span><span class="o">.</span><span class="n">n</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">node</span><span class="o">.</span><span class="n">s</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Constant</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">node</span><span class="o">.</span><span class="n">val</span>
+
+        <span class="c1"># look for name in variable dictionary</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">):</span>
+            <span class="c1"># check if it is a unit</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">unit_parser</span><span class="o">.</span><span class="n">parse_unit</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clk</span><span class="p">)</span>
+
+            <span class="c1">#check if it is a variable</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vars_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">val</span>
+
+        <span class="c1"># define binary operators (+,-,*,/)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BinOp</span><span class="p">):</span>
+            <span class="n">lhs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+            <span class="n">rhs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="n">ast_ops_dict</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">rhs</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+                        <span class="n">lhs</span> <span class="o">=</span> <span class="n">rhs</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">lhs</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">lhs</span> <span class="o">=</span> <span class="n">rhs</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">lhs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">lhs</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+                        <span class="n">rhs</span> <span class="o">=</span> <span class="n">lhs</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">rhs</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">rhs</span> <span class="o">=</span> <span class="n">lhs</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">op</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__proc_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">op</span><span class="p">,</span> <span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">,</span> <span class="n">out</span><span class="p">)))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__proc_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Binary operator: &quot;</span> <span class="o">+</span> <span class="n">op</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">out</span>
+            <span class="k">return</span> <span class="n">op</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">)</span>
+
+        <span class="c1"># define unary operators (-)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">UnaryOp</span><span class="p">):</span>
+            <span class="n">operand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">operand</span><span class="p">)</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="n">ast_ops_dict</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="p">)]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">op</span><span class="p">(</span><span class="n">operand</span><span class="p">)</span>
+            <span class="c1"># if we have a np array, add to processor list</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__proc_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">op</span><span class="p">,</span> <span class="p">(</span><span class="n">operand</span><span class="p">,</span> <span class="n">out</span><span class="p">)))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__proc_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Unary operator: &quot;</span> <span class="o">+</span> <span class="n">op</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">out</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Subscript</span><span class="p">):</span>
+            <span class="c1"># print(ast.dump(node))</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Index</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">val</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">value</span><span class="p">)]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">val</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">value</span><span class="p">)]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Slice</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">val</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">lower</span><span class="p">),</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">upper</span><span class="p">),</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">step</span><span class="p">)</span> <span class="p">)]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">upper</span><span class="p">))</span>
+                    <span class="k">return</span> <span class="n">val</span><span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">upper</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">lower</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">step</span><span class="p">))]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">ExtSlice</span><span class="p">):</span>
+                <span class="n">slices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">slice</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slices</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+                        <span class="n">slices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">slices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">upper</span><span class="p">),</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">lower</span><span class="p">),</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">step</span><span class="p">)</span> <span class="p">)</span>
+                <span class="k">return</span> <span class="n">val</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">slices</span><span class="p">]</span>
+
+        <span class="c1"># for name.attribute</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Attribute</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="c1"># get shape with buffer_len dimension removed</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">attr</span><span class="o">==</span><span class="s1">&#39;shape&#39;</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="c1"># for func([args])</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">):</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">id</span>
+            <span class="c1"># get length of 1D array variable</span>
+            <span class="k">if</span> <span class="n">func</span><span class="o">==</span><span class="s2">&quot;len&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">):</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;len(): &quot;</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;has wrong number of dims&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">func</span><span class="o">==</span><span class="s2">&quot;round&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
+            <span class="c1"># if this is a valid call to construct a new array, do so; otherwise raise an exception</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__parse_expr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)):</span>
+                        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_width</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_width</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="n">shape</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Do not recognize call to &quot;</span><span class="o">+</span><span class="n">func</span><span class="o">+</span><span class="s2">&quot; with arguments of types &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="vm">__dict__</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">]))</span>
+                    <span class="k">try</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Do not recognize call to &quot;</span><span class="o">+</span><span class="n">func</span><span class="o">+</span><span class="s2">&quot; with arguments of types &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="vm">__dict__</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">]))</span>
+
+                    <span class="k">if</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vars_dict</span><span class="p">:</span>
+                        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vars_dict</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="n">shape</span> <span class="ow">and</span> <span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">==</span><span class="n">dtype</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Requested shape and type for &quot;</span> <span class="o">+</span> <span class="n">func</span> <span class="o">+</span> <span class="s2">&quot; do not match existing values&quot;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">var</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__vars_dict</span><span class="p">[</span><span class="n">func</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Added variable &#39;</span> <span class="o">+</span> <span class="n">func</span> <span class="o">+</span> <span class="s1">&#39; with shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; and type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">))</span>
+
+                        <span class="k">return</span> <span class="n">var</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Do not recognize call to &quot;</span><span class="o">+</span><span class="n">func</span><span class="o">+</span><span class="s2">&quot; with arguments &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">]))</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot parse AST nodes of type &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">__add_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an array of zeros to the vars dict called name and return it</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;\A\w+$&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39; is not a valid alphanumeric name&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vars_dict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39; is already in variable list&#39;</span><span class="p">)</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vars_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Added variable &#39;</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;(\w+)&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; and type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">arr</span>
+
+
+    <span class="k">def</span> <span class="nf">__execute_procs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        copy from input buffers to variables</span>
+<span class="sd">        call all the processors on their paired arg tuples</span>
+<span class="sd">        copy from variables to list of output buffers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">buf</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">scale</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__input_buffers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">scale</span><span class="p">,</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">buf</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="s1">&#39;unsafe&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">args</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proc_list</span><span class="p">:</span>
+            <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">buf</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">scale</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output_buffers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">scale</span><span class="p">,</span> <span class="n">buf</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="s1">&#39;unsafe&#39;</span><span class="p">)</span>
+
+    
+    <span class="k">def</span> <span class="nf">__execute_procs_verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        verbose version of __execute_procs. This is probably overkill, but it</span>
+<span class="sd">        was done to minimize python calls in the non-verbose version</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__vars_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Input:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__input_buffers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">scale</span><span class="p">,</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">buf</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="s1">&#39;unsafe&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s1">&#39; = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Processing:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="n">strs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proc_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proc_strs</span><span class="p">):</span>
+            <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">strs</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">strs</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s1">&#39; = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Output:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output_buffers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">scale</span><span class="p">,</span> <span class="n">buf</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="s1">&#39;unsafe&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s1">&#39; = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
+
+    
+    <span class="k">def</span> <span class="nf">__add_io_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">buffer_len</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        append a tuple with the buffer and variable to either the input buffer</span>
+<span class="sd">        list (if input=true) or output buffer list (if input=false), making sure</span>
+<span class="sd">        that buffer shapes are compatible</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">buff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Buffers must be ndarrays.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># if buffer length is not defined, figure out what it should be</span>
+        <span class="k">if</span> <span class="n">buffer_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span> <span class="o">=</span> <span class="n">buffer_len</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span> <span class="o">!=</span> <span class="n">buffer_len</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Buffer length was already set to a number different than the one provided. To change the buffer length, you must reset the buffers.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">buff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span> <span class="o">=</span> <span class="n">buff</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_width</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Setting i/o buffer length to &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span><span class="p">))</span>
+
+        <span class="c1"># if a unit is given, convert it to a scaling factor</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clk</span><span class="p">)</span>
+
+        <span class="c1"># if no buffer was provided, make one</span>
+        <span class="n">returnbuffer</span><span class="o">=</span><span class="kc">False</span>
+        <span class="k">if</span> <span class="n">buff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot make buffer for non-existent variable &quot;</span> <span class="o">+</span> <span class="n">varname</span><span class="p">)</span>
+            <span class="c1"># deduce dtype. If scale is used, force float type</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dtype</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">scale</span><span class="p">:</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="o">*</span><span class="mi">8</span><span class="p">))</span>
+            <span class="n">buff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span><span class="p">,)</span><span class="o">+</span><span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="p">)</span>
+            <span class="n">returnbuffer</span><span class="o">=</span><span class="kc">True</span>
+
+        <span class="c1"># Check that the buffer length is correct. For 1D buffer, reshape</span>
+        <span class="c1"># it if possible, assuming array of structure ordering</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">buff</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">buff</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">buff</span><span class="p">)</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">buff</span> <span class="o">=</span> <span class="n">buff</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buff</span><span class="p">)</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_len</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Buffer provided for &quot;</span> <span class="o">+</span> <span class="n">varname</span> <span class="o">+</span> <span class="s2">&quot; is the wrong length.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check that shape of buffer is compatible with shape of variable.</span>
+        <span class="c1"># If variable does not yet exist, add it here</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">scale</span><span class="p">:</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">buff</span><span class="o">.</span><span class="n">dtype</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">buff</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="o">*</span><span class="mi">8</span><span class="p">))</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__add_var</span><span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_width</span><span class="p">,)</span><span class="o">+</span><span class="n">buff</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">elif</span> <span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="n">buff</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided buffer has shape &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">buff</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; which is not compatible with &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; shape &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="n">varname</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;(\w+)&#39;</span><span class="p">,</span> <span class="n">varname</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">input</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__input_buffers</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Binding input buffer of shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">buff</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; and type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">buff</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; to variable &#39;</span> <span class="o">+</span> <span class="n">varname</span> <span class="o">+</span> <span class="s1">&#39; with shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; and type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__output_buffers</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__print</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Binding output buffer of shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">buff</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; and type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">buff</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; to variable &#39;</span> <span class="o">+</span> <span class="n">varname</span> <span class="o">+</span> <span class="s1">&#39; with shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; and type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">returnbuffer</span><span class="p">:</span> <span class="k">return</span> <span class="n">buff</span>
+
+
+    <span class="k">def</span> <span class="nf">__print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbosity</span> <span class="o">&gt;=</span> <span class="n">verbosity</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s1">&#39;Input variables: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__input_buffers</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
+        <span class="k">for</span> <span class="n">proc</span><span class="p">,</span> <span class="n">strs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proc_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proc_strs</span><span class="p">):</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">proc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">strs</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Output variables: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output_buffers</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
+        <span class="k">return</span> <span class="n">ret</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

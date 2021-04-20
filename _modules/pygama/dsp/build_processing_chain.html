@@ -1,0 +1,451 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.dsp.build_processing_chain &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.dsp.build_processing_chain</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.dsp.build_processing_chain</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">from</span> <span class="nn">pygama.dsp.ProcessingChain</span> <span class="kn">import</span> <span class="n">ProcessingChain</span>
+<span class="kn">from</span> <span class="nn">pygama.dsp.units</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pygama</span> <span class="kn">import</span> <span class="n">lh5</span>
+
+
+<div class="viewcode-block" id="build_processing_chain"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.build_processing_chain.build_processing_chain">[docs]</a><span class="k">def</span> <span class="nf">build_processing_chain</span><span class="p">(</span><span class="n">lh5_in</span><span class="p">,</span> <span class="n">dsp_config</span><span class="p">,</span> <span class="n">db_dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">outputs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">block_width</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Produces a ProcessingChain object and an lh5 table for output parameters</span>
+<span class="sd">    from an input lh5 table and a json recipe.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns (proc_chain, lh5_out):</span>
+<span class="sd">    - proc_chain: ProcessingChain object that is bound to lh5_in and lh5_out;</span>
+<span class="sd">      all you need to do is handle file i/o for lh5_in/out and run execute</span>
+<span class="sd">    - lh5_out: output LH5 table</span>
+<span class="sd">    </span>
+<span class="sd">    Required arguments:</span>
+<span class="sd">    - lh5_in: input LH5 table</span>
+<span class="sd">    - config: dict or name of json file containing a recipe for</span>
+<span class="sd">      constructing the ProcessingChain object produced by this function.</span>
+<span class="sd">      config is formated as a json dict with different processors. Config</span>
+<span class="sd">      should have a dictionary called processors, containing dictionaries</span>
+<span class="sd">      of the following format:</span>
+<span class="sd">        Key: parameter name: name of parameter produced by the processor.</span>
+<span class="sd">             can optionally provide multiple, separated by spaces</span>
+<span class="sd">        Values:</span>
+<span class="sd">          processor (req): name of gufunc</span>
+<span class="sd">          module (req): name of module in which to find processor</span>
+<span class="sd">          prereqs (req): name of parameters from other processors and from </span>
+<span class="sd">            input that are required to exist to run this</span>
+<span class="sd">          args (req): list of arguments for processor, with variables passed</span>
+<span class="sd">            by name or value. Names should either be inputs from lh5_in, or</span>
+<span class="sd">            parameter names for other processors. Names of the format db.name</span>
+<span class="sd">            will look up the parameter in the metadata. </span>
+<span class="sd">          kwargs (opt): kwargs used when adding processors to proc_chain</span>
+<span class="sd">          init_args (opt): args used when initializing a processor that has</span>
+<span class="sd">            static data (for factory functions)</span>
+<span class="sd">          default (opt): default value for db parameters if not found</span>
+<span class="sd">          unit (opt): unit to be used for attr in lh5 file.</span>
+<span class="sd">      There may also be a list called &#39;outputs&#39;, containing a list of parameters</span>
+<span class="sd">      to put into lh5_out.</span>
+<span class="sd">    </span>
+<span class="sd">    Optional keyword arguments:</span>
+<span class="sd">    - outputs: list of parameters to put in the output lh5 table. If None,</span>
+<span class="sd">      use the parameters in the &#39;outputs&#39; list from config</span>
+<span class="sd">    - db_dict: a nested dict pointing to values for db args.</span>
+<span class="sd">      e.g. if a processor uses arg db.trap.risetime, it will look up</span>
+<span class="sd">          db_dict[&#39;trap&#39;][&#39;risetime&#39;]</span>
+<span class="sd">      and use the found value. If no value is found, use the default defined</span>
+<span class="sd">      in the config file.</span>
+<span class="sd">    - verbosity: verbosity level:</span>
+<span class="sd">            0: Print nothing (except errors...)</span>
+<span class="sd">            1: Print basic warnings (default)</span>
+<span class="sd">            2: Print basic debug info</span>
+<span class="sd">            3: Print friggin&#39; everything!    </span>
+<span class="sd">    - block_width: number of entries to process at once.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dsp_config</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dsp_config</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">dsp_config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">dsp_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dsp_config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;outputs&#39;</span><span class="p">:[],</span> <span class="s1">&#39;processors&#39;</span><span class="p">:{}}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># We don&#39;t want to modify the input!</span>
+        <span class="n">dsp_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dsp_config</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">outputs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">dsp_config</span><span class="p">[</span><span class="s1">&#39;outputs&#39;</span><span class="p">]</span>
+
+    <span class="n">processors</span> <span class="o">=</span> <span class="n">dsp_config</span><span class="p">[</span><span class="s1">&#39;processors&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># for processors with multiple outputs, add separate entries to the processor list</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">processors</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,| &quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">processors</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
+    
+    <span class="c1"># Recursive function to crawl through the parameters/processors and get</span>
+    <span class="c1"># a sequence of unique parameters such that parameters always appear after</span>
+    <span class="c1"># their dependencies. For parameters that are not produced by the ProcChain</span>
+    <span class="c1"># (i.e. input/db parameters), add them to the list of leafs</span>
+    <span class="c1"># https://www.electricmonk.nl/docs/dependency_resolving_algorithm/dependency_resolving_algorithm.html</span>
+    <span class="k">def</span> <span class="nf">resolve_dependencies</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">resolved</span><span class="p">,</span> <span class="n">leafs</span><span class="p">,</span> <span class="n">unresolved</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="k">if</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">resolved</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">unresolved</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Circular references detected: </span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">edge</span><span class="p">))</span>
+
+        <span class="c1"># if we don&#39;t find a node, this is a leaf</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">processors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">par</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">leafs</span><span class="p">:</span>
+                <span class="n">leafs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># if it&#39;s a string, that means it is part of a processor that returns multiple outputs (see above); in that case, node is a str pointing to the actual node we want</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">resolve_dependencies</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">resolved</span><span class="p">,</span> <span class="n">leafs</span><span class="p">,</span> <span class="n">unresolved</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;prereqs&#39;</span><span class="p">]</span>
+        <span class="n">unresolved</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+            <span class="n">resolve_dependencies</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">resolved</span><span class="p">,</span> <span class="n">leafs</span><span class="p">,</span> <span class="n">unresolved</span><span class="p">)</span>
+        <span class="n">resolved</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+        <span class="n">unresolved</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+
+    <span class="n">proc_par_list</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># calculated from processors</span>
+    <span class="n">input_par_list</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># input from file and used for processors</span>
+    <span class="n">copy_par_list</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># copied from input to output</span>
+    <span class="n">out_par_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">out_par</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">out_par</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processors</span><span class="p">:</span>
+            <span class="n">copy_par_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_par</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resolve_dependencies</span><span class="p">(</span><span class="n">out_par</span><span class="p">,</span> <span class="n">proc_par_list</span><span class="p">,</span> <span class="n">input_par_list</span><span class="p">)</span>
+            <span class="n">out_par_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_par</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbosity</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing parameters:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">proc_par_list</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Required input parameters:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_par_list</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Copied output parameters:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">copy_par_list</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processed output parameters:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_par_list</span><span class="p">))</span>
+        
+    <span class="n">proc_chain</span> <span class="o">=</span> <span class="n">ProcessingChain</span><span class="p">(</span><span class="n">block_width</span><span class="p">,</span> <span class="n">lh5_in</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">verbosity</span> <span class="o">=</span> <span class="n">verbosity</span><span class="p">)</span>
+    
+    <span class="c1"># Now add all of the input buffers from lh5_in (and also the clk time)</span>
+    <span class="k">for</span> <span class="n">input_par</span> <span class="ow">in</span> <span class="n">input_par_list</span><span class="p">:</span>
+        <span class="n">buf_in</span> <span class="o">=</span> <span class="n">lh5_in</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">input_par</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">buf_in</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I don&#39;t know what to do with &quot;</span> <span class="o">+</span> <span class="n">input_par</span> <span class="o">+</span> <span class="s2">&quot;. Building output without it!&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buf_in</span><span class="p">,</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
+            <span class="n">proc_chain</span><span class="o">.</span><span class="n">add_input_buffer</span><span class="p">(</span><span class="n">input_par</span><span class="p">,</span> <span class="n">buf_in</span><span class="o">.</span><span class="n">nda</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buf_in</span><span class="p">,</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Table</span><span class="p">):</span>
+            <span class="c1"># check if this is waveform</span>
+            <span class="k">if</span> <span class="s1">&#39;t0&#39;</span> <span class="ow">and</span> <span class="s1">&#39;dt&#39;</span> <span class="ow">and</span> <span class="s1">&#39;values&#39;</span> <span class="ow">in</span> <span class="n">buf_in</span><span class="p">:</span>
+                <span class="n">proc_chain</span><span class="o">.</span><span class="n">add_input_buffer</span><span class="p">(</span><span class="n">input_par</span><span class="p">,</span> <span class="n">buf_in</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+                <span class="n">clk</span> <span class="o">=</span> <span class="n">buf_in</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">unit_parser</span><span class="o">.</span><span class="n">parse_unit</span><span class="p">(</span><span class="n">lh5_in</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span> <span class="o">!=</span> <span class="n">clk</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Somehow you managed to set multiple clock frequencies...Using &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span> <span class="o">=</span> <span class="n">clk</span>
+
+    <span class="c1"># now add the processors</span>
+    <span class="k">for</span> <span class="n">proc_par</span> <span class="ow">in</span> <span class="n">proc_par_list</span><span class="p">:</span>
+        <span class="n">recipe</span> <span class="o">=</span> <span class="n">processors</span><span class="p">[</span><span class="n">proc_par</span><span class="p">]</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">])</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;function&#39;</span><span class="p">])</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;db.&#39;</span><span class="p">:</span>
+                <span class="n">lookup_path</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">node</span> <span class="o">=</span> <span class="n">db_dict</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">lookup_path</span><span class="p">:</span>
+                        <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+                    <span class="k">if</span><span class="p">(</span><span class="n">verbosity</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database lookup: found&quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="s2">&quot;for&quot;</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;defaults&#39;</span><span class="p">][</span><span class="n">arg</span><span class="p">]</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">verbosity</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database lookup: using default value of&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;for&quot;</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Did not find&#39;</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="s1">&#39;in database, and could not find default value.&#39;</span><span class="p">)</span>
+            
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">recipe</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kwargs&#39;</span><span class="p">,</span> <span class="p">{})</span> <span class="c1"># might also need db lookup here</span>
+        <span class="c1"># if init_args are defined, parse any strings and then call func</span>
+        <span class="c1"># as a factory/constructor function</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">init_args</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;init_args&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">init_args</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;db.&#39;</span><span class="p">:</span>
+                    <span class="n">lookup_path</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">node</span> <span class="o">=</span> <span class="n">db_dict</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">lookup_path</span><span class="p">:</span>
+                            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="n">init_args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">verbosity</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database lookup: found&quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="s2">&quot;for&quot;</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">init_args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;defaults&#39;</span><span class="p">][</span><span class="n">arg</span><span class="p">]</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">verbosity</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database lookup: using default value of&quot;</span><span class="p">,</span> <span class="n">init_args</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;for&quot;</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Did not find&#39;</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="s1">&#39;in database, and could not find default value.&#39;</span><span class="p">)</span>
+                    <span class="n">arg</span> <span class="o">=</span> <span class="n">init_args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                <span class="c1"># see if string can be parsed by proc_chain</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">init_args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">proc_chain</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    
+            <span class="k">if</span><span class="p">(</span><span class="n">verbosity</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Building function&quot;</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;from init_args&quot;</span><span class="p">,</span> <span class="n">init_args</span><span class="p">)</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">init_args</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">proc_chain</span><span class="o">.</span><span class="n">add_processor</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    
+    <span class="c1"># build the output buffers</span>
+    <span class="n">lh5_out</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">proc_chain</span><span class="o">.</span><span class="n">_buffer_len</span><span class="p">)</span>
+    
+    <span class="c1"># add inputs that are directly copied</span>
+    <span class="k">for</span> <span class="n">copy_par</span> <span class="ow">in</span> <span class="n">copy_par_list</span><span class="p">:</span>
+        <span class="n">buf_in</span> <span class="o">=</span> <span class="n">lh5_in</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">copy_par</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buf_in</span><span class="p">,</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
+            <span class="n">lh5_out</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">copy_par</span><span class="p">,</span> <span class="n">buf_in</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buf_in</span><span class="p">,</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Table</span><span class="p">):</span>
+            <span class="c1"># check if this is waveform</span>
+            <span class="k">if</span> <span class="s1">&#39;t0&#39;</span> <span class="ow">and</span> <span class="s1">&#39;dt&#39;</span> <span class="ow">and</span> <span class="s1">&#39;values&#39;</span> <span class="ow">in</span> <span class="n">buf_in</span><span class="p">:</span>
+                <span class="n">lh5_out</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">copy_par</span><span class="p">,</span> <span class="n">buf_in</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">])</span>
+                <span class="n">clk</span> <span class="o">=</span> <span class="n">buf_in</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">unit_parser</span><span class="o">.</span><span class="n">parse_unit</span><span class="p">(</span><span class="n">lh5_in</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span> <span class="o">!=</span> <span class="n">clk</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Somehow you managed to set multiple clock frequencies...Using &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span> <span class="o">=</span> <span class="n">clk</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;I don&#39;t know what to do with &quot;</span> <span class="o">+</span> <span class="n">input_par</span> <span class="o">+</span> <span class="s2">&quot;. Building output without it!&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># finally, add the output buffers to lh5_out and the proc chain</span>
+    <span class="k">for</span> <span class="n">out_par</span> <span class="ow">in</span> <span class="n">out_par_list</span><span class="p">:</span>
+        <span class="n">recipe</span> <span class="o">=</span> <span class="n">processors</span><span class="p">[</span><span class="n">out_par</span><span class="p">]</span>
+        <span class="c1"># special case for proc with multiple outputs</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">recipe</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,| &quot;</span><span class="p">,</span> <span class="n">recipe</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">out_par</span><span class="p">)</span>
+            <span class="n">recipe</span> <span class="o">=</span> <span class="n">processors</span><span class="p">[</span><span class="n">recipe</span><span class="p">]</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">recipe</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">unit_parser</span><span class="o">.</span><span class="n">parse_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">),</span> <span class="n">clk</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InvalidConversion</span><span class="p">:</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="n">buf_out</span> <span class="o">=</span> <span class="n">proc_chain</span><span class="o">.</span><span class="n">get_output_buffer</span><span class="p">(</span><span class="n">out_par</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">lh5_out</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">out_par</span><span class="p">,</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">buf_out</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span><span class="n">unit</span><span class="p">})</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">proc_chain</span><span class="p">,</span> <span class="n">lh5_out</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

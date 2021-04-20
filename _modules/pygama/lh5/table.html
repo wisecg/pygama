@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.lh5.table &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.lh5.table</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.lh5.table</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">.struct</span> <span class="kn">import</span> <span class="n">Struct</span>
+
+
+<div class="viewcode-block" id="Table"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.table.Table">[docs]</a><span class="k">class</span> <span class="nc">Table</span><span class="p">(</span><span class="n">Struct</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A special struct of array or subtable &quot;columns&quot; of equal length.</span>
+
+<span class="sd">    Holds onto an internal read/write location &quot;loc&quot; that is useful in managing</span>
+<span class="sd">    table I/O using functions like push_row(), is_full(), and clear()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: overload getattr to allow access to fields as object attributes?</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">col_dict</span><span class="o">=</span><span class="p">{},</span> <span class="n">attrs</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        size : int (optional)</span>
+<span class="sd">            Sets the number of rows in the table. Arrays in col_dict will be</span>
+<span class="sd">            resized to match size if both are not None.  If size is left as</span>
+<span class="sd">            None, the number of table rows is determined from the length of the</span>
+<span class="sd">            first array in col_dict. If neither is provided, a default length of</span>
+<span class="sd">            1024 is used.</span>
+<span class="sd">        col_dict : dict (optional)</span>
+<span class="sd">            Instantiate this table using the supplied named lh5 array-like</span>
+<span class="sd">            objects.  </span>
+<span class="sd">            Note 1: no copy is performed, the objects are used directly.</span>
+<span class="sd">            Note 2: if size is not None, all arrays will be resized to match it</span>
+<span class="sd">            Note 3: if the arrays have different lengths, all will be resized to</span>
+<span class="sd">            match the length of the first array</span>
+<span class="sd">        attrs : dict (optional)</span>
+<span class="sd">            A set of user attributes to be carried along with this lh5 object</span>
+
+<span class="sd">        Initialization</span>
+<span class="sd">        --------------</span>
+<span class="sd">        self.loc is initialized to 0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">obj_dict</span><span class="o">=</span><span class="n">col_dict</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+
+        <span class="c1"># if col_dict is not empty, set size according to it</span>
+        <span class="c1"># if size is also supplied, resize all fields to match it</span>
+        <span class="c1"># otherwise, warn if the supplied fields have varying size</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
+            <span class="n">do_warn</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">new_size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">do_warn</span><span class="o">=</span><span class="n">do_warn</span><span class="p">)</span>
+
+        <span class="c1"># if no col_dict, just set the size (default to 1024)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span> <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1024</span>
+
+        <span class="c1"># always start at loc=0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="Table.datatype_name"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.table.Table.datatype_name">[docs]</a>    <span class="k">def</span> <span class="nf">datatype_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;The name for this object&#39;s lh5 datatype attribute&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;table&#39;</span></div>
+
+
+<div class="viewcode-block" id="Table.__len__"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.table.Table.__len__">[docs]</a>    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provides __len__ for this array-like class&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span></div>
+
+
+<div class="viewcode-block" id="Table.resize"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.table.Table.resize">[docs]</a>    <span class="k">def</span> <span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_size</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">do_warn</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># if new_size = None, use the size from the first field</span>
+        <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">new_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">new_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">!=</span> <span class="n">new_size</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">do_warn</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;warning: resizing field&#39;</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> 
+                          <span class="s1">&#39;with size&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="s1">&#39;!=&#39;</span><span class="p">,</span> <span class="n">new_size</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Table</span><span class="p">):</span> <span class="n">obj</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">new_size</span><span class="p">,</span> <span class="n">do_warn</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">new_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">new_size</span></div>
+
+
+<div class="viewcode-block" id="Table.push_row"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.table.Table.push_row">[docs]</a>    <span class="k">def</span> <span class="nf">push_row</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loc</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="Table.is_full"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.table.Table.is_full">[docs]</a>    <span class="k">def</span> <span class="nf">is_full</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span></div>
+
+
+<div class="viewcode-block" id="Table.clear"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.table.Table.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="Table.add_field"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.table.Table.add_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">use_obj_size</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">do_warn</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Table: Error: cannot add field of type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+        <span class="c1"># check / update sizes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+            <span class="n">new_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">if</span> <span class="n">use_obj_size</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">new_size</span><span class="p">,</span> <span class="n">do_warn</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Table.get_dataframe"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.table.Table.get_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">cols</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a pandase dataframe containing each of the columns given. If no</span>
+<span class="sd">        columns are given, get include all fields as columns.&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">dat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">nda</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span>
+        <span class="k">return</span> <span class="n">df</span></div></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

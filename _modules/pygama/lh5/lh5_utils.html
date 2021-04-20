@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.lh5.lh5_utils &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.lh5.lh5_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.lh5.lh5_utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="get_lh5_element_type"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.lh5_utils.get_lh5_element_type">[docs]</a><span class="k">def</span> <span class="nf">get_lh5_element_type</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the lh5 element type of a scalar or array</span>
+
+<span class="sd">    For use in the datatype attribute of lh5 objects</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    obj : str or any object with a numpy dtype</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    el_type : str</span>
+<span class="sd">        A string stating the determined element type of the object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;string&#39;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;dtype&#39;</span><span class="p">):</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;?&#39;</span> <span class="ow">or</span> <span class="n">obj</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#FIXME: pygama will call all uint8&#39;s &quot;blobs&quot; by this logic...</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">]:</span> <span class="k">return</span> <span class="s1">&#39;blob&#39;</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">]:</span> <span class="k">return</span> <span class="s1">&#39;real&#39;</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;complex&#39;</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;U&#39;</span><span class="p">]:</span> <span class="k">return</span> <span class="s1">&#39;string&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot determine lh5 element_type for object of type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="parse_datatype"><a class="viewcode-back" href="../../../pygama.lh5.html#pygama.lh5.lh5_utils.parse_datatype">[docs]</a><span class="k">def</span> <span class="nf">parse_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse datatype string and return type, dims, elements</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    datatype : str</span>
+<span class="sd">        a lh5-formatted datatype string</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    (type, dims, elements) : tuple</span>
+<span class="sd">        type : str</span>
+<span class="sd">            the datatype name</span>
+<span class="sd">        dims : tuple(ints) or None</span>
+<span class="sd">            if not None, a tuple of dimensions for the lh5 object. Note this is</span>
+<span class="sd">            not the same as the np shape of the underlying data object. See the</span>
+<span class="sd">            lh5 specification for more information. Also see</span>
+<span class="sd">            ArrayOfEqualSizedArrays and Store.read_object() for example code</span>
+<span class="sd">        elements: str or list of str&#39;s</span>
+<span class="sd">            for numeric objects, the element type</span>
+<span class="sd">            for struct-like  objects, the list of fields in the struct</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;{&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">datatype</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;scalar&#39;</span><span class="p">,</span> <span class="p">(),</span> <span class="n">datatype</span>
+
+    <span class="c1"># for other datatypes, need to parse the datatype string</span>
+    <span class="kn">from</span> <span class="nn">parse</span> <span class="kn">import</span> <span class="n">parse</span>
+    <span class="n">datatype</span><span class="p">,</span> <span class="n">element_description</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">{{</span><span class="si">{}</span><span class="s1">}}&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">datatype</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">):</span> 
+        <span class="n">datatype</span><span class="p">,</span> <span class="n">dims</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&lt;</span><span class="si">{}</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="p">)</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">datatype</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dims</span><span class="p">),</span> <span class="n">element_description</span>
+    <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="n">datatype</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">element_description</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

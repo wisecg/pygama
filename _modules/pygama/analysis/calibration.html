@@ -1,0 +1,533 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pygama.analysis.calibration &mdash; pygama v0.6 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>pygama.analysis.calibration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pygama.analysis.calibration</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">routines for automatic calibration.</span>
+<span class="sd">- peakdet (useful to find maxima in an array without taking derivative)</span>
+<span class="sd">- get_most_prominent_peaks (find by looking for spikes in spectrum derivative)</span>
+<span class="sd">- match_peaks (identify peaks based on ratios between known gamma energies)</span>
+<span class="sd">- calibrate_tl208 (main routine -- fits multiple peaks w/ Radford peak shape)</span>
+<span class="sd">- get_calibration_energies (a good place to put pk energies)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pygama.analysis.peak_fitting</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pygama.analysis.histograms</span> <span class="kn">import</span> <span class="n">get_bin_centers</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gs</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">argrelextrema</span><span class="p">,</span> <span class="n">medfilt</span><span class="p">,</span> <span class="n">find_peaks_cwt</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage.filters</span> <span class="kn">import</span> <span class="n">gaussian_filter1d</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">import</span> <span class="nn">scipy.optimize</span> <span class="k">as</span> <span class="nn">op</span>
+
+
+<div class="viewcode-block" id="peakdet"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.calibration.peakdet">[docs]</a><span class="k">def</span> <span class="nf">peakdet</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converted from MATLAB script at: http://billauer.co.il/peakdet.html</span>
+<span class="sd">    Returns two arrays: [maxtab, mintab] = peakdet(v, delta, x)</span>
+<span class="sd">    An updated (vectorized) version is in pygama.dsp.transforms.peakdet</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">maxtab</span><span class="p">,</span> <span class="n">mintab</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+    <span class="c1"># sanity checks</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Input vectors v and x must have same length&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">delta</span><span class="p">):</span> <span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Input argument delta must be a scalar&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">delta</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span> <span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Input argument delta must be positive&quot;</span><span class="p">)</span>
+
+    <span class="n">maxes</span><span class="p">,</span> <span class="n">mins</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">find_max</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+
+        <span class="c1"># for i=0, all 4 of these get set</span>
+        <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">:</span>
+            <span class="nb">max</span><span class="p">,</span> <span class="n">imax</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">:</span>
+            <span class="nb">min</span><span class="p">,</span> <span class="n">imin</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">find_max</span><span class="p">:</span>
+            <span class="c1"># if the sample is less than the current max,</span>
+            <span class="c1"># declare the previous one a maximum, then set this as the new &quot;min&quot;</span>
+            <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">max</span> <span class="o">-</span> <span class="n">delta</span><span class="p">:</span>
+                <span class="n">maxes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">imax</span><span class="p">,</span> <span class="nb">max</span><span class="p">))</span>
+                <span class="nb">min</span><span class="p">,</span> <span class="n">imin</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">find_max</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if the sample is more than the current min,</span>
+            <span class="c1"># declare the previous one a minimum, then set this as the new &quot;max&quot;</span>
+            <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">min</span> <span class="o">+</span> <span class="n">delta</span><span class="p">:</span>
+                <span class="n">mins</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">imin</span><span class="p">,</span> <span class="nb">min</span><span class="p">))</span>
+                <span class="nb">max</span><span class="p">,</span> <span class="n">imax</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">find_max</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">maxes</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mins</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_most_prominent_peaks"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.calibration.get_most_prominent_peaks">[docs]</a><span class="k">def</span> <span class="nf">get_most_prominent_peaks</span><span class="p">(</span><span class="n">energySeries</span><span class="p">,</span> <span class="n">xlo</span><span class="p">,</span> <span class="n">xhi</span><span class="p">,</span> <span class="n">xpb</span><span class="p">,</span>
+                             <span class="n">max_num_peaks</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    find the most prominent peaks in a spectrum by looking for spikes in derivative of spectrum</span>
+<span class="sd">    energySeries: array of measured energies</span>
+<span class="sd">    max_num_peaks = maximum number of most prominent peaks to find</span>
+<span class="sd">    return a histogram around the most prominent peak in a spectrum of a given percentage of width</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">xhi</span><span class="o">-</span><span class="n">xlo</span><span class="p">)</span><span class="o">/</span><span class="n">xpb</span><span class="p">)</span>
+    <span class="n">hist</span><span class="p">,</span> <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">energySeries</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="n">xlo</span><span class="p">,</span> <span class="n">xhi</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">nb</span><span class="p">)</span>
+    <span class="n">bin_centers</span> <span class="o">=</span> <span class="n">get_bin_centers</span><span class="p">(</span><span class="n">bin_edges</span><span class="p">)</span>
+
+    <span class="c1"># median filter along the spectrum, do this as a &quot;baseline subtraction&quot;</span>
+    <span class="n">hist_med</span> <span class="o">=</span> <span class="n">medfilt</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span>
+    <span class="n">hist</span> <span class="o">=</span> <span class="n">hist</span> <span class="o">-</span> <span class="n">hist_med</span>
+
+    <span class="c1"># identify peaks with a scipy function (could be improved ...)</span>
+    <span class="n">peak_idxs</span> <span class="o">=</span> <span class="n">find_peaks_cwt</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span> <span class="n">min_snr</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">peak_energies</span> <span class="o">=</span> <span class="n">bin_centers</span><span class="p">[</span><span class="n">peak_idxs</span><span class="p">]</span>
+
+    <span class="c1"># pick the num_peaks most prominent peaks</span>
+    <span class="k">if</span> <span class="n">max_num_peaks</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_energies</span><span class="p">):</span>
+        <span class="n">peak_vals</span> <span class="o">=</span> <span class="n">hist</span><span class="p">[</span><span class="n">peak_idxs</span><span class="p">]</span>
+        <span class="n">sort_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">peak_vals</span><span class="p">)</span>
+        <span class="n">peak_idxs_max</span> <span class="o">=</span> <span class="n">peak_idxs</span><span class="p">[</span><span class="n">sort_idxs</span><span class="p">[</span><span class="o">-</span><span class="n">max_num_peaks</span><span class="p">:]]</span>
+        <span class="n">peak_energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">bin_centers</span><span class="p">[</span><span class="n">peak_idxs_max</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">test</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bin_centers</span><span class="p">,</span> <span class="n">hist</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;steps&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">peak_energies</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Energy [uncal]&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Filtered Spectrum&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">peak_energies</span></div>
+
+
+<div class="viewcode-block" id="match_peaks"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.calibration.match_peaks">[docs]</a><span class="k">def</span> <span class="nf">match_peaks</span><span class="p">(</span><span class="n">data_pks</span><span class="p">,</span> <span class="n">cal_pks</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Match uncalibrated peaks with literature energy values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
+
+    <span class="n">n_pks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cal_pks</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cal_pks</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_pks</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_pks</span><span class="p">)</span>
+
+    <span class="n">cal_sets</span> <span class="o">=</span> <span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cal_pks</span><span class="p">)),</span> <span class="n">n_pks</span><span class="p">)</span>
+    <span class="n">data_sets</span> <span class="o">=</span> <span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_pks</span><span class="p">)),</span> <span class="n">n_pks</span><span class="p">)</span>
+
+    <span class="n">best_err</span><span class="p">,</span> <span class="n">best_m</span><span class="p">,</span> <span class="n">best_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">cal_set</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cal_sets</span><span class="p">):</span>
+
+        <span class="n">cal</span> <span class="o">=</span> <span class="n">cal_pks</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">cal_set</span><span class="p">)]</span> <span class="c1"># lit energies for this set</span>
+
+        <span class="k">for</span> <span class="n">data_set</span> <span class="ow">in</span> <span class="n">data_sets</span><span class="p">:</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data_pks</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">data_set</span><span class="p">)]</span> <span class="c1"># uncal energies for this set</span>
+
+            <span class="n">m</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">linregress</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">cal</span><span class="p">)</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">cal</span> <span class="o">-</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="n">data</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">err</span> <span class="o">&lt;</span> <span class="n">best_err</span><span class="p">:</span>
+                <span class="n">best_err</span><span class="p">,</span> <span class="n">best_m</span><span class="p">,</span> <span class="n">best_b</span> <span class="o">=</span> <span class="n">err</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">b</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">best_err</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cal:&quot;</span><span class="p">,</span><span class="n">cal</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;data:&quot;</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cal</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;min.err:</span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">best_m</span> <span class="o">*</span> <span class="n">xs</span> <span class="o">+</span> <span class="n">best_b</span> <span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;y = </span><span class="si">{:.2f}</span><span class="s2"> x + </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">best_m</span><span class="p">,</span><span class="n">best_b</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Energy (uncal)&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Energy (keV)&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">best_m</span><span class="p">,</span> <span class="n">best_b</span></div>
+
+
+<div class="viewcode-block" id="calibrate_tl208"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.calibration.calibrate_tl208">[docs]</a><span class="k">def</span> <span class="nf">calibrate_tl208</span><span class="p">(</span><span class="n">energy_series</span><span class="p">,</span> <span class="n">cal_peaks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plotFigure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    energy_series: array of energies we want to calibrate</span>
+<span class="sd">    cal_peaks: array of peaks to fit</span>
+
+<span class="sd">    1.) we find the 2614 peak by looking for the tallest peak at &gt;0.1 the max adc value</span>
+<span class="sd">    2.) fit that peak to get a rough guess at a calibration to find other peaks with</span>
+<span class="sd">    3.) fit each peak in peak_energies</span>
+<span class="sd">    4.) do a linear fit to the peak centroids to find a calibration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">cal_peaks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cal_peaks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="mf">238.632</span><span class="p">,</span> <span class="mf">510.770</span><span class="p">,</span> <span class="mf">583.191</span><span class="p">,</span> <span class="mf">727.330</span><span class="p">,</span> <span class="mf">860.564</span><span class="p">,</span>
+             <span class="mf">2614.553</span><span class="p">])</span>  <span class="c1">#get_calibration_energies(peak_energies)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cal_peaks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cal_peaks</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">energy_series</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
+
+    <span class="c1">#get 10 most prominent ~high e peaks</span>
+    <span class="n">max_adc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">energy_series</span><span class="p">)</span>
+    <span class="n">energy_hi</span> <span class="o">=</span> <span class="n">energy_series</span>  <span class="c1">#[ (energy_series &gt; np.percentile(energy_series, 20)) &amp; (energy_series &lt; np.percentile(energy_series, 99.9))]</span>
+
+    <span class="n">peak_energies</span><span class="p">,</span> <span class="n">peak_e_err</span> <span class="o">=</span> <span class="n">get_most_prominent_peaks</span><span class="p">(</span><span class="n">energy_hi</span><span class="p">,)</span>
+    <span class="n">rough_kev_per_adc</span><span class="p">,</span> <span class="n">rough_kev_offset</span> <span class="o">=</span> <span class="n">match_peaks</span><span class="p">(</span><span class="n">peak_energies</span><span class="p">,</span> <span class="n">cal_peaks</span><span class="p">)</span>
+    <span class="n">e_cal_rough</span> <span class="o">=</span> <span class="n">rough_kev_per_adc</span> <span class="o">*</span> <span class="n">energy_series</span> <span class="o">+</span> <span class="n">rough_kev_offset</span>
+
+    <span class="c1"># return rough_kev_per_adc, rough_kev_offset</span>
+    <span class="c1"># print(energy_series)</span>
+    <span class="c1"># plt.ion()</span>
+    <span class="c1"># plt.figure()</span>
+    <span class="c1"># # for peak in cal_peaks:</span>
+    <span class="c1"># #     plt.axvline(peak, c=&quot;r&quot;, ls=&quot;:&quot;)</span>
+    <span class="c1"># # energy_series.hist()</span>
+    <span class="c1"># # for peak in peak_energies:</span>
+    <span class="c1"># #      plt.axvline(peak, c=&quot;r&quot;, ls=&quot;:&quot;)</span>
+    <span class="c1"># #</span>
+    <span class="c1"># plt.hist(energy_series)</span>
+    <span class="c1"># # plt.hist(e_cal_rough[e_cal_rough&gt;100], bins=2700)</span>
+    <span class="c1"># val = input(&quot;do i exist?&quot;)</span>
+    <span class="c1"># exit()</span>
+
+    <span class="c1">###############################################</span>
+    <span class="c1">#Do a real fit to every peak in peak_energies</span>
+    <span class="c1">###############################################</span>
+    <span class="n">max_adc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">energy_series</span><span class="p">)</span>
+
+    <span class="n">peak_num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cal_peaks</span><span class="p">)</span>
+    <span class="n">centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">peak_num</span><span class="p">)</span>
+    <span class="n">fit_result_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">bin_size</span> <span class="o">=</span> <span class="mf">0.2</span>  <span class="c1">#keV</span>
+
+    <span class="k">if</span> <span class="n">plotFigure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plot_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">energy</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cal_peaks</span><span class="p">):</span>
+        <span class="n">window_width</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1">#keV</span>
+        <span class="n">window_width_in_adc</span> <span class="o">=</span> <span class="p">(</span><span class="n">window_width</span><span class="p">)</span> <span class="o">/</span> <span class="n">rough_kev_per_adc</span>
+        <span class="n">energy_in_adc</span> <span class="o">=</span> <span class="p">(</span><span class="n">energy</span> <span class="o">-</span> <span class="n">rough_kev_offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">rough_kev_per_adc</span>
+        <span class="n">bin_size_adc</span> <span class="o">=</span> <span class="p">(</span><span class="n">bin_size</span><span class="p">)</span> <span class="o">/</span> <span class="n">rough_kev_per_adc</span>
+
+        <span class="n">peak_vals</span> <span class="o">=</span> <span class="n">energy_series</span><span class="p">[</span>
+            <span class="p">(</span><span class="n">energy_series</span> <span class="o">&gt;</span> <span class="n">energy_in_adc</span> <span class="o">-</span> <span class="n">window_width_in_adc</span><span class="p">)</span> <span class="o">&amp;</span>
+            <span class="p">(</span><span class="n">energy_series</span> <span class="o">&lt;</span> <span class="n">energy_in_adc</span> <span class="o">+</span> <span class="n">window_width_in_adc</span><span class="p">)]</span>
+
+        <span class="n">peak_hist</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span>
+            <span class="n">peak_vals</span><span class="p">,</span>
+            <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">energy_in_adc</span> <span class="o">-</span> <span class="n">window_width_in_adc</span><span class="p">,</span>
+                           <span class="n">energy_in_adc</span> <span class="o">+</span> <span class="n">window_width_in_adc</span> <span class="o">+</span> <span class="n">bin_size_adc</span><span class="p">,</span>
+                           <span class="n">bin_size_adc</span><span class="p">))</span>
+        <span class="n">bin_centers</span> <span class="o">=</span> <span class="n">get_bin_centers</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+        <span class="c1"># plt.ion()</span>
+        <span class="c1"># plt.figure()</span>
+        <span class="c1"># plt.plot(bin_centers,peak_hist,  color=&quot;k&quot;, ls=&quot;steps&quot;)</span>
+
+        <span class="c1"># inpu = input(&quot;q to quit...&quot;)</span>
+        <span class="c1"># if inpu == &quot;q&quot;: exit()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">guess_e</span><span class="p">,</span> <span class="n">guess_sigma</span><span class="p">,</span> <span class="n">guess_area</span> <span class="o">=</span> <span class="n">get_gaussian_guess</span><span class="p">(</span>
+                <span class="n">peak_hist</span><span class="p">,</span> <span class="n">bin_centers</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">It looks like there may not be a peak at </span><span class="si">{}</span><span class="s2"> keV&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">energy</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Here is a plot of the area I&#39;m searching for a peak...&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bin_centers</span><span class="p">,</span> <span class="n">peak_hist</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;steps&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">e_cal_rough</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">2700</span><span class="p">,</span> <span class="n">histtype</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">)</span>
+            <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;--&gt;press any key to continue...&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">bin_centers</span><span class="p">,</span>
+            <span class="n">gauss</span><span class="p">(</span><span class="n">bin_centers</span><span class="p">,</span> <span class="n">guess_e</span><span class="p">,</span> <span class="n">guess_sigma</span><span class="p">,</span> <span class="n">guess_area</span><span class="p">),</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+
+        <span class="c1"># inpu = input(&quot;q to quit...&quot;)</span>
+        <span class="c1"># if inpu == &quot;q&quot;: exit()</span>
+
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">([</span><span class="mf">0.9</span> <span class="o">*</span> <span class="n">guess_e</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">guess_sigma</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span>
+            <span class="mf">1.1</span> <span class="o">*</span> <span class="n">guess_e</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">guess_sigma</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">window_width_in_adc</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="mi">5</span> <span class="o">*</span> <span class="n">guess_area</span>
+        <span class="p">])</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">fit_binned</span><span class="p">(</span>
+            <span class="n">radford_peak</span><span class="p">,</span>
+            <span class="n">peak_hist</span><span class="p">,</span>
+            <span class="n">bin_centers</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">guess_e</span><span class="p">,</span> <span class="n">guess_sigma</span><span class="p">,</span> <span class="mf">1E-3</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">guess_area</span><span class="p">],</span>
+        <span class="p">)</span>  <span class="c1">#bounds=bounds)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bin_centers</span><span class="p">,</span> <span class="n">radford_peak</span><span class="p">(</span><span class="n">bin_centers</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+
+        <span class="c1"># inpu = input(&quot;q to quit...&quot;)</span>
+        <span class="c1"># if inpu == &quot;q&quot;: exit()</span>
+
+        <span class="n">fit_result_map</span><span class="p">[</span><span class="n">energy</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="n">centers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">plotFigure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plot_map</span><span class="p">[</span><span class="n">energy</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">bin_centers</span><span class="p">,</span> <span class="n">peak_hist</span><span class="p">)</span>
+
+    <span class="c1">#Do a linear fit to find the calibration</span>
+    <span class="n">linear_cal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">cal_peaks</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plotFigure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">plotFigure</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">gs</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="n">peak_num</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">ax_line</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax_spec</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">energy</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cal_peaks</span><span class="p">):</span>
+            <span class="n">ax_peak</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="n">bin_centers</span><span class="p">,</span> <span class="n">peak_hist</span> <span class="o">=</span> <span class="n">plot_map</span><span class="p">[</span><span class="n">energy</span><span class="p">]</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">fit_result_map</span><span class="p">[</span><span class="n">energy</span><span class="p">]</span>
+            <span class="n">ax_peak</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">bin_centers</span> <span class="o">*</span> <span class="n">rough_kev_per_adc</span> <span class="o">+</span> <span class="n">rough_kev_offset</span><span class="p">,</span>
+                <span class="n">peak_hist</span><span class="p">,</span>
+                <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;steps-mid&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+            <span class="n">fit</span> <span class="o">=</span> <span class="n">radford_peak</span><span class="p">(</span><span class="n">bin_centers</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">)</span>
+            <span class="n">ax_peak</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">bin_centers</span> <span class="o">*</span> <span class="n">rough_kev_per_adc</span> <span class="o">+</span> <span class="n">rough_kev_offset</span><span class="p">,</span>
+                <span class="n">fit</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+
+        <span class="n">ax_peak</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Energy [keV]&quot;</span><span class="p">)</span>
+
+        <span class="n">ax_line</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">centers</span><span class="p">,</span>
+            <span class="n">cal_peaks</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_adc</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax_line</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">linear_cal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">linear_cal</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax_line</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;ADC&quot;</span><span class="p">)</span>
+        <span class="n">ax_line</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Energy [keV]&quot;</span><span class="p">)</span>
+
+        <span class="n">energies_cal</span> <span class="o">=</span> <span class="n">energy_series</span> <span class="o">*</span> <span class="n">linear_cal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">linear_cal</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">peak_hist</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">energies_cal</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2700</span><span class="p">))</span>
+        <span class="n">ax_spec</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">get_bin_centers</span><span class="p">(</span><span class="n">bins</span><span class="p">),</span> <span class="n">peak_hist</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;steps-mid&quot;</span><span class="p">)</span>
+        <span class="n">ax_spec</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Energy [keV]&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">linear_cal</span></div>
+
+
+<div class="viewcode-block" id="get_calibration_energies"><a class="viewcode-back" href="../../../pygama.analysis.html#pygama.analysis.calibration.get_calibration_energies">[docs]</a><span class="k">def</span> <span class="nf">get_calibration_energies</span><span class="p">(</span><span class="n">cal_type</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">cal_type</span> <span class="o">==</span> <span class="s2">&quot;th228&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">238</span><span class="p">,</span> <span class="mi">277</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">452</span><span class="p">,</span> <span class="mf">510.77</span><span class="p">,</span> <span class="mf">583.191</span><span class="p">,</span>
+                         <span class="mi">727</span><span class="p">,</span> <span class="mi">763</span><span class="p">,</span> <span class="mi">785</span><span class="p">,</span> <span class="mf">860.564</span><span class="p">,</span> <span class="mi">1620</span><span class="p">,</span> <span class="mf">2614.533</span><span class="p">],</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">cal_type</span> <span class="o">==</span> <span class="s2">&quot;uwmjlab&quot;</span><span class="p">:</span>
+        <span class="c1"># return np.array([239, 295, 351, 510, 583, 609, 911, 969, 1120,</span>
+        <span class="c1">#                  1258, 1378, 1401, 1460, 1588, 1764, 2204, 2615],</span>
+        <span class="c1">#                 dtype=&quot;double&quot;)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">239</span><span class="p">,</span> <span class="mi">911</span><span class="p">,</span> <span class="mi">1460</span><span class="p">,</span> <span class="mi">1764</span><span class="p">,</span> <span class="mi">2615</span><span class="p">],</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, LEGEND Collaboration.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
