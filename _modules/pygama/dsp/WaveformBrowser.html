@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pygama.dsp.WaveformBrowser &mdash; pygama v0.6 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pygama
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pygama</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pygama.dsp.WaveformBrowser</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pygama.dsp.WaveformBrowser</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pygama.io.raw_to_dsp</span> <span class="kn">import</span> <span class="n">build_processing_chain</span>
+<span class="kn">from</span> <span class="nn">pygama</span> <span class="kn">import</span> <span class="n">lh5</span>
+<span class="kn">import</span> <span class="nn">pygama.dsp.units</span> <span class="k">as</span> <span class="nn">units</span>
+
+<span class="kn">import</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">contextlib</span><span class="o">,</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">cycler</span> <span class="kn">import</span> <span class="n">cycler</span>
+
+<div class="viewcode-block" id="WaveformBrowser"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser">[docs]</a><span class="k">class</span> <span class="nc">WaveformBrowser</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Waveform Browser is a tool meant for interacting with waveforms from</span>
+<span class="sd">    LH5 files. This defines an interface for drawing waveforms from a file,</span>
+<span class="sd">    drawing transformed waveforms defined using raw_to_dsp style json files,</span>
+<span class="sd">    drawing horizontal and verticle lines at the values of calculated</span>
+<span class="sd">    parameters, and filling a legend with calculated parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files_in</span><span class="p">,</span> <span class="n">lh5_group</span><span class="p">,</span> <span class="n">dsp_config</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">database</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">n_drawn</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x_unit</span> <span class="o">=</span> <span class="s1">&#39;ns&#39;</span><span class="p">,</span> <span class="n">x_lim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">waveforms</span> <span class="o">=</span> <span class="s1">&#39;waveform&#39;</span><span class="p">,</span> <span class="n">wf_styles</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lines</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">legend</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">legend_opts</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">norm</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">selection</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">buffer_len</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="n">block_width</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor for WaveformBrowser:</span>
+<span class="sd">        - file_in: name of file or list of names to browse. Can use wildcards</span>
+<span class="sd">        - lh5_group: name of LH5 group in file to browse</span>
+<span class="sd">        - dsp_config (optional): name of DSP config json file containing transforms available to draw</span>
+<span class="sd">        - database (optional): dict with database of processing parameters</span>
+<span class="sd">        - n_drawn (default 1): number of events to draw simultaneously when calling DrawNext</span>
+<span class="sd">        - x_unit (default ns): unit for x-axis</span>
+<span class="sd">        - x_lim (default auto): range of x-values passes as tuple</span>
+<span class="sd">        - waveforms (default &#39;waveform&#39;): name of wf or list of wf names to draw</span>
+<span class="sd">        - wf_styles (default None): waveform colors and other style parameters to cycle through when drawing waveforms. Can be given as:</span>
+<span class="sd">            dict of lists: e.g. {&#39;color&#39;:[&#39;r&#39;, &#39;g&#39;, &#39;b&#39;], &#39;linestyle&#39;:[&#39;-&#39;, &#39;--&#39;, &#39;.&#39;]}</span>
+<span class="sd">            name of predefined style; see matplotlib.style documentation</span>
+<span class="sd">            None: use current matplotlib style</span>
+<span class="sd">          If a single style cycle is given, use for all lines; if a list is given, match to waveforms list.</span>
+<span class="sd">        - lines (default None): name of parameter or list of parameters to draw hlines and vlines for</span>
+<span class="sd">        - legend (default None): formatting string and values to include in the legend. This can be a list of values (one for each waveform in waveforms). The values can be given as a tuple whose first entry is a formatting string and subsequent entries are the values to place in the formatting string. When building a formatting string, if a name is given in the {}s, it is assumed to be a parameter from the DSP config file. An example is:</span>
+<span class="sd">          (&quot;{:0.1f} keV&quot;, energy)</span>
+<span class="sd">        - legend_opts (default None): dict containing kwargs for formatting the legend</span>
+<span class="sd">        - norm (default None): name of parameter (probably energy) to use to normalize WFs; useful when drawing multiple</span>
+<span class="sd">        - align (default None): name of time parameter to set as 0 time; useful for aligning multiple waveforms</span>
+<span class="sd">        - selection (optional): selection of events to draw. Can be either a list of event indices or a numpy array mask (ala pandas).</span>
+<span class="sd">        - buffer_len (default 128): number of waveforms to keep in memory at a time</span>
+<span class="sd">        - block_width (default 8): block width for processing chain</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="n">verbosity</span>
+
+        <span class="c1"># data i/o initialization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lh5_st</span> <span class="o">=</span> <span class="n">lh5</span><span class="o">.</span><span class="n">Store</span><span class="p">(</span><span class="n">keep_open</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">files_in</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">files_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">files_in</span><span class="p">]</span>
+        
+        <span class="c1"># Expand wildcards and map out the files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lh5_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f_wc</span> <span class="ow">in</span> <span class="n">files_in</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="n">f_wc</span><span class="p">)))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lh5_group</span> <span class="o">=</span> <span class="n">lh5_group</span>
+        <span class="c1"># file map is cumulative lenght of files up to file n. By doing searchsorted left, we can get the file for a given wf index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_st</span><span class="o">.</span><span class="n">read_n_rows</span><span class="p">(</span><span class="n">lh5_group</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_files</span><span class="p">],</span> <span class="s1">&#39;int64&#39;</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_map</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_map</span><span class="p">)</span>
+
+        <span class="c1"># Get the input buffer and read the first chunk</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lh5_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_st</span><span class="o">.</span><span class="n">get_buffer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">buffer_len</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lh5_st</span><span class="o">.</span><span class="n">read_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">start_row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="n">buffer_len</span><span class="p">,</span> <span class="n">obj_buf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_in</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer_len</span> <span class="o">=</span> <span class="n">buffer_len</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_file</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_chunk</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># initialize stuff for iteration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selection</span> <span class="o">=</span> <span class="n">selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_it</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_drawn</span> <span class="o">=</span> <span class="n">n_drawn</span>
+
+        <span class="c1"># initialize list of objects to draw</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">waveforms</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">waveforms</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">waveforms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">waveforms</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wf_data</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_names</span> <span class="p">]</span>
+
+        <span class="c1"># wf_styles</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wf_styles</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wf_styles</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span> <span class="o">=</span> <span class="p">[</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_data</span> <span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sty</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">wf_styles</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sty</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">library</span><span class="p">[</span><span class="n">sty</span><span class="p">][</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">sty</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cycler</span><span class="p">(</span><span class="o">**</span><span class="n">sty</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wf_styles</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">library</span><span class="p">[</span><span class="n">wf_styles</span><span class="p">][</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">wf_styles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span> <span class="o">=</span> <span class="n">cycler</span><span class="p">(</span><span class="o">**</span><span class="n">wf_styles</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">lines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_names</span> <span class="o">=</span> <span class="n">lines</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>  <span class="bp">self</span><span class="o">.</span><span class="n">line_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">lines</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line_data</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_names</span> <span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">legend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">legend</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">legend</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="n">legend</span> <span class="o">=</span> <span class="p">[</span><span class="n">legend</span><span class="p">]</span>
+
+        <span class="c1"># Set up the legend format strings and collect input values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend_input</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend_format</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">legend</span><span class="p">:</span>
+            <span class="n">legend_input</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">legend_format</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">entry</span> <span class="o">=</span> <span class="p">(</span><span class="n">entry</span><span class="p">,)</span>
+
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">st</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">cv</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">Formatter</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+                        <span class="n">legend_format</span> <span class="o">+=</span> <span class="n">st</span>
+                        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">legend_format</span> <span class="o">+=</span> <span class="s1">&#39;{&#39;</span>
+                            <span class="n">legend_input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">form</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">form</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                                <span class="n">legend_format</span> <span class="o">+=</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">form</span>
+                            <span class="k">if</span> <span class="n">cv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cv</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                                <span class="n">legend_format</span> <span class="o">+=</span> <span class="s1">&#39;!&#39;</span> <span class="o">+</span> <span class="n">cv</span>
+                            <span class="n">legend_format</span> <span class="o">+=</span> <span class="s1">&#39;}&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># find any {}s to fill from the formatter</span>
+                    <span class="n">idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">legend_input</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span><span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">inp</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">idxs</span><span class="p">:</span> <span class="c1"># if we found a {}. it&#39;s already in the formatter</span>
+                        <span class="n">legend_input</span><span class="p">[</span><span class="n">idxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">val</span>
+                    <span class="k">else</span><span class="p">:</span> <span class="c1"># otherwise add to formatter</span>
+                        <span class="n">legend_input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">legend_format</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="n">legend_format</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+                            <span class="n">legend_format</span> <span class="o">+=</span> <span class="n">val</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; = </span><span class="si">{:.3g}</span><span class="s1">&#39;</span>
+                        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                            <span class="n">legend_format</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:.3g}</span><span class="s1">&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">legend_input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">legend_input</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">legend_format</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">legend_format</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend_data</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend_input</span> <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend_kwargs</span> <span class="o">=</span> <span class="n">legend_opts</span> <span class="k">if</span> <span class="n">legend_opts</span> <span class="k">else</span> <span class="p">{}</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_par</span> <span class="o">=</span> <span class="n">norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">align_par</span> <span class="o">=</span> <span class="n">align</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">unit_parser</span><span class="o">.</span><span class="n">parse_unit</span><span class="p">(</span><span class="n">x_unit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_lim</span> <span class="o">=</span> <span class="n">x_lim</span>
+
+        <span class="c1"># make processing chain and output buffer</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_names</span> <span class="o">+</span> \
+                  <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_names</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)]</span> <span class="o">+</span> \
+                  <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend_input</span>  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_par</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">outputs</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_par</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">align_par</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">outputs</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">align_par</span><span class="p">]</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">proc_chain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_out</span> <span class="o">=</span> <span class="n">build_processing_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_in</span><span class="p">,</span> <span class="n">dsp_config</span><span class="p">,</span> <span class="n">db_dict</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span><span class="p">,</span> <span class="n">block_width</span><span class="o">=</span><span class="n">block_width</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="kc">None</span>        
+    
+<div class="viewcode-block" id="WaveformBrowser.new_figure"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.new_figure">[docs]</a>    <span class="k">def</span> <span class="nf">new_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new figure and draw in it&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WaveformBrowser.save_figure"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.save_figure">[docs]</a>    <span class="k">def</span> <span class="nf">save_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">f_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">f_out</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to specify an output filename!&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WaveformBrowser.set_figure"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.set_figure">[docs]</a>    <span class="k">def</span> <span class="nf">set_figure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use an already existing figure and axis; make sure to set clear to False when drawing if you don&#39;t want to clear what&#39;s already there! Can give a WaveformBrowser object to use the fig/axis from that&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">WaveformBrowser</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">fig</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">ax</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
+            <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;ax must be matplotlib.Axis&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;fig must be matplotlib.Figure or WaveformBrowser&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WaveformBrowser.clear_data"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.clear_data">[docs]</a>    <span class="k">def</span> <span class="nf">clear_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">wf_set</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_data</span><span class="p">:</span> <span class="n">wf_set</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line_set</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_data</span><span class="p">:</span> <span class="n">line_set</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">leg_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend_data</span><span class="p">:</span> <span class="n">leg_data</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="WaveformBrowser.find_entry"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.find_entry">[docs]</a>    <span class="k">def</span> <span class="nf">find_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the requested data associated with entry in input files and</span>
+<span class="sd">        place it in self.wf_data, self.line_data and self.legend_data. Set</span>
+<span class="sd">        append to False to clear these buffers before fetching the entry/ies.</span>
+<span class="sd">        Can give a list/tuple to find multiple entries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">append</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">clear_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_entry</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># figure out which file we are reading from and the chunk/index within the file, using the file map</span>
+        <span class="n">file_no</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_map</span><span class="p">,</span> <span class="n">entry</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">file_no</span><span class="o">&gt;</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_files</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span>
+        <span class="c1"># get chunk and index within this chunk</span>
+        <span class="n">file_beg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_map</span><span class="p">[</span><span class="n">file_no</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">file_no</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">chunk</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">entry</span> <span class="o">-</span> <span class="n">file_beg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_len</span><span class="p">)</span>
+        
+        <span class="c1"># Update the chunk as needed</span>
+        <span class="k">if</span> <span class="n">file_no</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_file</span> <span class="ow">or</span> <span class="n">chunk</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_chunk</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_chunk</span> <span class="o">=</span> <span class="n">chunk</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_file</span> <span class="o">=</span> <span class="n">file_no</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lh5_in</span><span class="p">,</span> <span class="n">n_read</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_st</span><span class="o">.</span><span class="n">read_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_group</span><span class="p">,</span>
+                                                          <span class="bp">self</span><span class="o">.</span><span class="n">lh5_files</span><span class="p">[</span><span class="n">file_no</span><span class="p">],</span>
+                                                          <span class="n">start_row</span><span class="o">=</span><span class="n">chunk</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer_len</span><span class="p">,</span>
+                                                          <span class="n">n_rows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_in</span><span class="p">),</span>
+                                                          <span class="n">field_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_mask</span><span class="p">,</span>
+                                                          <span class="n">obj_buf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_in</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proc_chain</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_read</span><span class="p">)</span>
+            
+
+        <span class="c1"># get scaling factor/time shift if used</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_par</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_par</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_par</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_par</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">align_par</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ref_time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">align_par</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">align_par</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">unit_parser</span><span class="o">.</span><span class="n">parse_unit</span><span class="p">(</span><span class="n">unit</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_unit</span><span class="p">)</span>
+            <span class="n">ref_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">align_par</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">*</span><span class="n">dt</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ref_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">align_par</span><span class="p">[</span><span class="n">entry</span><span class="p">]</span>
+            
+        <span class="n">leg_handle</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">#waveforms</span>
+        <span class="k">for</span> <span class="n">wf_name</span><span class="p">,</span> <span class="n">wf_data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_data</span><span class="p">):</span>
+            <span class="c1"># Get the data; note this is implicitly copying it!</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_out</span><span class="p">[</span><span class="n">wf_name</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">/</span><span class="n">norm</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_unit</span><span class="o">.</span><span class="n">derivation</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span><span class="o">.</span><span class="n">derivation</span><span class="p">:</span>
+                <span class="c1"># this is a WF</span>
+                <span class="n">dt</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_unit</span><span class="p">)</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">ref_time</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span><span class="o">-</span><span class="n">ref_time</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_unit</span><span class="o">.</span><span class="n">derivation</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span><span class="p">)</span><span class="o">.</span><span class="n">derivation</span><span class="p">:</span>
+                <span class="c1"># this is a FT</span>
+                <span class="n">f_nyq</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">proc_chain</span><span class="o">.</span><span class="n">_clk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_unit</span><span class="p">)</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">f_nyq</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span>
+            <span class="n">wf_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+                    
+        <span class="c1"># lines</span>
+        <span class="k">for</span> <span class="n">line_name</span><span class="p">,</span> <span class="n">line_data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_data</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span> <span class="c1"># if unit is time, do vline</span>
+                <span class="n">unit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">unit_parser</span><span class="o">.</span><span class="n">parse_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_out</span><span class="p">[</span><span class="n">line_name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">])</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_out</span><span class="p">[</span><span class="n">line_name</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">*</span><span class="n">unit</span>
+                <span class="n">val</span> <span class="o">-=</span> <span class="n">ref_time</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_unit</span>
+                
+            <span class="k">except</span><span class="p">:</span> <span class="c1"># else do hline</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lh5_out</span><span class="p">[</span><span class="n">line_name</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">/</span><span class="n">norm</span>
+
+            <span class="n">line_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="c1"># legend data</span>
+        <span class="k">for</span> <span class="n">legend_input</span><span class="p">,</span> <span class="n">legend_data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legend_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend_data</span><span class="p">):</span>
+            <span class="n">leg_vals</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">legend_input</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">leg_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lh5_out</span><span class="p">[</span><span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">leg_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="n">entry</span><span class="p">])</span>
+            <span class="n">legend_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leg_vals</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="WaveformBrowser.draw_current"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.draw_current">[docs]</a>    <span class="k">def</span> <span class="nf">draw_current</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw the waveforms and data currently held internally by this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Make figure/axis if needed</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="ow">and</span> <span class="n">plt</span><span class="o">.</span><span class="n">fignum_exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">number</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_figure</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">clear</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="n">leg_handles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">leg_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">wf_styles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span>
+            
+        <span class="c1"># draw waveforms</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">wf_set</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_data</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">wf_styles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wf_styles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">wf_styles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">wf_styles</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">wf</span><span class="p">,</span> <span class="n">sty</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wf_set</span><span class="p">,</span> <span class="n">wf_styles</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">sty</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">wf_line</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">wf</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">wf_line</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">wf</span><span class="p">,</span> <span class="o">**</span><span class="n">sty</span><span class="p">)</span>
+                <span class="n">leg_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wf_line</span><span class="p">)</span>
+
+        <span class="c1"># draw legend</span>
+        <span class="k">for</span> <span class="n">legend_data</span><span class="p">,</span> <span class="n">legend_format</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legend_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend_format</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">legend_vals</span> <span class="ow">in</span> <span class="n">legend_data</span><span class="p">:</span>
+                <span class="n">leg_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">legend_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">legend_vals</span><span class="p">))</span>
+
+        <span class="c1"># draw hlines and vlines</span>
+        <span class="k">for</span> <span class="n">lines</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_data</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">units</span><span class="o">.</span><span class="n">unit</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_unit</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_unit</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_coords</span><span class="p">(</span><span class="mf">0.98</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_lim</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_lim</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">leg_labels</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">clear</span><span class="p">:</span>
+                <span class="n">old_leg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_legend</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">old_leg</span><span class="p">:</span>
+                    <span class="n">leg_handles</span> <span class="o">=</span> <span class="n">old_leg</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()</span> <span class="o">+</span> <span class="n">leg_handles</span>
+                    <span class="n">leg_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">old_leg</span><span class="o">.</span><span class="n">get_texts</span><span class="p">()]</span> <span class="o">+</span> <span class="n">leg_labels</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">leg_handles</span><span class="p">,</span> <span class="n">leg_labels</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">legend_kwargs</span><span class="p">)</span></div>
+        
+                
+<div class="viewcode-block" id="WaveformBrowser.draw_entry"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.draw_entry">[docs]</a>    <span class="k">def</span> <span class="nf">draw_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Draw specified entries from file. Entry_list can be either a single value or list of values representing the index of an event within all files. If append is True, previously drawn entries will be drawn along with this one. If clear is False, the axis will not be cleared before drawing. Return the axis object&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">find_entry</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">append</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_current</span><span class="p">(</span><span class="n">clear</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WaveformBrowser.find_next"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.find_next">[docs]</a>    <span class="k">def</span> <span class="nf">find_next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_wfs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">append</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find the next n_wfs (default to self.n_drawn) waveforms indicated by self.selection and place them in self.wf_data, self.line_data and self.legend_data. If append is True, do not clear these buffers first.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n_wfs</span><span class="p">:</span> <span class="n">n_wfs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_drawn</span>
+
+        <span class="n">wf_indices</span> <span class="o">=</span> <span class="p">[</span> <span class="n">i_wf</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">i_wf</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_wfs</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_it</span><span class="p">)</span> <span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf_indices</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_wfs</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof</span><span class="o">=</span><span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">find_entry</span><span class="p">(</span><span class="n">wf_indices</span><span class="p">,</span> <span class="n">append</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wf_indices</span></div>
+        
+<div class="viewcode-block" id="WaveformBrowser.draw_next"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.draw_next">[docs]</a>    <span class="k">def</span> <span class="nf">draw_next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_wfs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">append</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">clear</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Draw the next n_wfs waveforms on the same axis. If a selection was set, only draw waveforms from that selection. Return a list of waveform indices drawn and the axis object:</span>
+<span class="sd">           n_wfs: number of waveforms to draw (default is self.n_wfs)</span>
+<span class="sd">           append: set to True to prevent clearing of axis before drawing</span>
+<span class="sd">           clear: set False to draw on an already defined axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">wf_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_next</span><span class="p">(</span><span class="n">n_wfs</span><span class="p">,</span> <span class="n">append</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_current</span><span class="p">(</span><span class="n">clear</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">wf_indices</span></div>
+            
+<div class="viewcode-block" id="WaveformBrowser.reset"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reset to the start of the file for draw_next &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eof</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">index_it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_map</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span> <span class="c1"># index list</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">index_it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span> <span class="c1"># numpy boolean mask</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">index_it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span> <span class="c1"># pandas series mask</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">index_it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="o">.</span><span class="n">values</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not sure what to do with selection&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="p">,</span> <span class="s2">&quot;(&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;)&quot;</span><span class="p">)</span></div>
+        
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+    
+<div class="viewcode-block" id="WaveformBrowser.__next__"><a class="viewcode-back" href="../../../pygama.dsp.html#pygama.dsp.WaveformBrowser.WaveformBrowser.__next__">[docs]</a>    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Call draw_next... &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">draw_next</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,71 +1,31 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="python" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>pygama.io.orca_digitizers &mdash; pygama v0.6 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../../index.html" class="icon icon-home"> pygama
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,86 +33,36 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">pygama</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
       <li>pygama.io.orca_digitizers</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for pygama.io.orca_digitizers</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -168,7 +78,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">decoder_name</span> <span class="o">=</span> <span class="s1">&#39;ORSIS3302DecoderForEnergy&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orca_class_name</span> <span class="o">=</span> <span class="s1">&#39;ORSIS3302Model&#39;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values_template</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;packet_id&#39;</span><span class="p">:</span> <span class="p">{</span>
                <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
              <span class="p">},</span>
@@ -206,14 +116,23 @@
         <span class="p">}</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c1"># also initializes the garbage df</span>
-        <span class="c1"># self.enabled_cccs = []</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># self.enabled_cccs = []</span>
 
 
 <div class="viewcode-block" id="ORCAStruck3302.get_decoded_values"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302.get_decoded_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_decoded_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># TODO: return channel-specific decoded_values</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span></div>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+            <span class="n">dec_vals_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dec_vals_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ORSIS3302Model: Error: decoded_values not built yet!&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">dec_vals_list</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Get first thing we find</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ORSIS3302Model: Error: No decoded values for channel&quot;</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="ORCAStruck3302.set_object_info"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302.set_object_info">[docs]</a>    <span class="k">def</span> <span class="nf">set_object_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_info</span><span class="p">):</span>
@@ -227,27 +146,26 @@
             <span class="n">int_enabled_mask</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;internalTriggerEnabledMask&#39;</span><span class="p">]</span>
             <span class="n">ext_enabled_mask</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;externalTriggerEnabledMask&#39;</span><span class="p">]</span>
             <span class="n">enabled_mask</span> <span class="o">=</span> <span class="n">int_enabled_mask</span> <span class="o">|</span> <span class="n">ext_enabled_mask</span>
-            <span class="n">trace_length</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
                 <span class="c1"># only care about enabled channels</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">enabled_mask</span> <span class="o">&gt;&gt;</span> <span class="n">channel</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="p">:</span>
-                    <span class="c1"># save list of enabled channels</span>
-                    <span class="c1">#self.enabled_cccs.append(get_ccc(crate, card, channel))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="n">enabled_mask</span> <span class="o">&gt;&gt;</span> <span class="n">channel</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="p">):</span> <span class="k">continue</span>
 
-                    <span class="c1"># get trace length(s). Should all be the same until</span>
-                    <span class="c1"># multi-buffer mode is implemented AND each channel has its</span>
-                    <span class="c1"># own buffer</span>
-                    <span class="n">this_length</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;sampleLengths&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">channel</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
-                    <span class="k">if</span> <span class="n">trace_length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">trace_length</span> <span class="o">=</span> <span class="n">this_length</span>
-                    <span class="k">elif</span> <span class="n">this_length</span> <span class="o">!=</span> <span class="n">trace_length</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SIS3316ORCADecoder Error: multiple trace lengths not supported&#39;</span><span class="p">)</span>
-                        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+                <span class="n">ccc</span> <span class="o">=</span> <span class="n">get_ccc</span><span class="p">(</span><span class="n">crate</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+                <span class="c1"># save list of enabled channels</span>
+                <span class="c1">#self.enabled_cccs.append(ccc)</span>
 
-            <span class="c1"># check trace length and update decoded_values</span>
-            <span class="k">if</span> <span class="n">trace_length</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">trace_length</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="mi">16</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SIS3316ORCADecoder Error: invalid trace_length&#39;</span><span class="p">,</span> <span class="n">trace_length</span><span class="p">)</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_length</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decoded_values_template</span><span class="p">)</span>
+                <span class="n">sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="c1"># alias</span>
+
+                <span class="c1"># get trace length(s). Should all be the same until</span>
+                <span class="c1"># multi-buffer mode is implemented AND each channel has its</span>
+                <span class="c1"># own buffer</span>
+                <span class="n">trace_length</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;sampleLengths&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">channel</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="n">trace_length</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">trace_length</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="mi">16</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SIS3316ORCADecoder Error: invalid trace_length&#39;</span><span class="p">,</span> <span class="n">trace_length</span><span class="p">)</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">ccc</span><span class="p">][</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_length</span></div>
 
 
 <div class="viewcode-block" id="ORCAStruck3302.max_n_rows_per_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302.max_n_rows_per_packet">[docs]</a>    <span class="k">def</span> <span class="nf">max_n_rows_per_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -431,7 +349,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dec_vals_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ORGretina4MModel: Error: decoded_values not built yet!&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">None</span>
-            <span class="k">return</span> <span class="n">dec_vals_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">dec_vals_list</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Get first thing we find</span>
         <span class="k">if</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ORGretina4MModel: Error: No decoded values for channel&quot;</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
@@ -689,46 +607,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020, LEGEND Collaboration.
-
-    </p>
+    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

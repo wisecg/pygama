@@ -1,71 +1,31 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="python" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>pygama.lh5.store &mdash; pygama v0.6 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../../index.html" class="icon icon-home"> pygama
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,86 +33,36 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installing pygama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pygama.html">Package API reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">pygama</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
       <li>pygama.lh5.store</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for pygama.lh5.store</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -265,14 +175,15 @@
 <span class="sd">            will be sliced to obey those constraints, where n_rows is</span>
 <span class="sd">            interpreted as the (max) number of -selected- values (in idx) to be</span>
 <span class="sd">            read out.</span>
-<span class="sd">        field_mask : dict or defaultdict { str : bool } (optional)</span>
+<span class="sd">        field_mask : dict or defaultdict { str : bool } or list/tuple (optional)</span>
 <span class="sd">            For tables and structs, determines which fields get written out.</span>
 <span class="sd">            Only applies to immediate fields of the requested objects. If a dict</span>
 <span class="sd">            is used, a defaultdict will be made with the default set to the</span>
 <span class="sd">            opposite of the first element in the dict. This way if one specifies</span>
 <span class="sd">            a few fields at &quot;false&quot;, all but those fields will be read out,</span>
 <span class="sd">            while if one specifies just a few fields as &quot;true&quot;, only those</span>
-<span class="sd">            fields will be read out.</span>
+<span class="sd">            fields will be read out. If a list is provided, the listed fields</span>
+<span class="sd">            will be set to &quot;true&quot;, while the rest will default to &quot;false&quot;.</span>
 <span class="sd">        obj_buf : lh5 object (optional)</span>
 <span class="sd">            Read directly into memory provided in obj_buf. Note: the buffer will</span>
 <span class="sd">            be expanded to accommodate the data requested. To maintain the</span>
@@ -297,7 +208,8 @@
         <span class="c1">#          proc.execute()</span>
 
         <span class="c1"># Handle list-of-files recursively</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">h5py</span><span class="o">.</span><span class="n">_hl</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">File</span><span class="p">)):</span>
+            <span class="n">lh5_file</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">)</span>
             <span class="n">n_rows_read</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">h5f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lh5_file</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -382,6 +294,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">default</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">field_mask</span><span class="p">[</span><span class="n">field_mask</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
                 <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">default</span><span class="p">,</span> <span class="n">field_mask</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{</span> <span class="n">field</span> <span class="p">:</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_mask</span><span class="p">}</span> <span class="p">)</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;bad field_mask of type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
@@ -429,6 +343,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">default</span> <span class="o">=</span> <span class="ow">not</span> <span class="p">(</span><span class="n">field_mask</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">field_mask</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]])</span>
                 <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">default</span><span class="p">,</span> <span class="n">field_mask</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">field_mask</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{</span> <span class="n">field</span> <span class="p">:</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_mask</span><span class="p">}</span> <span class="p">)</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_mask</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;bad field_mask of type&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field_mask</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
@@ -858,46 +774,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020, LEGEND Collaboration.
-
-    </p>
+    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
