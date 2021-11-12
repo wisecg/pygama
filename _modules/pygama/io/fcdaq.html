@@ -506,8 +506,18 @@
     <span class="n">packet_id</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">rc</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">bytes_processed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">bytes_per_loop</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">file_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">daq_file</span><span class="p">)</span>
     <span class="n">max_numtraces</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;B&quot;</span>
+    <span class="n">n_entries</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">n_max</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="ow">and</span> <span class="n">n_max</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">n_entries</span> <span class="o">=</span> <span class="n">n_max</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">n_entries</span> <span class="o">=</span> <span class="n">file_size</span>
+    <span class="n">progress_bar</span> <span class="o">=</span> <span class="n">tqdm_range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_entries</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Processing&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
     <span class="k">while</span> <span class="n">rc</span> <span class="ow">and</span> <span class="n">packet_id</span> <span class="o">&lt;</span> <span class="n">n_max</span><span class="p">:</span>
         <span class="n">rc</span> <span class="o">=</span> <span class="n">fcio</span><span class="o">.</span><span class="n">get_record</span><span class="p">()</span>
 
@@ -517,15 +527,10 @@
 
         <span class="n">packet_id</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">packet_id</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># FIXME: is cast to float necessary?</span>
-            <span class="n">pct_done</span> <span class="o">=</span> <span class="n">bytes_processed</span> <span class="o">/</span> <span class="n">file_size</span>
-            <span class="k">if</span> <span class="n">n_max</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="ow">and</span> <span class="n">n_max</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">pct_done</span> <span class="o">=</span> <span class="n">packet_id</span> <span class="o">/</span> <span class="n">n_max</span>
-            <span class="n">update_progress</span><span class="p">(</span><span class="n">pct_done</span><span class="p">)</span>
-
         <span class="c1"># Status record</span>
         <span class="k">if</span> <span class="n">rc</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="n">bytes_processed</span> <span class="o">+=</span> <span class="n">status_decoder</span><span class="o">.</span><span class="n">decode_packet</span><span class="p">(</span><span class="n">fcio</span><span class="p">,</span> <span class="n">status_tbl</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">)</span>
+            <span class="n">bytes_per_loop</span> <span class="o">=</span> <span class="n">status_decoder</span><span class="o">.</span><span class="n">decode_packet</span><span class="p">(</span><span class="n">fcio</span><span class="p">,</span> <span class="n">status_tbl</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">)</span>
+            <span class="n">bytes_processed</span> <span class="o">+=</span> <span class="n">bytes_per_loop</span>
             <span class="k">if</span> <span class="n">status_tbl</span><span class="o">.</span><span class="n">is_full</span><span class="p">():</span>
                 <span class="n">lh5_store</span><span class="o">.</span><span class="n">write_object</span><span class="p">(</span><span class="n">status_tbl</span><span class="p">,</span> <span class="s1">&#39;fcio_status&#39;</span><span class="p">,</span> <span class="n">status_filename</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="n">status_tbl</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
                 <span class="n">status_tbl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -549,7 +554,16 @@
                     <span class="n">tbl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
             <span class="c1"># Looks okay: just decode</span>
-            <span class="n">bytes_processed</span> <span class="o">+=</span> <span class="n">event_decoder</span><span class="o">.</span><span class="n">decode_packet</span><span class="p">(</span><span class="n">fcio</span><span class="p">,</span> <span class="n">event_tables</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">)</span>
+            <span class="n">bytes_per_loop</span> <span class="o">=</span> <span class="n">event_decoder</span><span class="o">.</span><span class="n">decode_packet</span><span class="p">(</span><span class="n">fcio</span><span class="p">,</span> <span class="n">event_tables</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">)</span>
+            <span class="n">bytes_processed</span> <span class="o">+=</span> <span class="n">bytes_per_loop</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+              <span class="n">update_len</span> <span class="o">=</span> <span class="mi">0</span>
+              <span class="k">if</span> <span class="n">n_max</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="ow">and</span> <span class="n">n_max</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                  <span class="n">update_len</span> <span class="o">=</span> <span class="mi">1</span>
+              <span class="k">else</span><span class="p">:</span>
+                  <span class="n">update_len</span> <span class="o">=</span> <span class="n">bytes_per_loop</span>
+              <span class="n">update_progress</span><span class="p">(</span><span class="n">progress_bar</span><span class="p">,</span> <span class="n">update_len</span><span class="p">)</span>
 
             <span class="c1"># i_debug += 1</span>
             <span class="c1"># if i_debug == 10:</span>
@@ -576,7 +590,6 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Not saving file since no data were found:&#39;</span><span class="p">,</span> <span class="n">out_file</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="n">update_progress</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">packet_id</span><span class="p">,</span> <span class="s1">&#39;packets decoded&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">event_decoder</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

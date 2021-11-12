@@ -68,6 +68,7 @@
 <span class="sd">pygama convenience functions.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
@@ -88,7 +89,7 @@
 <span class="sd">        arg(&quot;-r&quot;, &quot;--run&quot;, nargs=1, help=&quot;load a single run&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">pygama</span> <span class="kn">import</span> <span class="n">DataSet</span>
-    
+
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;ds&quot;</span><span class="p">]:</span>
         <span class="n">ds_lo</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;ds&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">try</span><span class="p">:</span>
@@ -96,9 +97,9 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">ds_hi</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">ds_lo</span><span class="p">,</span> <span class="n">ds_hi</span><span class="p">,</span> <span class="n">md</span><span class="o">=</span><span class="n">run_db</span><span class="p">,</span> <span class="n">cal</span><span class="o">=</span><span class="n">cal_db</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">])</span>
-    
+
     <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]:</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">run</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">md</span><span class="o">=</span><span class="n">run_db</span><span class="p">,</span> <span class="n">cal</span><span class="o">=</span><span class="n">cal_db</span><span class="p">,</span> 
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">run</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">md</span><span class="o">=</span><span class="n">run_db</span><span class="p">,</span> <span class="n">cal</span><span class="o">=</span><span class="n">cal_db</span><span class="p">,</span>
                      <span class="n">v</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">ds</span></div>
 
@@ -119,35 +120,65 @@
     <span class="k">return</span> <span class="n">decoders</span>
 
 
-<div class="viewcode-block" id="update_progress"><a class="viewcode-back" href="../../pygama.html#pygama.utils.update_progress">[docs]</a><span class="k">def</span> <span class="nf">update_progress</span><span class="p">(</span><span class="n">progress</span><span class="p">,</span> <span class="n">run</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="update_progress"><a class="viewcode-back" href="../../pygama.html#pygama.utils.update_progress">[docs]</a><span class="k">def</span> <span class="nf">update_progress</span><span class="p">(</span><span class="n">tqdm_bar</span><span class="p">,</span> <span class="n">progress</span><span class="p">):</span>
+    <span class="n">tqdm_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">progress</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="tqdm_range"><a class="viewcode-back" href="../../pygama.html#pygama.utils.tqdm_range">[docs]</a><span class="k">def</span> <span class="nf">tqdm_range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bar_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    adapted from from https://stackoverflow.com/a/15860757</span>
+<span class="sd">    Uses tqdm.trange which wraps around the python range and also has the option</span>
+<span class="sd">    to display a progress</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        for start_row in range(0, tot_n_rows, buffer_len):</span>
+<span class="sd">            ...</span>
+
+<span class="sd">            Can be converted to the following</span>
+
+<span class="sd">        for start_row in tqdm_range(0, tot_n_rows, buffer_len, verbose):</span>
+<span class="sd">            ...</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    start : int</span>
+<span class="sd">        starting iteration value</span>
+<span class="sd">    stop : int</span>
+<span class="sd">        ending iteration value</span>
+<span class="sd">    step : int</span>
+<span class="sd">        step size inbetween each iteration</span>
+<span class="sd">    verbose : int</span>
+<span class="sd">        verbose = 0 hides progress bar verbose &gt; 0 displays progress bar</span>
+<span class="sd">    text : str</span>
+<span class="sd">        text to display in front of the progress bar</span>
+<span class="sd">    bar_length : str</span>
+<span class="sd">        horizontal length of the bar in cursor spaces</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    iterable : tqdm.trange</span>
+<span class="sd">        object that can be iterated over in a for loop</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">barLength</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># length of the progress bar</span>
-    <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">progress</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="n">progress</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">progress</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">progress</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="n">progress</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;error: progress var must be float</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-    <span class="k">if</span> <span class="n">progress</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">progress</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;Halt...</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-    <span class="k">if</span> <span class="n">progress</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">progress</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;Done...</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-    <span class="n">block</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">barLength</span> <span class="o">*</span> <span class="n">progress</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">run</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s2">Progress : [</span><span class="si">{}</span><span class="s2">] </span><span class="si">{:0.1f}</span><span class="s2">% </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="s2">&quot;#&quot;</span> <span class="o">*</span> <span class="n">block</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">barLength</span> <span class="o">-</span> <span class="n">block</span><span class="p">),</span> <span class="n">progress</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s2">Progress : [</span><span class="si">{}</span><span class="s2">] </span><span class="si">{:0.1f}</span><span class="s2">% </span><span class="si">{}</span><span class="s2"> (Run </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="s2">&quot;#&quot;</span> <span class="o">*</span> <span class="n">block</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">barLength</span> <span class="o">-</span> <span class="n">block</span><span class="p">),</span> <span class="n">progress</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span>
-            <span class="n">run</span><span class="p">)</span>
+    <span class="n">hide_bar</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">hide_bar</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">hide_bar</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+    <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Processing&quot;</span>
+
+    <span class="k">if</span> <span class="n">unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;it&quot;</span>
+
+    <span class="n">bar_format</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="s2">l_bar</span><span class="se">}}{{</span><span class="s2">bar:</span><span class="si">{</span><span class="n">bar_length</span><span class="si">}</span><span class="se">}}{{</span><span class="s2">r_bar</span><span class="se">}}{{</span><span class="s2">bar:</span><span class="si">{</span><span class="o">-</span><span class="n">bar_length</span><span class="si">}</span><span class="s2">b</span><span class="se">}}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">trange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span>
+                       <span class="n">disable</span><span class="o">=</span><span class="n">hide_bar</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
+                       <span class="n">bar_format</span><span class="o">=</span><span class="n">bar_format</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="n">unit_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="sizeof_fmt"><a class="viewcode-back" href="../../pygama.html#pygama.utils.sizeof_fmt">[docs]</a><span class="k">def</span> <span class="nf">sizeof_fmt</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">):</span>
@@ -336,7 +367,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">/</span><span class="n">var</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">/</span><span class="n">var</span>
-    <span class="n">sum_wts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="n">var</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">var</span><span class="p">)</span> 
+    <span class="n">sum_wts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="n">var</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">var</span><span class="p">)</span>
     <span class="n">sum_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="n">sum_xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
     <span class="n">sum_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
