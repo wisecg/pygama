@@ -124,7 +124,7 @@
 
 
 <div class="viewcode-block" id="ORCAStruck3302.get_decoded_values"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAStruck3302.get_decoded_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_decoded_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dec_vals_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dec_vals_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ORSIS3302Model: Error: decoded_values not built yet!&quot;</span><span class="p">)</span>
@@ -180,20 +180,20 @@
         <span class="c1"># does not copy data. p32 and p16 are read-only</span>
         <span class="n">p32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
         <span class="n">p16</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
-        
+
         <span class="c1"># read the crate/card/channel first</span>
         <span class="n">crate</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">21</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xF</span>
         <span class="n">card</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1F</span>
         <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">p32</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
         <span class="n">ccc</span> <span class="o">=</span> <span class="n">get_ccc</span><span class="p">(</span><span class="n">crate</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
-        
+
         <span class="c1"># aliases for brevity</span>
         <span class="n">tb</span> <span class="o">=</span> <span class="n">lh5_tables</span>
-        <span class="c1"># if the first key is an int, then there are different tables for </span>
+        <span class="c1"># if the first key is an int, then there are different tables for</span>
         <span class="c1"># each channel.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">tb</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lh5_tables</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">:</span> 
+                <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">return</span>
@@ -344,7 +344,7 @@
 
 
 <div class="viewcode-block" id="ORCAGretina4M.get_decoded_values"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.ORCAGretina4M.get_decoded_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_decoded_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dec_vals_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dec_vals_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ORGretina4MModel: Error: decoded_values not built yet!&quot;</span><span class="p">)</span>
@@ -421,9 +421,9 @@
 
         <span class="c1"># aliases for brevity</span>
         <span class="n">tb</span> <span class="o">=</span> <span class="n">lh5_tables</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tb</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span> 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tb</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lh5_tables</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">:</span> 
+                <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">return</span>
@@ -507,103 +507,206 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
 
 
-<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">class SIS3316ORCADecoder(DataTaker):</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-<span class="sd">    handle ORCA Struck 3316 digitizer</span>
+<div class="viewcode-block" id="SIS3316ORCADecoder"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.SIS3316ORCADecoder">[docs]</a><span class="k">class</span> <span class="nc">SIS3316ORCADecoder</span><span class="p">(</span><span class="n">OrcaDecoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decode ORCA Struck 3316 digitizer data.</span>
+<span class="sd">    Thanks to J. Browning of COHERENT for getting this updated!</span>
 
 <span class="sd">    TODO:</span>
 <span class="sd">    handle per-channel data (gain, ...)</span>
 <span class="sd">    most metadata of Struck header (energy, ...)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<span class="sd">    def __init__(self, *args, **kwargs):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
-<span class="sd">        self.decoder_name = &#39;ORSIS3316WaveformDecoder&#39;</span>
-<span class="sd">        self.class_name = &#39;ORSIS3316Model&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoder_name</span> <span class="o">=</span> <span class="s1">&#39;ORSIS3316WaveformDecoder&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orca_class_name</span> <span class="o">=</span> <span class="s1">&#39;ORSIS3316Model&#39;</span>
 
-<span class="sd">        # store an entry for every event</span>
-<span class="sd">        self.decoded_values = {</span>
-<span class="sd">            &quot;packet_id&quot;: [],</span>
-<span class="sd">            &quot;ievt&quot;: [],</span>
-<span class="sd">            &quot;energy_first&quot;: [],</span>
-<span class="sd">            &quot;energy&quot;: [],</span>
-<span class="sd">            &quot;timestamp&quot;: [],</span>
-<span class="sd">            &quot;channel&quot;: [],</span>
-<span class="sd">            &quot;waveform&quot;: [],</span>
-<span class="sd">        }</span>
-<span class="sd">        super().__init__(*args, **kwargs) # also initializes the garbage df (whatever that means...)</span>
+        <span class="c1"># store an entry for every event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;packet_id&#39;</span><span class="p">:</span> <span class="p">{</span>
+               <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+             <span class="p">},</span>
+            <span class="s1">&#39;ievt&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;adc&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;energy_first&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint32&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint64&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;clock_ticks&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;crate&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint8&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;card&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint8&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;channel&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint8&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;waveform&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="s1">&#39;uint16&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;waveform&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="mi">65532</span><span class="p">,</span> <span class="c1"># max value. override this before initalizing buffers to save RAM</span>
+              <span class="s1">&#39;sample_period&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="c1"># override if a different clock rate is used</span>
+              <span class="s1">&#39;sample_period_units&#39;</span><span class="p">:</span> <span class="s1">&#39;ns&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="s1">&#39;adc&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c1"># also initializes the garbage df (whatever that means...)</span>
 
-<span class="sd">        # self.event_header_length = 1 #?</span>
-<span class="sd">        self.sample_period = 10  # ns, I will set this later, according to header info</span>
-<span class="sd">        self.gain = 0</span>
-<span class="sd">        self.h5_format = &quot;table&quot;</span>
-<span class="sd">        self.ievt = 0       #event number</span>
-<span class="sd">        self.ievt_gbg = 0      #garbage event number</span>
-<span class="sd">        self.window = False</span>
-
-
-<span class="sd">    def decode_event(self, event_data_bytes, packet_id, header_dict, verbose=False):</span>
-
-<span class="sd">        # parse the raw event data into numpy arrays of 16 and 32 bit ints</span>
-<span class="sd">        evt_data_32 = np.fromstring(event_data_bytes, dtype=np.uint32)</span>
-<span class="sd">        evt_data_16 = np.fromstring(event_data_bytes, dtype=np.uint16)</span>
-
-<span class="sd">        #TODO Figure out the header, particularly card/crate/channel/timestamp</span>
-<span class="sd">        n_lost_msb = 0</span>
-<span class="sd">        n_lost_lsb = 0</span>
-<span class="sd">        n_lost_records = 0</span>
-<span class="sd">        crate = evt_data_32[3]</span>
-<span class="sd">        card = evt_data_32[4]</span>
-<span class="sd">        channel = evt_data_32[4]</span>
-<span class="sd">        buffer_wrap = 0</span>
-<span class="sd">        crate_card_chan = crate + card + channel</span>
-<span class="sd">        wf_length_32 = 0</span>
-<span class="sd">        ene_wf_length = evt_data_32[4]</span>
-<span class="sd">        evt_header_id = 0</span>
-<span class="sd">        timestamp = 0</span>
-
-<span class="sd">        # compute expected and actual array dimensions</span>
-<span class="sd">        wf_length16 = 1024</span>
-<span class="sd">        orca_helper_length16 = 52</span>
-<span class="sd">        header_length16 = orca_helper_length16</span>
-<span class="sd">        ene_wf_length16 = 2 * ene_wf_length</span>
-<span class="sd">        footer_length16 = 0</span>
-
-<span class="sd">        expected_wf_length = (len(evt_data_16) - header_length16 - ene_wf_length16)/2</span>
-
-<span class="sd">        if wf_length16 != expected_wf_length:</span>
-<span class="sd">            print(&quot;ERROR: Waveform size %d doesn&#39;t match expected size %d.&quot; %</span>
-<span class="sd">                  (wf_length16, expected_wf_length))</span>
-<span class="sd">            #exit()</span>
-
-<span class="sd">        # indexes of stuff (all referring to the 16 bit array)</span>
-<span class="sd">        i_wf_start = header_length16</span>
-<span class="sd">        i_wf_stop = i_wf_start + wf_length16</span>
-<span class="sd">        i_ene_start = i_wf_stop + 1</span>
-<span class="sd">        i_ene_stop = i_ene_start + ene_wf_length16</span>
+        <span class="c1"># self.event_header_length = 1 #?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">=</span> <span class="mi">0</span>
 
 
-<span class="sd">        # handle the waveform(s)</span>
-<span class="sd">        if wf_length16 &gt; 0:</span>
-<span class="sd">            wf_data = evt_data_16[i_wf_start:i_wf_stop]</span>
+<div class="viewcode-block" id="SIS3316ORCADecoder.get_decoded_values"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.SIS3316ORCADecoder.get_decoded_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_decoded_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># TODO: return channel-specific decoded_values</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span></div>
 
 
-<span class="sd">        #TODO check if number of events matches expected</span>
-<span class="sd">        #if len(wf_data) != expected_wf_length:</span>
-<span class="sd">        #    print(&quot;ERROR: We expected %d WF samples and only got %d&quot; %</span>
-<span class="sd">        #          (expected_wf_length, len(wf_data)))</span>
-<span class="sd">        #    exit()</span>
+<div class="viewcode-block" id="SIS3316ORCADecoder.set_object_info"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.SIS3316ORCADecoder.set_object_info">[docs]</a>    <span class="k">def</span> <span class="nf">set_object_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_info</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object_info</span> <span class="o">=</span> <span class="n">object_info</span>
+        <span class="n">trace_length</span> <span class="o">=</span> <span class="mi">65000</span>
 
-<span class="sd">        # final raw wf array</span>
-<span class="sd">        waveform = wf_data</span>
+        <span class="c1"># parse object_info for important info</span>
+        <span class="k">for</span> <span class="n">card_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_info</span><span class="p">:</span>
+            <span class="n">crate</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Crate&#39;</span><span class="p">]</span>
+            <span class="n">card</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;Card&#39;</span><span class="p">]</span>
 
-<span class="sd">        # set the event number (searchable HDF5 column)</span>
-<span class="sd">        ievt = self.ievt</span>
-<span class="sd">        self.ievt += 1</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">int_enabled_mask</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;internalTriggerEnabledMask&#39;</span><span class="p">]</span>
+                <span class="n">ext_enabled_mask</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;externalTriggerEnabledMask&#39;</span><span class="p">]</span>
+                <span class="n">enabled_mask</span> <span class="o">=</span> <span class="n">int_enabled_mask</span> <span class="o">|</span> <span class="n">ext_enabled_mask</span>
+                <span class="n">trace_length</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+                    <span class="c1"># only care about enabled channels</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">enabled_mask</span> <span class="o">&gt;&gt;</span> <span class="n">channel</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span><span class="p">:</span>
+                    <span class="c1"># save list of enabled channels</span>
+                    <span class="c1">#self.enabled_cccs.append(get_ccc(crate, card, channel))</span>
 
-<span class="sd">        # send any variable with a name in &quot;decoded_values&quot; to the pandas output</span>
-<span class="sd">        self.format_data(locals())</span>
-<span class="sd">&#39;&#39;&#39;</span>
+                    <span class="c1"># get trace length(s). Should all be the same until</span>
+                    <span class="c1"># multi-buffer mode is implemented AND each channel has its</span>
+                    <span class="c1"># own buffer</span>
+                        <span class="n">this_length</span> <span class="o">=</span> <span class="n">card_dict</span><span class="p">[</span><span class="s1">&#39;sampleLengths&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">channel</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
+                        <span class="k">if</span> <span class="n">trace_length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">trace_length</span> <span class="o">=</span> <span class="n">this_length</span>
+                        <span class="k">elif</span> <span class="n">this_length</span> <span class="o">!=</span> <span class="n">trace_length</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SIS3316ORCADecoder Error: multiple trace lengths not supported&#39;</span><span class="p">)</span>
+                            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;I dont know what this is for&#39;</span><span class="p">)</span>
+
+            <span class="c1"># check trace length and update decoded_values</span>
+            <span class="k">if</span> <span class="n">trace_length</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">trace_length</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="mi">16</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SIS3316ORCADecoder Error: invalid trace_length&#39;</span><span class="p">,</span> <span class="n">trace_length</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decoded_values</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_length</span></div>
+
+
+<div class="viewcode-block" id="SIS3316ORCADecoder.max_n_rows_per_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.SIS3316ORCADecoder.max_n_rows_per_packet">[docs]</a>    <span class="k">def</span> <span class="nf">max_n_rows_per_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="SIS3316ORCADecoder.decode_packet"><a class="viewcode-back" href="../../../pygama.io.html#pygama.io.orca_digitizers.SIS3316ORCADecoder.decode_packet">[docs]</a>    <span class="k">def</span> <span class="nf">decode_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">,</span> <span class="n">lh5_tables</span><span class="p">,</span> <span class="n">packet_id</span><span class="p">,</span> <span class="n">header_dict</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="c1"># parse the raw event data into numpy arrays of 16 and 32 bit ints</span>
+        <span class="n">evt_data_32</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+        <span class="n">evt_data_16</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+
+        <span class="n">tb</span> <span class="o">=</span> <span class="n">lh5_tables</span>
+
+        <span class="n">crate</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">card</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt_data_32</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xFFF0</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Something went wrong&#39;</span><span class="p">)</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="mi">33</span>
+        <span class="n">ccc</span> <span class="o">=</span> <span class="n">get_ccc</span><span class="p">(</span><span class="n">crate</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">tb</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lh5_tables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ccc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">skipped_channels</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">return</span>
+            <span class="n">tb</span> <span class="o">=</span> <span class="n">lh5_tables</span><span class="p">[</span><span class="n">ccc</span><span class="p">]</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">loc</span>
+
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;packet_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">packet_id</span>
+
+        <span class="c1"># TODO: Figure out the header, particularly card/crate/channel/timestamp</span>
+        <span class="n">n_lost_msb</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">n_lost_lsb</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">n_lost_records</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;crate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;card&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;channel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">evt_data_32</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xFFF0</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Something went wrong&#39;</span><span class="p">)</span>
+            <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;channel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">33</span>
+        <span class="n">buffer_wrap</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">crate_card_chan</span> <span class="o">=</span> <span class="n">crate</span> <span class="o">+</span> <span class="n">card</span> <span class="o">+</span> <span class="n">channel</span>
+        <span class="n">wf_length_32</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ene_wf_length</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">evt_header_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_32</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">evt_data_32</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xffff0000</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;something went wrong here too&#39;</span><span class="p">)</span>
+            <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># compute expected and actual array dimensions</span>
+        <span class="n">wf_length16</span> <span class="o">=</span> <span class="mi">65000</span>
+        <span class="n">orca_helper_length16</span> <span class="o">=</span> <span class="mi">52</span>
+        <span class="n">header_length16</span> <span class="o">=</span> <span class="n">orca_helper_length16</span>
+        <span class="n">ene_wf_length16</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ene_wf_length</span>
+        <span class="n">footer_length16</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">expected_wf_length</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">evt_data_16</span><span class="p">)</span> <span class="o">-</span> <span class="n">header_length16</span> <span class="o">-</span> <span class="n">ene_wf_length16</span><span class="p">)</span>
+
+        <span class="c1"># if wf_length16 != expected_wf_length:</span>
+        <span class="c1">#    print(len(evt_data_16), orca_helper_length16, header_length16,</span>
+        <span class="c1">#          footer_length16)</span>
+        <span class="c1">#    print(&quot;ERROR: Waveform size %d doesn&#39;t match expected size %d.&quot; %</span>
+        <span class="c1">#          (wf_length16, expected_wf_length))</span>
+        <span class="c1">#    print(&quot;       The Last Word (should be 0xdeadbeef):&quot;,)</span>
+        <span class="c1">#    exit()</span>
+
+        <span class="c1"># indexes of stuff (all referring to the 16 bit array)</span>
+        <span class="n">i_wf_start</span> <span class="o">=</span> <span class="n">header_length16</span>
+        <span class="n">i_wf_stop</span> <span class="o">=</span> <span class="n">i_wf_start</span> <span class="o">+</span> <span class="n">wf_length16</span>
+        <span class="n">i_ene_start</span> <span class="o">=</span> <span class="n">i_wf_stop</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">i_ene_stop</span> <span class="o">=</span> <span class="n">i_ene_start</span> <span class="o">+</span> <span class="n">ene_wf_length16</span>
+
+        <span class="n">tbwf</span> <span class="o">=</span> <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="c1">#print(len(tb[&#39;waveform&#39;][&#39;values&#39;].nda[ii]))</span>
+        <span class="c1"># handle the waveform(s)</span>
+        <span class="k">if</span> <span class="n">wf_length16</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">evt_data_16</span><span class="p">[</span><span class="n">i_wf_start</span><span class="p">:</span><span class="n">i_wf_stop</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">evt_data_16</span><span class="p">[</span><span class="n">i_wf_start</span><span class="p">:</span><span class="n">i_wf_stop</span><span class="p">]))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tb</span><span class="p">[</span><span class="s1">&#39;waveform&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]))</span>
+
+        <span class="c1"># TODO check if number of events matches expected</span>
+        <span class="c1"># if len(wf_data) != expected_wf_length:</span>
+        <span class="c1">#    print(&quot;ERROR: We expected %d WF samples and only got %d&quot; %</span>
+        <span class="c1">#          (expected_wf_length, len(wf_data)))</span>
+        <span class="c1">#    exit()</span>
+
+        <span class="c1"># final raw wf array</span>
+
+        <span class="c1"># set the event number (searchable HDF5 column)</span>
+        <span class="n">tb</span><span class="p">[</span><span class="s1">&#39;ievt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nda</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ievt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">tb</span><span class="o">.</span><span class="n">push_row</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>
