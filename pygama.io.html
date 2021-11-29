@@ -618,6 +618,43 @@ the constructor</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="pygama.io.orca_digitizers.SIS3316ORCADecoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.io.orca_digitizers.</span></span><span class="sig-name descname"><span class="pre">SIS3316ORCADecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#SIS3316ORCADecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.SIS3316ORCADecoder" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.io.orcadaq.OrcaDecoder" title="pygama.io.orcadaq.OrcaDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.io.orcadaq.OrcaDecoder</span></code></a></p>
+<p>Decode ORCA Struck 3316 digitizer data.
+Thanks to J. Browning of COHERENT for getting this updated!</p>
+<p>TODO:
+handle per-channel data (gain, ...)
+most metadata of Struck header (energy, ...)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.io.orca_digitizers.SIS3316ORCADecoder.decode_packet">
+<span class="sig-name descname"><span class="pre">decode_packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lh5_tables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#SIS3316ORCADecoder.decode_packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.SIS3316ORCADecoder.decode_packet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.io.orca_digitizers.SIS3316ORCADecoder.get_decoded_values">
+<span class="sig-name descname"><span class="pre">get_decoded_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#SIS3316ORCADecoder.get_decoded_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.SIS3316ORCADecoder.get_decoded_values" title="Permalink to this definition"></a></dt>
+<dd><p>Get decoded values (optionally for a given channel)</p>
+<p>Must overload for your decoder if it has channel-specific decoded
+values. Note: implement channel = None returns a &quot;default&quot; decoded_values</p>
+<p>Otherwise, just returns self.decoded_values, which should be defined in
+the constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.io.orca_digitizers.SIS3316ORCADecoder.max_n_rows_per_packet">
+<span class="sig-name descname"><span class="pre">max_n_rows_per_packet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#SIS3316ORCADecoder.max_n_rows_per_packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.SIS3316ORCADecoder.max_n_rows_per_packet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.io.orca_digitizers.SIS3316ORCADecoder.set_object_info">
+<span class="sig-name descname"><span class="pre">set_object_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pygama/io/orca_digitizers.html#SIS3316ORCADecoder.set_object_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pygama.io.orca_digitizers.SIS3316ORCADecoder.set_object_info" title="Permalink to this definition"></a></dt>
+<dd><p>Overload to e.g. update decoded_values based on object_info.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-pygama.io.orcadaq">
 <span id="pygama-io-orcadaq-module"></span><h2>pygama.io.orcadaq module<a class="headerlink" href="#module-pygama.io.orcadaq" title="Permalink to this headline"></a></h2>
