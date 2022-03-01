@@ -1,0 +1,41 @@
+pygama package
+==============
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pygama.analysis
+   pygama.dsp
+   pygama.io
+   pygama.lh5
+   pygama.sandbox
+
+Submodules
+----------
+
+pygama.utils module
+-------------------
+
+.. automodule:: pygama.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygama.version module
+---------------------
+
+.. automodule:: pygama.version
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pygama
+   :members:
+   :undoc-members:
+   :show-inheritance:
