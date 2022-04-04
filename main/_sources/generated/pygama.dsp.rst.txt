@@ -1,6 +1,11 @@
 pygama.dsp package
 ==================
 
+.. automodule:: pygama.dsp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -56,14 +61,6 @@ pygama.dsp.units module
 -----------------------
 
 .. automodule:: pygama.dsp.units
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pygama.dsp
    :members:
    :undoc-members:
    :show-inheritance:

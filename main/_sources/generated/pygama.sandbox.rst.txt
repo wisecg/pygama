@@ -1,6 +1,11 @@
 pygama.sandbox package
 ======================
 
+.. automodule:: pygama.sandbox
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -176,14 +181,6 @@ pygama.sandbox.vector module
 ----------------------------
 
 .. automodule:: pygama.sandbox.vector
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pygama.sandbox
    :members:
    :undoc-members:
    :show-inheritance:

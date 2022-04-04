@@ -1,6 +1,11 @@
 pygama.io package
 =================
 
+.. automodule:: pygama.io
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -40,6 +45,14 @@ pygama.io.fcdaq module
 ----------------------
 
 .. automodule:: pygama.io.fcdaq
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygama.io.hit\_to\_evt module
+-----------------------------
+
+.. automodule:: pygama.io.hit_to_evt
    :members:
    :undoc-members:
    :show-inheritance:
@@ -112,14 +125,6 @@ pygama.io.wfcompress module
 ---------------------------
 
 .. automodule:: pygama.io.wfcompress
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pygama.io
    :members:
    :undoc-members:
    :show-inheritance:

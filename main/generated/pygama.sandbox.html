@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pygama.sandbox package &mdash; pygama  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="pygama.lh5 package" href="pygama.lh5.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pygama
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+    
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contribution guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pygama.html">Package API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pygama.analysis.html">pygama.analysis package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.dsp.html">pygama.dsp package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.io.html">pygama.io package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.lh5.html">pygama.lh5 package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pygama.sandbox package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-base-module">pygama.sandbox.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-base-calculators-module">pygama.sandbox.base_calculators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-base-transforms-module">pygama.sandbox.base_transforms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.sandbox.compass_header">pygama.sandbox.compass_header module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-compass-wfs-module">pygama.sandbox.compass_wfs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.sandbox.database">pygama.sandbox.database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.sandbox.databases">pygama.sandbox.databases module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.sandbox.h5parser">pygama.sandbox.h5parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-multirun-module">pygama.sandbox.multirun module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-test-module">pygama.sandbox.test module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-test-3302-module">pygama.sandbox.test_3302 module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-test-lh5-buffered-read-module">pygama.sandbox.test_lh5_buffered_read module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-test-pygama-module">pygama.sandbox.test_pygama module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-test-tier-0-module">pygama.sandbox.test_tier_0 module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-test-tier-1-module">pygama.sandbox.test_tier_1 module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.sandbox.test_wfc">pygama.sandbox.test_wfc module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-tier1-base-module">pygama.sandbox.tier1_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-tier1-vector-module">pygama.sandbox.tier1_vector module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-uproot-mjd-module">pygama.sandbox.uproot_mjd module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-sandbox-uproot-test-module">pygama.sandbox.uproot_test module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.sandbox.vec1">pygama.sandbox.vec1 module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.sandbox.vector">pygama.sandbox.vector module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama.utils">pygama.utils module</a></li>
+</ul>
+</li>
+</ul>
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: main
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Branches</dt>
+          <dd><a href="pygama.sandbox.html">main</a></dd>
+          <dd><a href="../../refactor/index.html">refactor</a></dd>
+        </dl>
+      </div>
+    </div>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pygama</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="pygama.html">pygama package</a> &raquo;</li>
+      <li>pygama.sandbox package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/generated/pygama.sandbox.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pygama.sandbox">
+<span id="pygama-sandbox-package"></span><h1>pygama.sandbox package<a class="headerlink" href="#module-pygama.sandbox" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-base-module">
+<h2>pygama.sandbox.base module<a class="headerlink" href="#pygama-sandbox-base-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-base-calculators-module">
+<h2>pygama.sandbox.base_calculators module<a class="headerlink" href="#pygama-sandbox-base-calculators-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-base-transforms-module">
+<h2>pygama.sandbox.base_transforms module<a class="headerlink" href="#pygama-sandbox-base-transforms-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pygama.sandbox.compass_header">
+<span id="pygama-sandbox-compass-header-module"></span><h2>pygama.sandbox.compass_header module<a class="headerlink" href="#module-pygama.sandbox.compass_header" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.compass_header.compare_settings">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.compass_header.</span></span><span class="sig-name descname"><span class="pre">compare_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.compass_header.compare_settings" title="Permalink to this definition"></a></dt>
+<dd><p>compare settings in multiple runs</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.compass_header.main">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.compass_header.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.compass_header.main" title="Permalink to this definition"></a></dt>
+<dd><p>parse CAEN's Compass XML header files.
+python xml package docs: <a class="reference external" href="https://docs.python.org/3/library/xml.html">https://docs.python.org/3/library/xml.html</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.compass_header.parse_header">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.compass_header.</span></span><span class="sig-name descname"><span class="pre">parse_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.compass_header.parse_header" title="Permalink to this definition"></a></dt>
+<dd><p>recursively parses a row of the XML ElementTree, also saves stuff to a dict
+<a class="reference external" href="https://stackoverflow.com/questions/28194703/recursive-xml-parsing-python-using-elementtree">https://stackoverflow.com/questions/28194703/recursive-xml-parsing-python-using-elementtree</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.compass_header.print_file">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.compass_header.</span></span><span class="sig-name descname"><span class="pre">print_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.compass_header.print_file" title="Permalink to this definition"></a></dt>
+<dd><p>print one file</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.compass_header.print_settings">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.compass_header.</span></span><span class="sig-name descname"><span class="pre">print_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.compass_header.print_settings" title="Permalink to this definition"></a></dt>
+<dd><p>creates an ElementTree, and calls the parser function</p>
+</dd></dl>
+
+</section>
+<section id="pygama-sandbox-compass-wfs-module">
+<h2>pygama.sandbox.compass_wfs module<a class="headerlink" href="#pygama-sandbox-compass-wfs-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pygama.sandbox.database">
+<span id="pygama-sandbox-database-module"></span><h2>pygama.sandbox.database module<a class="headerlink" href="#module-pygama.sandbox.database" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.database.create_db">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.database.</span></span><span class="sig-name descname"><span class="pre">create_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fdb</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.database.create_db" title="Permalink to this definition"></a></dt>
+<dd><p>overwrite any existing testDB file,
+and create a small DB with a few different tables.
+NOTE: tables should be the primary structure we use, but we can also
+insert single documents as needed.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.database.main">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.database.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.database.main" title="Permalink to this definition"></a></dt>
+<dd><p>using the TinyDB module,
+show an example of filling a fake database file,
+then give a couple of examples on accessing it.</p>
+<p>important methods to cover:
+query (i.e. search), insert, update, table</p>
+<p>read the docs:
+<a class="reference external" href="https://tinydb.readthedocs.io/en/latest/api.html">https://tinydb.readthedocs.io/en/latest/api.html</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.database.parse_db">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.database.</span></span><span class="sig-name descname"><span class="pre">parse_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fdb</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.database.parse_db" title="Permalink to this definition"></a></dt>
+<dd><p>access our test database and show a few examples of parsing.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.database.update_db">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.database.</span></span><span class="sig-name descname"><span class="pre">update_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fdb</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.database.update_db" title="Permalink to this definition"></a></dt>
+<dd><p>appending to tinyDB tables is tricky, you can get duplicate values.
+show a couple of examples of handling this.</p>
+</dd></dl>
+
+</section>
+<section id="module-pygama.sandbox.databases">
+<span id="pygama-sandbox-databases-module"></span><h2>pygama.sandbox.databases module<a class="headerlink" href="#module-pygama.sandbox.databases" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.databases.get_nonlinearity">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.databases.</span></span><span class="sig-name descname"><span class="pre">get_nonlinearity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.databases.get_nonlinearity" title="Permalink to this definition"></a></dt>
+<dd><p>reads from a pandas hdf5 database</p>
+</dd></dl>
+
+</section>
+<section id="module-pygama.sandbox.h5parser">
+<span id="pygama-sandbox-h5parser-module"></span><h2>pygama.sandbox.h5parser module<a class="headerlink" href="#module-pygama.sandbox.h5parser" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.h5parser.get_legend_dtype">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.h5parser.</span></span><span class="sig-name descname"><span class="pre">get_legend_dtype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtstr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.h5parser.get_legend_dtype" title="Permalink to this definition"></a></dt>
+<dd><p>the 'datatype' attribute is specific to LEGEND HDF5 files.
+reference: <a class="reference external" href="http://legend-exp.org/legend-data-format-specs/dev/">http://legend-exp.org/legend-data-format-specs/dev/</a>
+right now, this fills an output dict by string splitting.
+there is probably a better way to read the Julia-formatted string.
+also, think about changing enums to numpy named tuples for faster lookups.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.h5parser.h5iter">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.h5parser.</span></span><span class="sig-name descname"><span class="pre">h5iter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.h5parser.h5iter" title="Permalink to this definition"></a></dt>
+<dd><p>simple iterator to expose groups and attributes of
+everything in a given hdf5 file.  can also start at [prefix]-level.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.h5parser.main">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.h5parser.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.h5parser.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.h5parser.show_evts">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.h5parser.</span></span><span class="sig-name descname"><span class="pre">show_evts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.h5parser.show_evts" title="Permalink to this definition"></a></dt>
+<dd><p>look at events (make a small pandas dataframe).
+this is specific to Oliver's test file.
+<strong>* Let's worry about making this fast LATER. *</strong></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.h5parser.show_h5">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.h5parser.</span></span><span class="sig-name descname"><span class="pre">show_h5</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.h5parser.show_h5" title="Permalink to this definition"></a></dt>
+<dd><p>simple LEGEND data viewer function.
+shows the group structure, attributes, units, wfs, etc.
+can also do a lot of this from the cmd line with:
+$ h5ls -vlr [file]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.h5parser.test_bool">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.h5parser.</span></span><span class="sig-name descname"><span class="pre">test_bool</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.h5parser.test_bool" title="Permalink to this definition"></a></dt>
+<dd><p>quick MWE for Oliver.
+the bool branches in the current file are broken in python,
+have to handle bools specially (open issue w/ h5py)
+<a class="reference external" href="https://github.com/h5py/h5py/pull/821">https://github.com/h5py/h5py/pull/821</a></p>
+<p>the message:
+TypeError: No NumPy equivalent for TypeBitfieldID exists</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.h5parser.write_h5">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.h5parser.</span></span><span class="sig-name descname"><span class="pre">write_h5</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.h5parser.write_h5" title="Permalink to this definition"></a></dt>
+<dd><p>read an MJ60 raw file and convert to Oliver's format.
+this is a test function on the way to changing daq_to_raw.py in pygama.</p>
+</dd></dl>
+
+</section>
+<section id="pygama-sandbox-multirun-module">
+<h2>pygama.sandbox.multirun module<a class="headerlink" href="#pygama-sandbox-multirun-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-test-module">
+<h2>pygama.sandbox.test module<a class="headerlink" href="#pygama-sandbox-test-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-test-3302-module">
+<h2>pygama.sandbox.test_3302 module<a class="headerlink" href="#pygama-sandbox-test-3302-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-test-lh5-buffered-read-module">
+<h2>pygama.sandbox.test_lh5_buffered_read module<a class="headerlink" href="#pygama-sandbox-test-lh5-buffered-read-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-test-pygama-module">
+<h2>pygama.sandbox.test_pygama module<a class="headerlink" href="#pygama-sandbox-test-pygama-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-test-tier-0-module">
+<h2>pygama.sandbox.test_tier_0 module<a class="headerlink" href="#pygama-sandbox-test-tier-0-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-test-tier-1-module">
+<h2>pygama.sandbox.test_tier_1 module<a class="headerlink" href="#pygama-sandbox-test-tier-1-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pygama.sandbox.test_wfc">
+<span id="pygama-sandbox-test-wfc-module"></span><h2>pygama.sandbox.test_wfc module<a class="headerlink" href="#module-pygama.sandbox.test_wfc" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.test_wfc.main">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.test_wfc.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.test_wfc.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="pygama-sandbox-tier1-base-module">
+<h2>pygama.sandbox.tier1_base module<a class="headerlink" href="#pygama-sandbox-tier1-base-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-tier1-vector-module">
+<h2>pygama.sandbox.tier1_vector module<a class="headerlink" href="#pygama-sandbox-tier1-vector-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-uproot-mjd-module">
+<h2>pygama.sandbox.uproot_mjd module<a class="headerlink" href="#pygama-sandbox-uproot-mjd-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-sandbox-uproot-test-module">
+<h2>pygama.sandbox.uproot_test module<a class="headerlink" href="#pygama-sandbox-uproot-test-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pygama.sandbox.vec1">
+<span id="pygama-sandbox-vec1-module"></span><h2>pygama.sandbox.vec1 module<a class="headerlink" href="#module-pygama.sandbox.vec1" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vec1.check_equal">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vec1.</span></span><span class="sig-name descname"><span class="pre">check_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vec1.check_equal" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vec1.daq_to_raw">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vec1.</span></span><span class="sig-name descname"><span class="pre">daq_to_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_evt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vec1.daq_to_raw" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vec1.main">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vec1.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vec1.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vec1.optimize_raw_to_dsp_mp">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vec1.</span></span><span class="sig-name descname"><span class="pre">optimize_raw_to_dsp_mp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vec1.optimize_raw_to_dsp_mp" title="Permalink to this definition"></a></dt>
+<dd><p>seems that the sweet spot on my mac is chunksize ~ 3000</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vec1.process_chunk">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vec1.</span></span><span class="sig-name descname"><span class="pre">process_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h5key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vec1.process_chunk" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vec1.raw_to_dsp">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vec1.</span></span><span class="sig-name descname"><span class="pre">raw_to_dsp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vec1.raw_to_dsp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vec1.raw_to_dsp_mp">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vec1.</span></span><span class="sig-name descname"><span class="pre">raw_to_dsp_mp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vec1.raw_to_dsp_mp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vec1.raw_to_dsp_quick">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vec1.</span></span><span class="sig-name descname"><span class="pre">raw_to_dsp_quick</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vec1.raw_to_dsp_quick" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-pygama.sandbox.vector">
+<span id="pygama-sandbox-vector-module"></span><h2>pygama.sandbox.vector module<a class="headerlink" href="#module-pygama.sandbox.vector" title="Permalink to this headline"></a></h2>
+<p>-- vectorized pygama processors --
+take big 2d blocks of waveforms (ndarrays)
+with a waveform on every row, and apply
+various transforms / calcsulations.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.VectorCalculator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vector.</span></span><span class="sig-name descname"><span class="pre">VectorCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.VectorCalculator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.sandbox.vector.VectorProcessorBase" title="pygama.sandbox.vector.VectorProcessorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.sandbox.vector.VectorProcessorBase</span></code></a></p>
+<p>save some argunemnts specific to this transform/calcsulator</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.VectorProcess">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vector.</span></span><span class="sig-name descname"><span class="pre">VectorProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.VectorProcess" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Handle vectorized calculators and transforms.
+Keep an internal 'intercom' of calcsulator results and waveform transforms.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.VectorProcess.AddCalculator">
+<span class="sig-name descname"><span class="pre">AddCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.VectorProcess.AddCalculator" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.VectorProcess.AddTransformer">
+<span class="sig-name descname"><span class="pre">AddTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.VectorProcess.AddTransformer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.VectorProcess.Process">
+<span class="sig-name descname"><span class="pre">Process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wfnames_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.VectorProcess.Process" title="Permalink to this definition"></a></dt>
+<dd><p>Apply each processor to the Tier 0 input dataframe,
+and return a Tier 1 dataframe (i.e. gatified single-valued).
+Optionally return a dataframe with the waveform objects.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.VectorProcess.SetDefaultList">
+<span class="sig-name descname"><span class="pre">SetDefaultList</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.VectorProcess.SetDefaultList" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.VectorProcessorBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vector.</span></span><span class="sig-name descname"><span class="pre">VectorProcessorBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.VectorProcessorBase" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>save some argunemnts specific to this transform/calcsulator</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.VectorProcessorBase.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waves</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calcs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.VectorProcessorBase.process" title="Permalink to this definition"></a></dt>
+<dd><p>run the given calcsulation on the wf block in waves.
+can also use results from other calcsulations via calcs.
+individual processor functions can decide if they want to use the
+df axes, or convert to a numpy array for extra speed</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.VectorTransformer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vector.</span></span><span class="sig-name descname"><span class="pre">VectorTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.VectorTransformer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.sandbox.vector.VectorProcessorBase" title="pygama.sandbox.vector.VectorProcessorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.sandbox.vector.VectorProcessorBase</span></code></a></p>
+<p>save some argunemnts specific to this transform/calcsulator</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.avg_baseline">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vector.</span></span><span class="sig-name descname"><span class="pre">avg_baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waves</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.avg_baseline" title="Permalink to this definition"></a></dt>
+<dd><p>Simple mean, vectorized version of baseline calcsulator</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.bl_subtract">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vector.</span></span><span class="sig-name descname"><span class="pre">bl_subtract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waves</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.bl_subtract" title="Permalink to this definition"></a></dt>
+<dd><p>Return an ndarray of baseline-subtracted waveforms
+Depends on fit_baseline calcsulator.
+for reference, the non-vector version is just:
+return waveform - (bl_0 + bl_1 * np.arange(len(waveform)))</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.fit_baseline">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vector.</span></span><span class="sig-name descname"><span class="pre">fit_baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waves</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.fit_baseline" title="Permalink to this definition"></a></dt>
+<dd><p>Polynomial fit [order], vectorized version of baseline calcsulator
+TODO: arbitrary orders?</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.trap_filter">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vector.</span></span><span class="sig-name descname"><span class="pre">trap_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waves</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.trap_filter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pygama.sandbox.vector.trap_max">
+<span class="sig-prename descclassname"><span class="pre">pygama.sandbox.vector.</span></span><span class="sig-name descname"><span class="pre">trap_max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waves</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.sandbox.vector.trap_max" title="Permalink to this definition"></a></dt>
+<dd><p>calcsulate maximum of trapezoid filter - no pride here</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pygama.lh5.html" class="btn btn-neutral float-left" title="pygama.lh5 package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

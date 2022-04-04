@@ -1,6 +1,11 @@
 pygama package
 ==============
 
+.. automodule:: pygama
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -20,22 +25,6 @@ pygama.utils module
 -------------------
 
 .. automodule:: pygama.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pygama.version module
----------------------
-
-.. automodule:: pygama.version
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pygama
    :members:
    :undoc-members:
    :show-inheritance:

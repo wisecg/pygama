@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pygama.dsp package &mdash; pygama  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pygama.io package" href="pygama.io.html" />
+    <link rel="prev" title="pygama.analysis package" href="pygama.analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pygama
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+    
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installing pygama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contribution guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pygama.html">Package API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pygama.analysis.html">pygama.analysis package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pygama.dsp package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-processingchain-module">pygama.dsp.ProcessingChain module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-waveformbrowser-module">pygama.dsp.WaveformBrowser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-build-processing-chain-module">pygama.dsp.build_processing_chain module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-dsp-optimize-module">pygama.dsp.dsp_optimize module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp.errors">pygama.dsp.errors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp.processors">pygama.dsp.processors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-units-module">pygama.dsp.units module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.io.html">pygama.io package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.lh5.html">pygama.lh5 package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pygama.sandbox.html">pygama.sandbox package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pygama.html#module-pygama.utils">pygama.utils module</a></li>
+</ul>
+</li>
+</ul>
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: main
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Branches</dt>
+          <dd><a href="pygama.dsp.html">main</a></dd>
+          <dd><a href="../../refactor/index.html">refactor</a></dd>
+        </dl>
+      </div>
+    </div>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pygama</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="pygama.html">pygama package</a> &raquo;</li>
+      <li>pygama.dsp package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/generated/pygama.dsp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pygama.dsp">
+<span id="pygama-dsp-package"></span><h1>pygama.dsp package<a class="headerlink" href="#module-pygama.dsp" title="Permalink to this headline"></a></h1>
+<p>The pygama signal processing framework is contained in the <a class="reference internal" href="#module-pygama.dsp" title="pygama.dsp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygama.dsp</span></code></a>
+submodule. This code is responsible for running a variety of discrete signal
+processors on data, producing tier 2 (dsp) files from tier 1 (raw) files. The
+main contents of this submodule are:</p>
+<ul class="simple">
+<li><p>processors: A collection of numba functions that perform individual DSP
+transforms and reductions on our data. Individual processors are held in the
+<cite>_processors</cite> directory, which is where contributors will write new
+processors for inclusion in the analysis.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessingChain</span></code>: A class that manages and efficiently
+runs a list of DSP processors</p></li>
+</ul>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-dsp-processingchain-module">
+<h2>pygama.dsp.ProcessingChain module<a class="headerlink" href="#pygama-dsp-processingchain-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-dsp-waveformbrowser-module">
+<h2>pygama.dsp.WaveformBrowser module<a class="headerlink" href="#pygama-dsp-waveformbrowser-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-dsp-build-processing-chain-module">
+<h2>pygama.dsp.build_processing_chain module<a class="headerlink" href="#pygama-dsp-build-processing-chain-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pygama-dsp-dsp-optimize-module">
+<h2>pygama.dsp.dsp_optimize module<a class="headerlink" href="#pygama-dsp-dsp-optimize-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pygama.dsp.errors">
+<span id="pygama-dsp-errors-module"></span><h2>pygama.dsp.errors module<a class="headerlink" href="#module-pygama.dsp.errors" title="Permalink to this headline"></a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pygama.dsp.errors.DSPError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.dsp.errors.</span></span><span class="sig-name descname"><span class="pre">DSPError</span></span><a class="headerlink" href="#pygama.dsp.errors.DSPError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Base class for signal processors</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pygama.dsp.errors.DSPFatal">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.dsp.errors.</span></span><span class="sig-name descname"><span class="pre">DSPFatal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pygama.dsp.errors.DSPFatal" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.dsp.errors.DSPError" title="pygama.dsp.errors.DSPError"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.dsp.errors.DSPError</span></code></a></p>
+<p>Fatal error thrown by DSP processors that halts production
+Attributes:
+wf_range: range of wf indices. This will be set after the exception</p>
+<blockquote>
+<div><p>is caught, and appended to the error message</p>
+</div></blockquote>
+<dl class="simple">
+<dt>processor: string of processor and arguments. This will be set after</dt><dd><p>the exception is caught, and appended to the error message</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pygama.dsp.errors.ProcessingChainError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pygama.dsp.errors.</span></span><span class="sig-name descname"><span class="pre">ProcessingChainError</span></span><a class="headerlink" href="#pygama.dsp.errors.ProcessingChainError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pygama.dsp.errors.DSPError" title="pygama.dsp.errors.DSPError"><code class="xref py py-class docutils literal notranslate"><span class="pre">pygama.dsp.errors.DSPError</span></code></a></p>
+<p>Error thrown when there is a problem setting up a processing chain</p>
+</dd></dl>
+
+</section>
+<section id="module-pygama.dsp.processors">
+<span id="pygama-dsp-processors-module"></span><h2>pygama.dsp.processors module<a class="headerlink" href="#module-pygama.dsp.processors" title="Permalink to this headline"></a></h2>
+<p>Contains a list of dsp processors used by the legend experiment, implemented
+using numba's guvectorize to implement numpy's ufunc interface. In other words,
+all of the functions are void functions whose outputs are given as parameters.
+The ufunc interface provides additional information about the function
+signatures that enables broadcasting the arrays and SIMD processing. Thanks to
+the ufunc interface, they can also be called to return a numpy array, but if
+this is done, memory will be allocated for this array, slowing things down.</p>
+<p>The pygama processors use the
+[ufunc](<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/ufuncs.html">https://docs.scipy.org/doc/numpy/reference/ufuncs.html</a>) framework,
+which is designed to encourage highly performant python practices. Ufuncs have
+several advantages:</p>
+<p>1. Ufuncs work with [numpy
+arrays](<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/arrays.html">https://docs.scipy.org/doc/numpy/reference/arrays.html</a>). Numpy arrays
+are arrays of same-typed objects that are stored adjacently in memory
+(equivalent to a dynamically allocated C-array or a C++ vector). Compared to
+standard python lists, they perform computations much faster. They are ideal
+for representing waveforms and transformed waveforms.</p>
+<p>2. Ufuncs perform vectorized operations. Vectorization causes commands to
+perform the same operation on all components of an array. For example, the
+ufunc <cite>np.add(a, b, out=c)</cite> (equivalently <cite>c=a+b</cite>) is equivalent to:
+<a href="#id1"><span class="problematic" id="id2">``</span></a>`
+for i in range(len(c)):</p>
+<blockquote>
+<div><p>c[i] = a[i] + b[i]</p>
+</div></blockquote>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a>`
+Loops are slow in python since it is an interpreted language; vectorized
+commands remove the loop and only call the python interpreter once.</p>
+<p>Furthermore, ufuncs are capable of
+[broadcasting](<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/ufuncs.html#broadcasting">https://docs.scipy.org/doc/numpy/reference/ufuncs.html#broadcasting</a>)
+their dimensions. This involves a safety check to ensure the dimensions of <cite>a</cite>
+and <cite>b</cite> are compatible sizes. It also will automatically replicate a size-1
+dimension over another one, enabling the addition of a scalar to a vector
+quantity. This is useful, as it allows us to process multiple waveforms at
+once.</p>
+<p>One of the biggest advantages of vectorized ufuncs is that many of them will
+take advantage of SIMD (same input-multiple data) vectorization on a
+vector-CPU. Modern CPUs typically have 256- or 512-bit wide processing units,
+which can accommodate multiple 32- or 64-bit numbers. Programming with these,
+however, is quite difficult and requires specialized commands to be called.
+Luckily for us, many numpy ufuncs will automatically use these for us, speeding
+up our code!</p>
+<p>3. Ufuncs are capable of calculating their output in place, meaning they can
+place calculated values in pre-allocated memory rather than allocating and
+returning new values. This is important because memory allocation is one of the
+slowest processes computers can perform, and should be avoided. With ufuncs,
+this can be done using the out keyword in arguments (ex <cite>np.add(a, b, out=c)</cite>,
+or more succinctly, <cite>np.add(a, b, c)</cite>). While this may seem counterintuitive at
+first, the alternative (<cite>c = np.add(a,b)</cite> or <cite>c = a+b</cite>) causes an entirely new
+array to be allocated, with c pointing at that. These array allocations can add
+up very quickly: <cite>e = a*b + c*d</cite>, for example, would allocate 3 different
+arrays: one for <cite>a*b</cite>, one for <cite>c*d</cite>, and one for the sum of those two. As we
+write ufuncs to use for LEGEND, it is important that we try to use functions
+that operate in place as much as possible!</p>
+</section>
+<section id="pygama-dsp-units-module">
+<h2>pygama.dsp.units module<a class="headerlink" href="#pygama-dsp-units-module" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pygama.analysis.html" class="btn btn-neutral float-left" title="pygama.analysis package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pygama.io.html" class="btn btn-neutral float-right" title="pygama.io package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

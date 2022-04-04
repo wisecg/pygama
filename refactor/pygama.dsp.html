@@ -49,7 +49,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-waveformbrowser-module">pygama.dsp.WaveformBrowser module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-build-processing-chain-module">pygama.dsp.build_processing_chain module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-dsp-optimize-module">pygama.dsp.dsp_optimize module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-processors-module">pygama.dsp.processors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp.processors">pygama.dsp.processors module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pygama-dsp-units-module">pygama.dsp.units module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pygama.dsp">Module contents</a></li>
 </ul>
@@ -75,7 +75,7 @@
       <div class="rst-other-versions">
         <dl>
           <dt>Branches</dt>
-          <dd><a href="../main/pygama.dsp.html">main</a></dd>
+          <dd><a href="../main/index.html">main</a></dd>
           <dd><a href="pygama.dsp.html">refactor</a></dd>
         </dl>
       </div>
@@ -123,8 +123,17 @@
 <section id="pygama-dsp-dsp-optimize-module">
 <h2>pygama.dsp.dsp_optimize module<a class="headerlink" href="#pygama-dsp-dsp-optimize-module" title="Permalink to this headline"></a></h2>
 </section>
-<section id="pygama-dsp-processors-module">
-<h2>pygama.dsp.processors module<a class="headerlink" href="#pygama-dsp-processors-module" title="Permalink to this headline"></a></h2>
+<section id="module-pygama.dsp.processors">
+<span id="pygama-dsp-processors-module"></span><h2>pygama.dsp.processors module<a class="headerlink" href="#module-pygama.dsp.processors" title="Permalink to this headline"></a></h2>
+<p>Contains a list of dsp processors used by the legend experiment, implemented
+using numba's guvectorize to implement numpy's ufunc interface. In other words,
+all of the functions are void functions whose outputs are given as parameters.
+The ufunc interface provides additional information about the function
+signatures that enables broadcasting the arrays and SIMD processing. Thanks to
+the ufunc interface, they can also be called to return a numpy array, but if</p>
+<blockquote>
+<div><p>this is done, memory will be allocated for this array, slowing things down.</p>
+</div></blockquote>
 </section>
 <section id="pygama-dsp-units-module">
 <h2>pygama.dsp.units module<a class="headerlink" href="#pygama-dsp-units-module" title="Permalink to this headline"></a></h2>

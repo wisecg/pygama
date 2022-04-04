@@ -19,7 +19,7 @@ Package index
    install
    contributing
    tutorials
-   Package API reference <pygama>
+   Package API reference <generated/pygama>
 
 Indices and tables
 ==================

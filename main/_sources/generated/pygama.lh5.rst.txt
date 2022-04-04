@@ -1,6 +1,11 @@
 pygama.lh5 package
 ==================
 
+.. automodule:: pygama.lh5
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -72,14 +77,6 @@ pygama.lh5.vectorofvectors module
 ---------------------------------
 
 .. automodule:: pygama.lh5.vectorofvectors
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pygama.lh5
    :members:
    :undoc-members:
    :show-inheritance:

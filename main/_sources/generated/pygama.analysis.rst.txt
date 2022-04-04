@@ -1,6 +1,11 @@
 pygama.analysis package
 =======================
 
+.. automodule:: pygama.analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -56,14 +61,6 @@ pygama.analysis.pulse\_shape\_analysis module
 ---------------------------------------------
 
 .. automodule:: pygama.analysis.pulse_shape_analysis
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pygama.analysis
    :members:
    :undoc-members:
    :show-inheritance:
