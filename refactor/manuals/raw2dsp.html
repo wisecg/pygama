@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Signal Processing &mdash; pygama  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorials (Jupyter notebooks)" href="../tutorials.html" />
+    <link rel="prev" title="Decoding digitizer data" href="daq2raw.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pygama
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+    
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="daq2raw.html">Decoding digitizer data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Digital Signal Processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing-custom-processors">Writing custom processors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials (Jupyter notebooks)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../generated/modules.html">Package API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contribution guide</a></li>
+</ul>
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: refactor
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Branches</dt>
+          <dd><a href="../../main/index.html">main</a></dd>
+          <dd><a href="raw2dsp.html">refactor</a></dd>
+        </dl>
+      </div>
+    </div>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pygama</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">User Manual</a> &raquo;</li>
+      <li>Digital Signal Processing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/manuals/raw2dsp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="digital-signal-processing">
+<h1>Digital Signal Processing<a class="headerlink" href="#digital-signal-processing" title="Permalink to this heading"></a></h1>
+<p><em>Under construction...</em></p>
+<section id="writing-custom-processors">
+<h2>Writing custom processors<a class="headerlink" href="#writing-custom-processors" title="Permalink to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1) Import Python modules</span>
+<span class="c1">#</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">guvectorize</span>
+
+<span class="kn">from</span> <span class="nn">pygama.dsp.errors</span> <span class="kn">import</span> <span class="n">DSPFatal</span>
+
+
+<span class="c1"># 2) Provide instructions to Numba</span>
+<span class="c1">#</span>
+<span class="c1"># Documentation about Numba guvectorize decorator:</span>
+<span class="c1"># https://numba.pydata.org/numba-doc/latest/user/vectorize.html#the-guvectorize-decorator</span>
+<span class="c1">#</span>
+<span class="c1"># Notes:</span>
+<span class="c1"># - Use &quot;nopython=True, cache=True&quot;</span>
+<span class="c1"># - Use two declarations, one for 32-bit variables and one for 64-bit variables</span>
+<span class="c1"># - Do not use &quot;int&quot; as it does not support an NaN value</span>
+<span class="c1"># - Use [:] for all output parameters</span>
+<span class="c1">#</span>
+<span class="nd">@guvectorize</span><span class="p">([</span><span class="s2">&quot;void(float32[:], float32, float32, float32[:])&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;void(float64[:], float64, float64, float64[:])&quot;</span><span class="p">],</span>
+              <span class="s2">&quot;(n),(),()-&gt;()&quot;</span><span class="p">,</span> <span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># 3) Define the processor interface</span>
+<span class="c1">#</span>
+<span class="c1"># Notes:</span>
+<span class="c1"># - Add the &quot;_in&quot;/&quot;_out&quot; suffix to the name of the input/output variables</span>
+<span class="c1"># - Use &quot;w_&quot; for waveforms, &quot;t_&quot; for indexes, &quot;a_&quot; for amplitudes</span>
+<span class="c1"># - Use underscore casing for the name of the processor and variables, e.g.,</span>
+<span class="c1">#   &quot;a_trap_energy_in&quot; or &quot;t_trigger_in&quot;</span>
+<span class="c1">#</span>
+<span class="k">def</span> <span class="nf">the_processor_template</span><span class="p">(</span><span class="n">w_in</span><span class="p">,</span> <span class="n">t_in</span><span class="p">,</span> <span class="n">a_in</span><span class="p">,</span> <span class="n">w_out</span><span class="p">,</span> <span class="n">t_out</span><span class="p">):</span>
+
+    <span class="c1"># 4) Document the algorithm</span>
+    <span class="c1">#</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add here a complete description of what the processor does, including the</span>
+<span class="sd">    meaning of input and output variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># 5) Initialize output parameters</span>
+    <span class="c1">#</span>
+    <span class="c1"># Notes:</span>
+    <span class="c1"># - All output parameters should be initializes to a NaN.  If a processor</span>
+    <span class="c1">#   fails, its output parameters should have the default NaN value</span>
+    <span class="c1"># - Use np.nan for both variables and arrays</span>
+    <span class="c1">#</span>
+    <span class="n">w_out</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1"># use [:] for arrays</span>
+    <span class="n">t_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1"># use [0] for scalar parameters</span>
+
+    <span class="c1"># 6) Check inputs</span>
+    <span class="c1">#</span>
+    <span class="c1"># There are two kinds of checks:</span>
+    <span class="c1"># - NaN checks.  A processor might depend on others, i.e., its input</span>
+    <span class="c1">#   parameters are the output parameters of an other processors.  When a</span>
+    <span class="c1">#   processor fails, all processors depending on its output should not run.</span>
+    <span class="c1">#   Thus, skip this processor if a NaN value is detected and return NaN</span>
+    <span class="c1">#   output parameters to propagate the failure throughout the processing chain.</span>
+    <span class="c1"># - In-range checks.  Check if indexes are within 0 and len(waveform),</span>
+    <span class="c1">#   amplitudes are positive, etc.  A failure of this check implies errors in</span>
+    <span class="c1">#   the DSP JSON config file.  Abort the analysis immediately.</span>
+    <span class="c1">#</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">w_in</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">t_in</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">a_in</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">a_in</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DSPFatal</span><span class="p">(</span><span class="s1">&#39;The error message goes here&#39;</span><span class="p">)</span>
+
+    <span class="c1"># 7) Algorithm</span>
+    <span class="c1">#</span>
+    <span class="c1"># Loop over waveforms by using a &quot;for i in range(.., .., ..)&quot; instruction.</span>
+    <span class="c1"># Avoid loops based on a while condition which might lead to segfault.  Avoid</span>
+    <span class="c1"># also enumerate/ndenumerate to keep code as similar as possible among all</span>
+    <span class="c1"># processors.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Example of an algorithm to find the first index above &quot;t_in&quot; in which the</span>
+    <span class="c1"># signal crossed the value &quot;a_in&quot;</span>
+    <span class="c1">#</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">t_in</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">w_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">a_in</span> <span class="ow">and</span> <span class="n">w_in</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">a_in</span><span class="p">:</span>
+            <span class="n">t_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">return</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="daq2raw.html" class="btn btn-neutral float-left" title="Decoding digitizer data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tutorials.html" class="btn btn-neutral float-right" title="Tutorials (Jupyter notebooks)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,20 +1,31 @@
-Installing pygama
-=================
+Installation
+============
 
-Install on local systems with: ::
+Install on local systems with:
 
-    > git clone https://github.com/legend-exp/pygama
-    > pip install -e pygama
+.. code-block:: console
 
-You can omit the ``-e`` flag (editable mode) if you do not plan to develop
-pygama. If you do not have admin rights (e.g. at NERSC) you can install pygama
-as a normal user: ::
+    $ git clone https://github.com/legend-exp/pygama
+    $ pip install pygama
 
-    > pip install -e pygama --user
+Append the ``-e`` flag (editable mode) if you plan to develop *pygama*. If you
+do not have admin rights you can install pygama as a normal user:
 
-To uninstall pygama run: ::
+.. code-block:: console
 
-    > pip uninstall pygama
+    $ pip install pygama --user
 
-To run pygama at NERSC (and set up JupyterHub), we have additional instructions
-`at this link <https://github.com/legend-exp/legend/wiki/Computing-Resources-at-NERSC#configuring-jupyter--nersc>`_.
+and make sure that your ``PYTHONPATH`` environment variable is aware of the
+install location. Optionally-required dependencies can be also collected:
+
+.. code-block:: console
+
+    $ pip install pygama[daq]  # if you need to convert DAQ files to LH5
+    $ pip install pygama[test] # if you want to run package test files
+    $ pip install pygama[docs] # if you need to build documentation
+
+To uninstall pygama run:
+
+.. code-block:: console
+
+    $ pip uninstall pygama

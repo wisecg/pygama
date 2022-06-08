@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pygama.dsp._processors package &mdash; pygama  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pygama.flow package" href="pygama.flow.html" />
+    <link rel="prev" title="pygama.dsp package" href="pygama.dsp.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> pygama
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+    
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manuals/index.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials (Jupyter notebooks)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Package API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pygama.html">pygama package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pygama.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pygama.dsp.html">pygama.dsp package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.flow.html">pygama.flow package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.hit.html">pygama.hit package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.lgdo.html">pygama.lgdo package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.math.html">pygama.math package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.pargen.html">pygama.pargen package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.raw.html">pygama.raw package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pygama.vis.html">pygama.vis package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contribution guide</a></li>
+</ul>
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: refactor
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Branches</dt>
+          <dd><a href="../../main/index.html">main</a></dd>
+          <dd><a href="pygama.dsp._processors.html">refactor</a></dd>
+        </dl>
+      </div>
+    </div>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pygama</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">pygama</a> &raquo;</li>
+          <li><a href="pygama.html">pygama package</a> &raquo;</li>
+          <li><a href="pygama.dsp.html">pygama.dsp package</a> &raquo;</li>
+      <li>pygama.dsp._processors package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/generated/pygama.dsp._processors.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pygama-dsp-processors-package">
+<h1>pygama.dsp._processors package<a class="headerlink" href="#pygama-dsp-processors-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-bl-subtract-module">
+<h2>pygama.dsp._processors.bl_subtract module<a class="headerlink" href="#pygama-dsp-processors-bl-subtract-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-convolutions-module">
+<h2>pygama.dsp._processors.convolutions module<a class="headerlink" href="#pygama-dsp-processors-convolutions-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-fftw-module">
+<h2>pygama.dsp._processors.fftw module<a class="headerlink" href="#pygama-dsp-processors-fftw-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-fixed-time-pickoff-module">
+<h2>pygama.dsp._processors.fixed_time_pickoff module<a class="headerlink" href="#pygama-dsp-processors-fixed-time-pickoff-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-gaussian-filter1d-module">
+<h2>pygama.dsp._processors.gaussian_filter1d module<a class="headerlink" href="#pygama-dsp-processors-gaussian-filter1d-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-get-multi-local-extrema-module">
+<h2>pygama.dsp._processors.get_multi_local_extrema module<a class="headerlink" href="#pygama-dsp-processors-get-multi-local-extrema-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-linear-slope-fit-module">
+<h2>pygama.dsp._processors.linear_slope_fit module<a class="headerlink" href="#pygama-dsp-processors-linear-slope-fit-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-log-check-module">
+<h2>pygama.dsp._processors.log_check module<a class="headerlink" href="#pygama-dsp-processors-log-check-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-min-max-module">
+<h2>pygama.dsp._processors.min_max module<a class="headerlink" href="#pygama-dsp-processors-min-max-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-moving-windows-module">
+<h2>pygama.dsp._processors.moving_windows module<a class="headerlink" href="#pygama-dsp-processors-moving-windows-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-multi-a-filter-module">
+<h2>pygama.dsp._processors.multi_a_filter module<a class="headerlink" href="#pygama-dsp-processors-multi-a-filter-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-multi-t-filter-module">
+<h2>pygama.dsp._processors.multi_t_filter module<a class="headerlink" href="#pygama-dsp-processors-multi-t-filter-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-optimize-module">
+<h2>pygama.dsp._processors.optimize module<a class="headerlink" href="#pygama-dsp-processors-optimize-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-param-lookup-module">
+<h2>pygama.dsp._processors.param_lookup module<a class="headerlink" href="#pygama-dsp-processors-param-lookup-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-pole-zero-module">
+<h2>pygama.dsp._processors.pole_zero module<a class="headerlink" href="#pygama-dsp-processors-pole-zero-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-presum-module">
+<h2>pygama.dsp._processors.presum module<a class="headerlink" href="#pygama-dsp-processors-presum-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-pulse-injector-module">
+<h2>pygama.dsp._processors.pulse_injector module<a class="headerlink" href="#pygama-dsp-processors-pulse-injector-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-saturation-module">
+<h2>pygama.dsp._processors.saturation module<a class="headerlink" href="#pygama-dsp-processors-saturation-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-soft-pileup-corr-module">
+<h2>pygama.dsp._processors.soft_pileup_corr module<a class="headerlink" href="#pygama-dsp-processors-soft-pileup-corr-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-time-point-thresh-module">
+<h2>pygama.dsp._processors.time_point_thresh module<a class="headerlink" href="#pygama-dsp-processors-time-point-thresh-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-trap-filters-module">
+<h2>pygama.dsp._processors.trap_filters module<a class="headerlink" href="#pygama-dsp-processors-trap-filters-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-wiener-filter-module">
+<h2>pygama.dsp._processors.wiener_filter module<a class="headerlink" href="#pygama-dsp-processors-wiener-filter-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="pygama-dsp-processors-windower-module">
+<h2>pygama.dsp._processors.windower module<a class="headerlink" href="#pygama-dsp-processors-windower-module" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pygama.dsp.html" class="btn btn-neutral float-left" title="pygama.dsp package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pygama.flow.html" class="btn btn-neutral float-right" title="pygama.flow package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

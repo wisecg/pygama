@@ -1,0 +1,218 @@
+pygama.dsp.\_processors package
+===============================
+
+.. automodule:: pygama.dsp._processors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+Submodules
+----------
+
+pygama.dsp.\_processors.bl\_subtract module
+-------------------------------------------
+
+.. automodule:: pygama.dsp._processors.bl_subtract
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.convolutions module
+-------------------------------------------
+
+.. automodule:: pygama.dsp._processors.convolutions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.fftw module
+-----------------------------------
+
+.. automodule:: pygama.dsp._processors.fftw
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.fixed\_time\_pickoff module
+---------------------------------------------------
+
+.. automodule:: pygama.dsp._processors.fixed_time_pickoff
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.gaussian\_filter1d module
+-------------------------------------------------
+
+.. automodule:: pygama.dsp._processors.gaussian_filter1d
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.get\_multi\_local\_extrema module
+---------------------------------------------------------
+
+.. automodule:: pygama.dsp._processors.get_multi_local_extrema
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.linear\_slope\_fit module
+-------------------------------------------------
+
+.. automodule:: pygama.dsp._processors.linear_slope_fit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.log\_check module
+-----------------------------------------
+
+.. automodule:: pygama.dsp._processors.log_check
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.min\_max module
+---------------------------------------
+
+.. automodule:: pygama.dsp._processors.min_max
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.moving\_windows module
+----------------------------------------------
+
+.. automodule:: pygama.dsp._processors.moving_windows
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.multi\_a\_filter module
+-----------------------------------------------
+
+.. automodule:: pygama.dsp._processors.multi_a_filter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.multi\_t\_filter module
+-----------------------------------------------
+
+.. automodule:: pygama.dsp._processors.multi_t_filter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.optimize module
+---------------------------------------
+
+.. automodule:: pygama.dsp._processors.optimize
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.param\_lookup module
+--------------------------------------------
+
+.. automodule:: pygama.dsp._processors.param_lookup
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.pole\_zero module
+-----------------------------------------
+
+.. automodule:: pygama.dsp._processors.pole_zero
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.presum module
+-------------------------------------
+
+.. automodule:: pygama.dsp._processors.presum
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.pulse\_injector module
+----------------------------------------------
+
+.. automodule:: pygama.dsp._processors.pulse_injector
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.saturation module
+-----------------------------------------
+
+.. automodule:: pygama.dsp._processors.saturation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.soft\_pileup\_corr module
+-------------------------------------------------
+
+.. automodule:: pygama.dsp._processors.soft_pileup_corr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.time\_point\_thresh module
+--------------------------------------------------
+
+.. automodule:: pygama.dsp._processors.time_point_thresh
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.trap\_filters module
+--------------------------------------------
+
+.. automodule:: pygama.dsp._processors.trap_filters
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.wiener\_filter module
+---------------------------------------------
+
+.. automodule:: pygama.dsp._processors.wiener_filter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+pygama.dsp.\_processors.windower module
+---------------------------------------
+
+.. automodule:: pygama.dsp._processors.windower
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

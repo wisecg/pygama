@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contribution guide &mdash; pygama  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="pygama.vis package" href="generated/pygama.vis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pygama
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+    
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manuals/index.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials (Jupyter notebooks)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated/modules.html">Package API reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contribution guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#code-style">Code style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing-documentation">Writing documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-documentation">Building documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#versioning">Versioning</a></li>
+</ul>
+</li>
+</ul>
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: refactor
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Branches</dt>
+          <dd><a href="../main/contributing.html">main</a></dd>
+          <dd><a href="contributing.html">refactor</a></dd>
+        </dl>
+      </div>
+    </div>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pygama</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Contribution guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contributing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="contribution-guide">
+<h1>Contribution guide<a class="headerlink" href="#contribution-guide" title="Permalink to this heading"></a></h1>
+<p>The following rules and conventions have been established for the package
+development and are enforced throughout the entire code base. Merge requests
+that do not comply to the following directives will be rejected.</p>
+<p>All extra tools needed to develop <em>pygama</em> are listed as optional dependencies
+and can be installed via pip by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install .<span class="o">[</span>all<span class="o">]</span>
+</pre></div>
+</div>
+<section id="code-style">
+<h2>Code style<a class="headerlink" href="#code-style" title="Permalink to this heading"></a></h2>
+<p>A set of <a class="reference external" href="https://pre-commit.com">pre-commit</a> hooks is configured to make
+sure that <em>pygama</em> coherently follows standard coding style conventions. The
+pre-commit tool is able to identify common style problems and automatically fix
+them, wherever possible. Configured hooks are listed in the
+<code class="docutils literal notranslate"><span class="pre">.pre-commit-config.yaml</span></code> file at the project root folder. They are run
+remotely on the GitHub repository through the <a class="reference external" href="https://pre-commit.ci">pre-commit bot</a>, but can also be run locally before submitting a
+pull request (recommended):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install .<span class="o">[</span>test<span class="o">]</span>
+<span class="gp">$ </span>pre-commit run --all-files  <span class="c1"># analyse the source code and fix it wherever possible</span>
+<span class="gp">$ </span>pre-commit install          <span class="c1"># install a Git pre-commit hook (optional)</span>
+</pre></div>
+</div>
+<p>For a more comprehensive guide, check out the <a class="reference external" href="https://scikit-hep.org/developer/style">Scikit-HEP documentation about
+code style</a>.</p>
+</section>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>The <em>pygama</em> test suite is available below <code class="docutils literal notranslate"><span class="pre">tests/</span></code>. We use <a class="reference external" href="https://docs.pytest.org">pytest</a> to run tests and analyze their output. As
+a starting point to learn how to write good tests, reading of <a class="reference external" href="https://scikit-hep.org/developer/pytest">the
+Scikit-HEP Intro to testing</a> is
+recommended. Refer to <a class="reference external" href="https://docs.pytest.org/en/stable/how-to/index.html">pytest's how-to guides</a> for a complete
+overview.</p></li>
+<li><p><em>pygama</em> tests belong to three categories:</p>
+<dl class="field-list simple">
+<dt class="field-odd">unit tests</dt>
+<dd class="field-odd"><p>Should ensure the correct behaviour of each function
+independently, possibly without relying on other <em>pygama</em> methods. The
+existence of these micro-tests makes it possible to promptly identify and
+fix the source of a bug. An example of this are tests for each single DSP
+processor</p>
+</dd>
+<dt class="field-even">integration tests</dt>
+<dd class="field-even"><p>Should ensure that independent parts of the code base
+work well together and are integrated in a cohesive framework. An example
+of this is testing whether <code class="xref py py-func docutils literal notranslate"><span class="pre">moduleA.process_obj()</span></code> is able to
+correctly handle <code class="xref py py-class docutils literal notranslate"><span class="pre">moduleB.DataObj</span></code></p>
+</dd>
+<dt class="field-odd">functional tests</dt>
+<dd class="field-odd"><p>High-level tests of realistic applications. An example is
+testing whether the processing of a real or synthetic data sample yields
+consistent output parameters</p>
+</dd>
+</dl>
+</li>
+<li><p>Unit tests are automatically run for every push event and pull request to the
+remote Git repository on a remote server (currently handled by GitHub
+actions). Every pull request must pass all tests before being approved for
+merging. Running the test suite is simple:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install .<span class="o">[</span>test<span class="o">]</span>
+<span class="gp">$ </span>pytest
+</pre></div>
+</div>
+</li>
+<li><p>Additionally, pull request authors are required to provide tests with
+sufficient code coverage for every proposed change or addition. If necessary,
+high-level functional tests should be updated. We currently rely on
+<a class="reference external" href="https://app.codecov.io/gh/legend-exp/pygama">codecov.io</a> to keep track of
+test coverage. A local report, which must be inspected before submitting pull
+requests, can be generated by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pytest --cov<span class="o">=</span>pygama
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h2>
+<p>We adopt best practices in writing and maintaining <em>pygama</em>'s documentation. When
+contributing to the project, make sure to implement the following:</p>
+<ul class="simple">
+<li><p>Documentation should be exclusively available on the Project website
+<a class="reference external" href="https://legend-exp.github.io/pygama">https://legend-exp.github.io/pygama</a>. No READMEs, GitHub/LEGEND wiki pages
+should be written.</p></li>
+<li><p>Pull request authors are required to provide sufficient documentation for
+every proposed change or addition.</p></li>
+<li><p>Documentation for functions, classes, modules and packages should be provided
+as <a class="reference external" href="https://peps.python.org/pep-0257">Docstrings</a> along with the respective
+source code. Docstrings are automatically converted to HTML as part of the
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pygama</span></code> package API documentation.</p></li>
+<li><p>General guides, comprehensive tutorials or other high-level documentation
+(e.g. referring to how separate parts of the code interact between each
+other) must be provided as separate pages in <code class="docutils literal notranslate"><span class="pre">docs/source/</span></code> and linked in
+the table of contents.</p></li>
+<li><p>Jupyter notebooks should be added to the main Git repository below
+<code class="docutils literal notranslate"><span class="pre">tutorials/</span></code>.</p></li>
+<li><p>Before submitting a pull request, contributors are required to build the
+documentation locally and resolve and warnings or errors.</p></li>
+</ul>
+<section id="writing-documentation">
+<h3>Writing documentation<a class="headerlink" href="#writing-documentation" title="Permalink to this heading"></a></h3>
+<p>We adopt the following guidelines for writing documentation:</p>
+<ul class="simple">
+<li><p>Documentation source files must formatted in reStructuredText (reST). A
+reference format specification is available on the <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">Sphinx reST usage guide</a>.
+Usage of <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#cross-referencing-syntax">Cross-referencing syntax</a>
+in general and <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#cross-referencing-python-objects">for Python objects</a>
+in particular is recommended. We also support cross-referencing external
+documentation via <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html">sphinx.ext.intersphinx</a>,
+when referring for example to <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.</p></li>
+<li><p>To document Python objects, we also adopt the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">NumPy Docstring style</a>. Examples are
+available <a class="reference external" href="https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html">here</a>.</p></li>
+<li><p>We support also the Markdown format through the <a class="reference external" href="https://myst-parser.readthedocs.io/en/latest/syntax/syntax.html">MyST-Parser</a>.</p></li>
+</ul>
+</section>
+<section id="building-documentation">
+<h3>Building documentation<a class="headerlink" href="#building-documentation" title="Permalink to this heading"></a></h3>
+<p>Scripts and tools to build documentation are located below <code class="docutils literal notranslate"><span class="pre">docs/</span></code>. To build
+documentation, <code class="docutils literal notranslate"><span class="pre">sphinx</span></code>, <code class="docutils literal notranslate"><span class="pre">sphinx-rtd-theme</span></code> and a couple of additional
+Python packages are required. You can get all the needed dependencies by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip install .<span class="o">[</span>docs<span class="o">]</span>
+</pre></div>
+</div>
+<p>To build documentation for the current Git ref, run the following commands:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span> docs
+<span class="gp">$ </span>make clean
+<span class="gp">$ </span>make
+</pre></div>
+</div>
+<p>Documentation can be then displayed by opening <code class="docutils literal notranslate"><span class="pre">build/html/index.html</span></code> with a
+web browser.  To build documentation for all main <em>pygama</em> versions (development
+branch and stable releases), run</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git fetch --prune origin
+<span class="gp">$ </span><span class="nb">cd</span> docs
+<span class="gp">$ </span>make clean
+<span class="gp">$ </span>make allver
+</pre></div>
+</div>
+<p>and display the documentation by opening <code class="docutils literal notranslate"><span class="pre">build/allver/html/index.html</span></code>. This
+documentation is also deployed to the <em>pygama</em> website.</p>
+</section>
+</section>
+<section id="versioning">
+<h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this heading"></a></h2>
+<p>Collaborators with push access to the GitHub repository that wish to release a
+new project version must implement the following procedures:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://semver.org">Semantic versioning</a> is adopted. The version string
+uses the <code class="docutils literal notranslate"><span class="pre">MAJOR.MINOR.PATCH</span></code> format.</p></li>
+<li><p>To release a new <strong>minor</strong> or <strong>major version</strong>, the following procedure
+should be followed:</p>
+<ol class="arabic simple">
+<li><p>A new branch with name <code class="docutils literal notranslate"><span class="pre">releases/vMAJOR.MINOR</span></code> (note the <code class="docutils literal notranslate"><span class="pre">v</span></code>) containing
+the code at the intended stage is created</p></li>
+<li><p>The commit is tagged with a descriptive message: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">tag</span> <span class="pre">vMAJOR.MINOR.0</span>
+<span class="pre">-m</span> <span class="pre">'short</span> <span class="pre">descriptive</span> <span class="pre">message</span> <span class="pre">here'</span></code> (note the <code class="docutils literal notranslate"><span class="pre">v</span></code>)</p></li>
+<li><p>Changes are pushed to the remote: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--tags</span> <span class="pre">origin</span> <span class="pre">releases/vMAJOR.MINOR</span></code></p></li>
+</ol>
+</li>
+<li><p>To release a new <strong>patch version</strong>, the following procedure should be followed:</p>
+<ol class="arabic simple">
+<li><p>A commit with the patch is created on the relevant release branch
+<code class="docutils literal notranslate"><span class="pre">releases/vMAJOR.MINOR</span></code></p></li>
+<li><p>The commit is tagged: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">tag</span> <span class="pre">vMAJOR.MINOR.PATCH</span></code> (note the <code class="docutils literal notranslate"><span class="pre">v</span></code>)</p></li>
+<li><p>Changes are pushed to the remote: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--tags</span> <span class="pre">origin</span> <span class="pre">releases/vMAJOR.MINOR</span></code></p></li>
+</ol>
+</li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="generated/pygama.vis.html" class="btn btn-neutral float-left" title="pygama.vis package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, LEGEND Collaboration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
