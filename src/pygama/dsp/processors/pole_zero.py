@@ -47,6 +47,46 @@ def pole_zero(w_in: np.ndarray, t_tau: float, w_out: np.ndarray) -> None:
     for i in range(1, len(w_in), 1):
         w_out[i] = w_out[i - 1] + w_in[i] - w_in[i - 1] * const
 
+@guvectorize(
+    ["void(float32[:], float32, float32[:])", "void(float64[:], float64, float64[:])"],
+    "(n),()->(n)",
+    **nb_kwargs,
+)
+def inverse_pole_zero(w_in: np.ndarray, t_tau: float, w_out: np.ndarray) -> None:
+    """Apply an inverse pole-zero cancellation using the provided time
+    constant to the waveform.
+
+    Parameters
+    ----------
+    w_in
+        the input waveform.
+    t_tau
+        the time constant of the exponential to be deconvolved.
+    w_out
+        the pole-zero cancelled waveform.
+
+    JSON Configuration Example
+    --------------------------
+
+    .. code-block :: json
+
+        "wf_ipz": {
+            "function": "inverse_pole_zero",
+            "module": "pygama.dsp.processors",
+            "args": ["wf_bl", "400*us", "wf_ipz"],
+            "unit": "ADC"
+        }
+    """
+    w_out[:] = np.nan
+
+    if np.isnan(w_in).any() or np.isnan(t_tau):
+        return
+
+    const = np.exp(-1 / t_tau)
+    w_out[0] = w_in[0]
+    for i in range(1, len(w_in), 1):
+        w_out[i] = const*w_out[i - 1] + w_in[i] - w_in[i - 1] 
+
 
 @guvectorize(
     [
