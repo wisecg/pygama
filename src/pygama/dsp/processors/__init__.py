@@ -81,7 +81,7 @@ from .multi_t_filter import multi_t_filter, remove_duplicates
 from .optimize import optimize_1pz, optimize_2pz
 from .param_lookup import param_lookup
 from .peak_snr_threshold import peak_snr_threshold
-from .pole_zero import double_pole_zero, inverse_pole_zero, pole_zero
+from .pole_zero import double_pole_zero, inverse_pole_zero, pole_zero, triple_pole_zero
 from .presum import presum
 from .pulse_injector import inject_exp_pulse, inject_sig_pulse
 from .saturation import saturation
@@ -140,4 +140,5 @@ __all__ = [
     "wiener_filter",
     "windower",
     "time_over_threshold",
+    "triple_pole_zero"
 ]

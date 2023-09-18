@@ -186,3 +186,90 @@ def double_pole_zero(
             - transfer_denom_1 * w_out[i - 1]
             - transfer_denom_2 * w_out[i - 2]
         )
+
+@guvectorize(
+    [
+        "void(float32[:], float32, float32, float32, float32, float32, float32[:])",
+        "void(float64[:], float64, float64, float64, float64, float64, float64[:])",
+    ],
+    "(n),(),(),(),(),()->(n)",
+    **nb_kwargs,
+)
+def triple_pole_zero(
+    w_in: np.ndarray, t_tau1: float, t_tau2: float, t_tau3: float, frac1: float, frac2: float, w_out: np.ndarray
+) -> np.ndarray:
+    r"""
+    Apply a triple pole-zero cancellation using the provided time
+    constants to the waveform.
+
+    Parameters
+    ----------
+    w_in
+        the input waveform.
+    t_tau1
+        the time constant of the first exponential to be deconvolved.
+    t_tau2
+        the time constant of the second exponential to be deconvolved.
+    t_tau3
+        the time constant of the second exponential to be deconvolved.
+    frac1
+        the fraction which the second exponential contributes.
+    frac2
+        the fraction which the third exponential contributes.
+    w_out
+        the triple pole-zero cancelled waveform.
+
+    JSON Configuration Example
+    --------------------------
+
+    .. code-block :: json
+
+        "wf_pz": {
+            "function": "triple_pole_zero",
+            "module": "pygama.dsp.processors",
+            "args": ["wf_bl", "400*us", "20*us", "100*ns", "0.02", "0.98", "wf_pz"],
+            "unit": "ADC"
+        }
+
+    Notes
+    -----
+    This algorithm is an IIR filter to deconvolve the function
+
+    .. math::
+        s(t) = A \left[ f1 \cdot \exp\left(-\frac{t}{\tau_1} \right)
+               + f2 \cdot \exp\left(-\frac{t}{\tau_2} \right) +  (1-f1-f2) \cdot \exp\left(-\frac{t}{\tau_3}\right) \right]
+
+    (:math:`f` = `frac`) into a single step function of amplitude :math:`A`.
+    This filter is derived by :math:`z`-transforming the input (:math:`s(t)`)
+    and output (step function) signals, and then determining the transfer
+    function. 
+    """
+    w_out[:] = np.nan
+
+    if np.isnan(w_in).any() or np.isnan(t_tau1) or np.isnan(t_tau2) or np.isnan(t_tau3) or np.isnan(frac1) or np.isnan(frac2):
+        return
+    if len(w_in) <= 3:
+        raise DSPFatal(
+            "The length of the waveform must be larger than 3 for the filter to work safely"
+        )
+
+    a = np.exp(-1 / t_tau1)
+    b = np.exp(-1 / t_tau2)
+    c = np.exp(-1 / t_tau3)
+
+    w_out[0] = w_in[0]
+    w_out[1] = w_in[1]
+    w_out[2] = w_in[2]
+
+    num_1 = 1
+    num_2 = - a - b - c
+    num_3 = a*b + a*c + b*c
+    num_4 = -a*b*c
+    
+    denom_1 = 1 
+    denom_2 = -1 - a - b + a*frac1 - c*frac1 + b*frac2 - c*frac2
+    denom_3 = a + b + a*b - a*frac1 -a*b*frac1 + c*frac1 + b*c*frac1 - b*frac2 - a*b*frac2 + c*frac2 + a*c*frac2
+    denom_4 = -a*b + a*b*frac1 - b*c*frac1 + a*b*frac2 - a*c*frac2
+    
+    for i in range(3, len(w_in)):
+        w_out[i] = -denom_2*w_out[i-1] - denom_3*w_out[i-2] - denom_4*w_out[i-3] + num_1*w_in[i] + num_2*w_in[i-1] + num_3*w_in[i-2] + num_4*w_in[i-3]
