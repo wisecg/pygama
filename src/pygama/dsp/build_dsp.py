@@ -181,7 +181,7 @@ def build_dsp(
                 proc_chain, lh5_it.field_mask, tb_out = build_processing_chain(
                     lh5_in, dsp_config, db_dict, outputs, block_width
                 )
-                if log.getEffectiveLevel() >= logging.INFO:
+                if log.getEffectiveLevel() <= logging.INFO:
                     progress_bar = tqdm(
                         desc=f"Processing table {tb}",
                         total=tot_n_rows,
@@ -206,13 +206,13 @@ def build_dsp(
                 write_start=write_offset + start_row,
             )
 
-            if log.getEffectiveLevel() >= logging.INFO:
+            if log.getEffectiveLevel() <= logging.INFO:
                 progress_bar.update(n_rows)
 
             if start_row + n_rows >= tot_n_rows:
                 break
 
-        if log.getEffectiveLevel() >= logging.INFO:
+        if log.getEffectiveLevel() <= logging.INFO:
             progress_bar.close()
 
     raw_store.write_object(dsp_info, "dsp_info", f_dsp, wo_mode="o")

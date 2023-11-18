@@ -167,7 +167,7 @@ def build_raw(
         raise NotImplementedError("unknown input stream type {in_stream_type}")
 
     # initialize the stream and read header. Also initializes rb_lib
-    if log.getEffectiveLevel() >= logging.INFO:
+    if log.getEffectiveLevel() <= logging.INFO:
         progress_bar.update(0)
 
     out_stream = out_spec if isinstance(out_spec, str) else ""
@@ -179,7 +179,7 @@ def build_raw(
         out_stream=out_stream,
     )
     rb_lib = streamer.rb_lib
-    if log.getEffectiveLevel() >= logging.INFO and n_max == np.inf:
+    if log.getEffectiveLevel() <= logging.INFO and n_max == np.inf:
         progress_bar.update(streamer.n_bytes_read)
 
     # rb_lib should now be fully initialized. Check if files need to be
@@ -211,7 +211,7 @@ def build_raw(
     n_bytes_last = streamer.n_bytes_read
     while True:
         chunk_list = streamer.read_chunk()
-        if log.getEffectiveLevel() >= logging.INFO and n_max == np.inf:
+        if log.getEffectiveLevel() <= logging.INFO and n_max == np.inf:
             progress_bar.update(streamer.n_bytes_read - n_bytes_last)
             n_bytes_last = streamer.n_bytes_read
         if len(chunk_list) == 0:
@@ -222,7 +222,7 @@ def build_raw(
                 rb.loc = n_max
             n_max -= rb.loc
             n_read += rb.loc
-        if log.getEffectiveLevel() >= logging.INFO and n_max < np.inf:
+        if log.getEffectiveLevel() <= logging.INFO and n_max < np.inf:
             progress_bar.update(n_read)
         write_to_lh5_and_clear(chunk_list, lh5_store)
         if n_max <= 0:
