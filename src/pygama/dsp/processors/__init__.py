@@ -87,11 +87,12 @@ from .pulse_injector import inject_exp_pulse, inject_sig_pulse
 from .saturation import saturation
 from .soft_pileup_corr import soft_pileup_corr, soft_pileup_corr_bl
 from .time_over_threshold import time_over_threshold
-from .time_point_thresh import time_point_thresh
+from .time_point_thresh import time_point_thresh, bi_level_zero_crossing_time_points, interpolated_time_point_thresh
 from .trap_filters import asym_trap_filter, trap_filter, trap_norm, trap_pickoff
 from .upsampler import interpolating_upsampler, upsampler
 from .wiener_filter import wiener_filter
 from .windower import windower
+from .rc_cr2 import rc_cr2
 
 __all__ = [
     "bl_subtract",
@@ -141,5 +142,7 @@ __all__ = [
     "windower",
     "time_over_threshold",
     "triple_pole_zero", 
-    "double_pole_zero_two_fracs"
+    "double_pole_zero_two_fracs",
+    "bi_level_zero_crossing_time_points",
+    "rc_cr2"
 ]
