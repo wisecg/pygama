@@ -3,15 +3,19 @@ Implements a LEGEND Data Object representing a special
 :class:`~.lgdo.table.Table` to store blocks of one-dimensional time-series
 data.
 """
+
 from __future__ import annotations
 
 import logging
 from typing import Any
 
+import awkward as ak
 import numpy as np
+import pandas as pd
 
 from pygama.lgdo.array import Array
 from pygama.lgdo.arrayofequalsizedarrays import ArrayOfEqualSizedArrays
+from pygama.lgdo.encoded import ArrayOfEncodedEqualSizedArrays, VectorOfEncodedVectors
 from pygama.lgdo.table import Table
 from pygama.lgdo.vectorofvectors import VectorOfVectors
 
@@ -21,7 +25,7 @@ log = logging.getLogger(__name__)
 class WaveformTable(Table):
     r"""An LGDO for storing blocks of (1D) time-series data.
 
-    A :class:`WaveformTable` is an LGDO :class:`~.lgdo.table.Table` with the 3
+    A :class:`WaveformTable` is an LGDO :class:`.Table` with the 3
     columns ``t0``, ``dt``, and ``values``:
 
     * ``t0[i]`` is a time offset (relative to a user-defined global reference)
@@ -31,9 +35,9 @@ class WaveformTable(Table):
       Implemented as an LGDO :class:`.Array` with optional attribute ``units``.
     * ``values[i]`` is the ``i``'th waveform in the table. Internally, the
       waveforms values may be either an LGDO :class:`.ArrayOfEqualSizedArrays`\
-      ``<1,1>`` or as an LGDO :class:`.VectorOfVectors` that supports
-      waveforms of unequal length. Can optionally be given a ``units``
-      attribute.
+      ``<1,1>``, an LGDO :class:`.VectorOfVectors` or
+      :class:`.VectorOfEncodedVectors` that supports waveforms of unequal
+      length. Can optionally be given a ``units`` attribute.
 
     Note
     ----
@@ -43,16 +47,16 @@ class WaveformTable(Table):
 
     def __init__(
         self,
-        size: int = None,
+        size: int | None = None,
         t0: float | Array | np.ndarray = 0,
-        t0_units: str = None,
+        t0_units: str | None = None,
         dt: float | Array | np.ndarray = 1,
-        dt_units: str = None,
+        dt_units: str | None = None,
         values: ArrayOfEqualSizedArrays | VectorOfVectors | np.ndarray = None,
-        values_units: str = None,
-        wf_len: int = None,
+        values_units: str | None = None,
+        wf_len: int | None = None,
         dtype: np.dtype = None,
-        attrs: dict[str, Any] = None,
+        attrs: dict[str, Any] | None = None,
     ) -> None:
         r"""
         Parameters
@@ -114,6 +118,7 @@ class WaveformTable(Table):
             if nda.shape != shape:
                 nda.resize(shape, refcheck=True)
             t0 = Array(nda=nda)
+
         if t0_units is not None:
             t0.attrs["units"] = f"{t0_units}"
 
@@ -129,15 +134,21 @@ class WaveformTable(Table):
         if dt_units is not None:
             dt.attrs["units"] = f"{dt_units}"
 
-        if not isinstance(values, ArrayOfEqualSizedArrays) and not isinstance(
-            values, VectorOfVectors
+        if not isinstance(
+            values,
+            (
+                ArrayOfEqualSizedArrays,
+                VectorOfVectors,
+                VectorOfEncodedVectors,
+                ArrayOfEncodedEqualSizedArrays,
+            ),
         ):
             if isinstance(values, np.ndarray):
                 try:
                     wf_len = values.shape[1]
                 except Exception:
                     wf_len = None
-            if wf_len is None:  # VectorOfVectors
+            if wf_len is None:  # make a VectorOfVectors
                 shape_guess = (size, 100)
                 if dtype is None:
                     dtype = np.dtype(np.float64)
@@ -155,7 +166,7 @@ class WaveformTable(Table):
                         cumulative_length=cumulative_length,
                         dtype=dtype,
                     )
-            else:  # ArrayOfEqualSizedArrays
+            else:  # make a ArrayOfEqualSizedArrays
                 shape = (size, wf_len)
                 if dtype is None:
                     dtype = (
@@ -243,15 +254,10 @@ class WaveformTable(Table):
         string = ""
 
         for i in range(self.size):
-            if isinstance(self.values, VectorOfVectors):
-                string += f"{self.values.get_vector(i)}"
-            else:
-                string += f"{self.values.nda[i]}"
-
-            string += f", dt={self.dt.nda[i]}"
+            string += f"{self.values[i]}, dt={self.dt[i]}"
             if self.dt_units:
                 string += f" {self.dt_units}"
-            string += f", t0={self.t0.nda[i]}"
+            string += f", t0={self.t0[i]}"
             if self.t0_units:
                 string += f" {self.t0_units}"
             if i < self.size - 1:
@@ -259,3 +265,18 @@ class WaveformTable(Table):
 
         np.set_printoptions(**npopt)
         return string
+
+    def view_as(
+        self,
+        library: str,
+        with_units: bool = False,
+        cols: list[str] | None = None,
+        prefix: str = "",
+    ) -> pd.DataFrame | np.NDArray | ak.Array:
+        r"""View the waveform data as a third-party format data structure.
+
+        See Also
+        --------
+        .LGDO.view_as
+        """
+        return super().view_as(library, with_units, cols, prefix)

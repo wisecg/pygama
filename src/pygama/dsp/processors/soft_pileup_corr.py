@@ -40,7 +40,7 @@ def soft_pileup_corr(
 
         "wf_bl": {
             "function": "soft_pileup_corr",
-            "module": "pygama.dsp.processors",
+            "module": "dspeed.processors",
             "args": ["waveform", "1000", "500*us", "wf_bl"],
             "unit": "ADC"
         }
@@ -112,7 +112,7 @@ def soft_pileup_corr_bl(
 
         "wf_bl": {
             "function": "soft_pileup_corr_bl",
-            "module": "pygama.dsp.processors",
+            "module": "dspeed.processors",
             "args": ["waveform", "1000", "500*us", "baseline", "wf_bl"],
             "unit": "ADC"
         }

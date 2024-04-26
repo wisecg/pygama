@@ -2,33 +2,30 @@
 Implements a LEGEND Data Object representing a struct and corresponding
 utilities.
 """
+
 from __future__ import annotations
 
 import logging
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 
-from pygama.lgdo.array import Array
-from pygama.lgdo.scalar import Scalar
-from pygama.lgdo.vectorofvectors import VectorOfVectors
+from pygama.lgdo.lgdo import LGDO
 
 log = logging.getLogger(__name__)
 
-LGDO = Union[Scalar, Array, VectorOfVectors]
 
-
-class Struct(dict):
+class Struct(LGDO, dict):
     """A dictionary of LGDO's with an optional set of attributes.
 
     After instantiation, add fields using :meth:`add_field` to keep the
     datatype updated, or call :meth:`update_datatype` after adding.
     """
 
-    # TODO: overload setattr to require add_field for setting?
-
     def __init__(
-        self, obj_dict: dict[str, LGDO | Struct] = None, attrs: dict[str, Any] = None
+        self,
+        obj_dict: dict[str, LGDO] | None = None,
+        attrs: dict[str, Any] | None = None,
     ) -> None:
         """
         Parameters
@@ -42,41 +39,43 @@ class Struct(dict):
         if obj_dict is not None:
             self.update(obj_dict)
 
-        self.attrs = {} if attrs is None else dict(attrs)
-
-        if "datatype" in self.attrs:
-            if self.attrs["datatype"] != self.form_datatype():
-                raise ValueError(
-                    "datatype does not match obj_dict! "
-                    f"datatype: {self.attrs['datatype']}, "
-                    f"obj_dict.keys(): {obj_dict.keys()}, "
-                    f"form_datatype(): {self.form_datatype()}"
-                )
-        self.update_datatype()
+        super().__init__(attrs)
 
     def datatype_name(self) -> str:
-        """The name for this LGDO's datatype attribute."""
         return "struct"
 
     def form_datatype(self) -> str:
-        """Return this LGDO's datatype attribute string."""
-        return self.datatype_name() + "{" + ",".join(self.keys()) + "}"
+        return (
+            self.datatype_name() + "{" + ",".join([str(k) for k in self.keys()]) + "}"
+        )
 
     def update_datatype(self) -> None:
         self.attrs["datatype"] = self.form_datatype()
 
-    def add_field(self, name: str, obj: LGDO | Struct) -> None:
+    def add_field(self, name: str | int, obj: LGDO) -> None:
         """Add a field to the table."""
-        self[name] = obj
+        super().__setitem__(name, obj)
         self.update_datatype()
 
-    def remove_field(self, name: str, delete: bool = False) -> None:
+    def __setitem__(self, name: str, obj: LGDO) -> None:
+        return self.add_field(name, obj)
+
+    def __getattr__(self, name: str) -> LGDO:
+        if hasattr(super(), name):
+            return super().__getattr__(name)
+
+        if name in self.keys():
+            return super().__getitem__(name)
+
+        raise AttributeError(name)
+
+    def remove_field(self, name: str | int, delete: bool = False) -> None:
         """Remove a field from the table.
 
         Parameters
         ----------
         name
-            name of the field to be removed
+            name of the field to be removed.
         delete
             if ``True``, delete the field object by calling :any:`del`.
         """
@@ -85,10 +84,6 @@ class Struct(dict):
         else:
             self.pop(name)
         self.update_datatype()
-
-    def __len__(self) -> int:
-        """As a convention for Structs, always return 1."""
-        return 1
 
     def __str__(self) -> str:
         """Convert to string (e.g. for printing)."""
@@ -105,10 +100,9 @@ class Struct(dict):
                 string += f" '{k}': {v},\n"
         string += "}"
 
-        tmp_attrs = self.attrs.copy()
-        tmp_attrs.pop("datatype")
-        if tmp_attrs:
-            string += f" with attrs={tmp_attrs}"
+        attrs = self.getattrs()
+        if attrs:
+            string += f" with attrs={attrs}"
 
         np.set_printoptions(threshold=thr_orig)
 
@@ -121,7 +115,27 @@ class Struct(dict):
             self.__class__.__name__
             + "(dict="
             + dict.__repr__(self)
-            + f", attrs={repr(self.attrs)})"
+            + f", attrs={self.attrs!r})"
         )
         np.set_printoptions(**npopt)
         return " ".join(out.replace("\n", " ").split())
+
+    def view_as(self) -> None:
+        r"""View the Struct data as a third-party format data structure.
+
+        Error
+        -----
+        Not implemented. Since Struct's fields can have different lengths,
+        converting to a NumPy, Pandas or Awkward is generally not possible.
+        Call :meth:`.LGDO.view_as` on the fields instead.
+
+        See Also
+        --------
+        .LGDO.view_as
+        """
+        msg = (
+            "Since Struct's fields can have different lengths, "
+            "converting to a NumPy, Pandas or Awkward is generally "
+            "not possible. Call view_as() on the fields instead."
+        )
+        raise NotImplementedError(msg)

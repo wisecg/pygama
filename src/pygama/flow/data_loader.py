@@ -24,7 +24,7 @@ from pygama.lgdo import (
     Table,
     WaveformTable,
 )
-from pygama.lgdo.vectorofvectors import build_cl, explode_arrays, explode_cl
+from pygama.lgdo.vovutils import build_cl, explode_arrays, explode_cl
 
 log = logging.getLogger(__name__)
 

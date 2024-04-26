@@ -32,18 +32,16 @@ browsed easily in python like any `HDF5 <https://www.hdfgroup.org>`_ file using
 from pygama.lgdo.array import Array
 from pygama.lgdo.arrayofequalsizedarrays import ArrayOfEqualSizedArrays
 from pygama.lgdo.fixedsizearray import FixedSizeArray
+from pygama.lgdo.encoded import ArrayOfEncodedEqualSizedArrays, VectorOfEncodedVectors
 from pygama.lgdo.lh5_store import LH5Iterator, LH5Store, load_dfs, load_nda, ls, show
 from pygama.lgdo.scalar import Scalar
 from pygama.lgdo.struct import Struct
 from pygama.lgdo.table import Table
 from pygama.lgdo.vectorofvectors import (
-    VectorOfVectors,
-    build_cl,
-    explode,
-    explode_arrays,
-    explode_cl,
+    VectorOfVectors
 )
 from pygama.lgdo.waveform_table import WaveformTable
+from pygama.lgdo.vovutils import build_cl, explode, explode_arrays, explode_cl
 
 __all__ = [
     "Array",
@@ -64,6 +62,8 @@ __all__ = [
     "explode",
     "explode_arrays",
     "explode_cl",
+    "ArrayOfEncodedEqualSizedArrays", 
+    "VectorOfEncodedVectors"
 ]
 
 import numpy as np

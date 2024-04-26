@@ -36,7 +36,7 @@ def trap_filter(w_in: np.ndarray, rise: int, flat: int, w_out: np.ndarray) -> No
 
         "wf_tf": {
             "function": "trap_filter",
-            "module": "pygama.dsp.processors",
+            "module": "dspeed.processors",
             "args": ["wf_pz", "10*us", "3*us", "wf_tf"],
             "unit": "ADC"
         }
@@ -102,7 +102,7 @@ def trap_norm(w_in: np.ndarray, rise: int, flat: int, w_out: np.ndarray) -> None
 
         "wf_tf": {
             "function": "trap_norm",
-            "module": "pygama.dsp.processors",
+            "module": "dspeed.processors",
             "args": ["wf_pz", "10*us", "3*us", "wf_tf"],
             "unit": "ADC"
         }
@@ -177,7 +177,7 @@ def asym_trap_filter(
 
         "wf_af": {
             "function": "asym_trap_filter",
-            "module": "pygama.dsp.processors",
+            "module": "dspeed.processors",
             "args": ["wf_pz", "128*ns", "64*ns", "2*us", "wf_af"],
             "unit": "ADC"
         }
@@ -253,7 +253,7 @@ def trap_pickoff(
 
         "ct_corr": {
             "function": "trap_pickoff",
-            "module": "pygama.dsp.processors",
+            "module": "dspeed.processors",
             "args": ["wf_pz", "1.5*us", 0, "tp_0", "ct_corr"],
             "unit": "ADC"
         }

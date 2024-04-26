@@ -8,7 +8,7 @@ and SIMD processing. Thanks to the :class:`~numpy.ufunc` interface, they can
 also be called to return a NumPy array, but if this is done, memory will be
 allocated for this array, slowing things down.
 
-The pygama processors use the :class:`~numpy.ufunc` framework, which is
+The dspeed processors use the :class:`~numpy.ufunc` framework, which is
 designed to encourage highly performant python practices. These functions have
 several advantages:
 
@@ -60,16 +60,19 @@ several advantages:
 """
 
 from .bl_subtract import bl_subtract
-from .convolutions import cusp_filter, t0_filter, zac_filter
+from .convolutions import convolve_wf, fft_convolve_wf
 from .dwt import discrete_wavelet_transform
+from .energy_kernels import cusp_filter, dplms, zac_filter
 from .fftw import dft, inv_dft, psd
 from .fixed_time_pickoff import fixed_time_pickoff
 from .gaussian_filter1d import gaussian_filter1d
 from .get_multi_local_extrema import get_multi_local_extrema
+from .get_wf_centroid import get_wf_centroid
 from .histogram import histogram, histogram_stats
-from .linear_slope_fit import linear_slope_fit
+from .kernels import moving_slope, step, t0_filter
+from .linear_slope_fit import linear_slope_diff, linear_slope_fit
 from .log_check import log_check
-from .min_max import min_max
+from .min_max import min_max, min_max_norm
 from .moving_windows import (
     avg_current,
     moving_window_left,
@@ -81,28 +84,38 @@ from .multi_t_filter import multi_t_filter, remove_duplicates
 from .optimize import optimize_1pz, optimize_2pz
 from .param_lookup import param_lookup
 from .peak_snr_threshold import peak_snr_threshold
-from .pole_zero import double_pole_zero, inverse_pole_zero, pole_zero, triple_pole_zero, double_pole_zero_two_fracs
+from .pole_zero import double_pole_zero, pole_zero
 from .presum import presum
 from .pulse_injector import inject_exp_pulse, inject_sig_pulse
+from .rc_cr2 import rc_cr2
+from .round_to_nearest import round_to_nearest
 from .saturation import saturation
 from .soft_pileup_corr import soft_pileup_corr, soft_pileup_corr_bl
+from .svm import svm_predict
 from .time_over_threshold import time_over_threshold
-from .time_point_thresh import time_point_thresh, bi_level_zero_crossing_time_points, interpolated_time_point_thresh
+from .time_point_thresh import (
+    bi_level_zero_crossing_time_points,
+    interpolated_time_point_thresh,
+    multi_time_point_thresh,
+    time_point_thresh,
+)
+from .transfer_function_convolver import transfer_function_convolver
 from .trap_filters import asym_trap_filter, trap_filter, trap_norm, trap_pickoff
 from .upsampler import interpolating_upsampler, upsampler
+from .wf_alignment import wf_alignment
 from .wiener_filter import wiener_filter
 from .windower import windower
-from .rc_cr2 import rc_cr2
 
 __all__ = [
     "bl_subtract",
+    "convolve_wf",
+    "fft_convolve_wf",
     "cusp_filter",
     "t0_filter",
     "zac_filter",
     "discrete_wavelet_transform",
     "dft",
     "inv_dft",
-    "inverse_pole_zero",
     "psd",
     "fixed_time_pickoff",
     "gaussian_filter1d",
@@ -110,8 +123,10 @@ __all__ = [
     "histogram",
     "histogram_stats",
     "linear_slope_fit",
+    "linear_slope_diff",
     "log_check",
     "min_max",
+    "min_max_norm",
     "avg_current",
     "moving_window_left",
     "moving_window_multi",
@@ -131,7 +146,10 @@ __all__ = [
     "peak_snr_threshold",
     "soft_pileup_corr",
     "soft_pileup_corr_bl",
+    "svm_predict",
     "time_point_thresh",
+    "interpolated_time_point_thresh",
+    "multi_time_point_thresh",
     "asym_trap_filter",
     "trap_filter",
     "trap_norm",
@@ -141,8 +159,13 @@ __all__ = [
     "wiener_filter",
     "windower",
     "time_over_threshold",
-    "triple_pole_zero", 
-    "double_pole_zero_two_fracs",
+    "dplms",
+    "moving_slope",
+    "step",
+    "get_wf_centroid",
+    "wf_alignment",
+    "round_to_nearest",
+    "transfer_function_convolver",
+    "rc_cr2",
     "bi_level_zero_crossing_time_points",
-    "rc_cr2"
 ]

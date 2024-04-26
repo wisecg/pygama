@@ -8,10 +8,10 @@ from pygama.dsp.utils import numba_defaults_kwargs as nb_kwargs
 
 @guvectorize(
     [
-        "void(float32[:], float32[:], float32, float32, float32[:], float32[:])",
-        "void(float64[:], float64[:], float64, float64, float64[:], float64[:])",
+        "void(float32[:], float32[:], float32, float32, float32[:], uint32[:])",
+        "void(float64[:], float64[:], float64, float64, float64[:], uint32[:])",
     ],
-    "(n),(m),(),(),(m),()",
+    "(n),(m),(),()->(m),()",
     **nb_kwargs,
 )
 def peak_snr_threshold(

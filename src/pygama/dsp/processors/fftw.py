@@ -6,17 +6,33 @@ import numpy as np
 from numba import guvectorize
 from pyfftw import FFTW
 
+from pygama.dsp.utils import ProcChainVarBase
 from pygama.dsp.utils import numba_defaults_kwargs as nb_kwargs
 
 
-def dft(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
+def dft(
+    w_in: np.ndarray | ProcChainVarBase, w_out: np.ndarray | ProcChainVarBase
+) -> Callable:
     """Perform discrete Fourier transforms using the FFTW library.
 
-    Note
-    ----
-    This processor is composed of a factory function that is called using the
-    `init_args` argument. The input and output waveforms are passed using
-    `args`.
+    Parameters
+    ----------
+    w_in
+        the input waveform.
+    w_out
+        the output fourier transform.
+
+    JSON Configuration Example
+    --------------------------
+
+    .. code-block :: json
+
+        "wf_dft": {
+            "function": "dft",
+            "module": "dspeed.processors",
+            "args": ["wf", "wf_dft"],
+            "init_args": ["wf", "wf_dft"]
+        }
 
     Note
     ----
@@ -25,11 +41,8 @@ def dft(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
     is a factory function that returns a Numba gufunc that performs the FFT.
     FFTW works on fixed memory buffers, so you must tell it what memory to use
     ahead of time.  When using this with
-    :class:`~.dsp.processing_chain.ProcessingChain`, to ensure the correct
-    buffers are used, call
-    :meth:`~.dsp.processing_chain.ProcessingChain.get_variable` to give it the
-    internal memory buffer directly. With :func:`~.dsp.build_dsp.build_dsp`,
-    you can just give it the name, and it will automatically happen. The
+    :class:`~.dsp.processing_chain.ProcessingChain`, the output waveform's size,
+    dtype and coordinate grid units can be set automatically.  The
     possible `dtypes` for the input/outputs are:
 
     =============================== ========= =============================== =============
@@ -43,15 +56,34 @@ def dft(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
     ``complex256``/``clongdouble``  :math:`n` ``complex256``/``clongdouble``  :math:`n`
     =============================== ========= =============================== =============
     """
+    # if we have a ProcChainVar, set up the output and get numpy arrays
+    if isinstance(w_in, ProcChainVarBase) and isinstance(w_out, ProcChainVarBase):
+        c = w_in.dtype.kind
+        s = w_in.dtype.itemsize
+        if c == "f":
+            w_out.update_auto(
+                shape=w_in.shape[:-1] + (w_in.shape[-1] // 2 + 1,),
+                dtype=np.dtype(f"c{2*s}"),
+                period=1.0 / w_in.period / w_in.shape[-1],
+            )
+        elif c == "c":
+            w_out.update_auto(
+                shape=w_in.shape,
+                dtype=np.dtype(f"c{s}"),
+                period=1.0 / w_in.period / w_in.shape[-1],
+            )
+        w_in = w_in.buffer
+        w_out = w_out.buffer
+
     try:
-        dft_fun = FFTW(buf_in, buf_out, axes=(-1,), direction="FFTW_FORWARD")
+        dft_fun = FFTW(w_in, w_out, axes=(-1,), direction="FFTW_FORWARD")
     except ValueError:
         raise ValueError(
             "incompatible array types/shapes. See function documentation for allowed values"
         )
 
-    typesig = "void(" + str(buf_in.dtype) + "[:, :], " + str(buf_out.dtype) + "[:, :])"
-    sizesig = "(m, n)->(m, n)" if buf_in.shape == buf_out.shape else "(m, n),(m, l)"
+    typesig = "void(" + str(w_in.dtype) + "[:, :], " + str(w_out.dtype) + "[:, :])"
+    sizesig = "(m, n)->(m, n)" if w_in.shape == w_out.shape else "(m, n),(m, l)"
 
     @guvectorize(
         [typesig],
@@ -67,14 +99,27 @@ def dft(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
     return dft
 
 
-def inv_dft(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
+def inv_dft(w_in: np.ndarray, w_out: np.ndarray) -> Callable:
     """Perform inverse discrete Fourier transforms using the FFTW library.
 
-    Note
-    ----
-    This processor is composed of a factory function that is called using the
-    `init_args` argument. The input and output waveforms are passed using
-    `args`.
+    Parameters
+    ----------
+    w_in
+        the input fourier transformed waveform.
+    w_out
+        the output time-domain waveform.
+
+    JSON Configuration Example
+    --------------------------
+
+    .. code-block :: json
+
+        "wf_invdft": {
+            "function": "inv_dft",
+            "module": "dspeed.processors",
+            "args": ["wf_dft", "wf_invdft"],
+            "init_args": ["wf_dft", "wf_invdft"]
+        }
 
     Note
     ----
@@ -83,12 +128,10 @@ def inv_dft(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
     is a factory function that returns a Numba gufunc that performs the FFT.
     FFTW works on fixed memory buffers, so you must tell it what memory to use
     ahead of time.  When using this with
-    :class:`~.dsp.processing_chain.ProcessingChain`, to ensure the correct
-    buffers are used, call
-    :meth:`~.dsp.processing_chain.ProcessingChain.get_variable` to give it the
-    internal memory buffer directly. With :func:`~.dsp.build_dsp.build_dsp`,
-    you can just give it the name, and it will automatically happen. The
-    possible `dtypes` for the input/outputs are:
+    :class:`~.dsp.processing_chain.ProcessingChain`, the output waveform's size,
+    dtype and coordinate grid units can be set automatically.  The automated
+    behavior will produce a real output by default, unless you specify a complex
+    output. Possible `dtypes` for the input/outputs are:
 
     =============================== ============= =============================== =========
     :class:`numpy.dtype`            Size          :class:`numpy.dtype`            Size
@@ -101,15 +144,36 @@ def inv_dft(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
     ``complex256``/``clongdouble``  :math:`n`     ``complex256``/``clongdouble``  :math:`n`
     =============================== ============= =============================== =========
     """
+    # if we have a ProcChainVar, set up the output and get numpy arrays
+    if isinstance(w_in, ProcChainVarBase) and isinstance(w_out, ProcChainVarBase):
+        s = w_in.dtype.itemsize
+        if w_out.dtype == "auto":
+            w_out.update_auto(
+                shape=w_in.shape[:-1] + (2 * (w_in.shape[-1] - 1),),
+                dtype=np.dtype(f"f{s//2}"),
+                period=1.0 / w_in.period / w_in.shape[-1],
+            )
+        else:
+            w_out.update_auto(
+                shape=(
+                    w_in.shape
+                    if w_out.dtype.kind == "c"
+                    else w_in.shape[:-1] + (2 * (w_in.shape[-1] - 1),)
+                ),
+                period=1.0 / w_in.period / w_in.shape[-1],
+            )
+        w_in = w_in.buffer
+        w_out = w_out.buffer
+
     try:
-        idft_fun = FFTW(buf_in, buf_out, axes=(-1,), direction="FFTW_BACKWARD")
+        idft_fun = FFTW(w_in, w_out, axes=(-1,), direction="FFTW_BACKWARD")
     except ValueError:
         raise ValueError(
             "incompatible array types/shapes. See function documentation for allowed values"
         )
 
-    typesig = "void(" + str(buf_in.dtype) + "[:, :], " + str(buf_out.dtype) + "[:, :])"
-    sizesig = "(m, n)->(m, n)" if buf_in.shape == buf_out.shape else "(m, n),(m, l)"
+    typesig = "void(" + str(w_in.dtype) + "[:, :], " + str(w_out.dtype) + "[:, :])"
+    sizesig = "(m, n)->(m, n)" if w_in.shape == w_out.shape else "(m, n),(m, l)"
 
     @guvectorize(
         [typesig],
@@ -125,15 +189,28 @@ def inv_dft(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
     return inv_dft
 
 
-def psd(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
+def psd(w_in: np.ndarray, w_out: np.ndarray) -> Callable:
     """Perform discrete Fourier transforms using the FFTW library, and use it to get
     the power spectral density.
 
-    Note
-    ----
-    This processor is composed of a factory function that is called using the
-    `init_args` argument. The input and output waveforms are passed using
-    `args`.
+    Parameters
+    ----------
+    w_in
+        the input waveform.
+    w_out
+        the output fourier transform.
+
+    JSON Configuration Example
+    --------------------------
+
+    .. code-block :: json
+
+        "wf_psd": {
+            "function": "psd",
+            "module": "dspeed.processors",
+            "args": ["wf", "wf_psd"],
+            "init_args": ["wf", "wf_psd"]
+        }
 
     Note
     ----
@@ -142,11 +219,8 @@ def psd(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
     is a factory function that returns a Numba gufunc that performs the FFT.
     FFTW works on fixed memory buffers, so you must tell it what memory to use
     ahead of time.  When using this with
-    :class:`~.dsp.processing_chain.ProcessingChain`, to ensure the correct
-    buffers are used, call
-    :meth:`~.dsp.processing_chain.ProcessingChain.get_variable` to give it the
-    internal memory buffer directly. With :func:`~.dsp.build_dsp.build_dsp`,
-    you can just give it the name, and it will automatically happen. The
+    :class:`~.dsp.processing_chain.ProcessingChain`, the output waveform's size,
+    dtype and coordinate grid units can be set automatically.  The
     possible `dtypes` for the input/outputs are:
 
     =============================== ========= ============================ =============
@@ -160,20 +234,36 @@ def psd(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
     ``float128``/``longdouble``     :math:`n` ``float128``/``longdouble``  :math:`n/2+1`
     =============================== ========= ============================ =============
     """
+    # if we have a ProcChainVar, set up the output and get numpy arrays
+    if isinstance(w_in, ProcChainVarBase) and isinstance(w_out, ProcChainVarBase):
+        c = w_in.dtype.kind
+        s = w_in.dtype.itemsize
+        if c == "f":
+            w_out.update_auto(
+                shape=w_in.shape[:-1] + (w_in.shape[-1] // 2 + 1,),
+                dtype=np.dtype(f"f{s}"),
+                period=1.0 / w_in.period / w_in.shape[-1],
+            )
+        elif c == "c":
+            w_out.update_auto(
+                shape=w_in.shape,
+                dtype=np.dtype(f"f{s//2}"),
+                period=1.0 / w_in.period / w_in.shape[-1],
+            )
+        w_in = w_in.buffer
+        w_out = w_out.buffer
 
     # build intermediate array for the dft, which will be abs'd to get the PSD
-    buf_dft = np.ndarray(
-        buf_out.shape, np.dtype("complex" + str(buf_out.dtype.itemsize * 16))
-    )
+    w_dft = np.ndarray(w_out.shape, np.dtype(f"c{w_in.dtype.itemsize*2}"))
     try:
-        dft_fun = FFTW(buf_in, buf_dft, axes=(-1,), direction="FFTW_FORWARD")
+        dft_fun = FFTW(w_in, w_dft, axes=(-1,), direction="FFTW_FORWARD")
     except ValueError:
         raise ValueError(
             "incompatible array types/shapes. See function documentation for allowed values"
         )
 
-    typesig = "void(" + str(buf_in.dtype) + "[:, :], " + str(buf_out.dtype) + "[:, :])"
-    sizesig = "(m, n)->(m, n)" if buf_in.shape == buf_out.shape else "(m, n),(m, l)"
+    typesig = "void(" + str(w_in.dtype) + "[:, :], " + str(w_out.dtype) + "[:, :])"
+    sizesig = "(m, n)->(m, n)" if w_in.shape == w_out.shape else "(m, n),(m, l)"
 
     @guvectorize(
         [typesig],
@@ -184,7 +274,7 @@ def psd(buf_in: np.ndarray, buf_out: np.ndarray) -> Callable:
         ),
     )
     def psd(wf_in: np.ndarray, psd_out: np.ndarray) -> None:
-        dft_fun(wf_in, buf_dft)
-        np.abs(buf_dft, psd_out)
+        dft_fun(wf_in, w_dft)
+        np.abs(w_dft, psd_out)
 
     return psd

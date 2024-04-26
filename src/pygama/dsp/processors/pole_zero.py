@@ -6,7 +6,6 @@ from numba import guvectorize
 from pygama.dsp.errors import DSPFatal
 from pygama.dsp.utils import numba_defaults_kwargs as nb_kwargs
 
-
 @guvectorize(
     ["void(float32[:], float32, float32[:])", "void(float64[:], float64, float64[:])"],
     "(n),()->(n)",
@@ -32,7 +31,7 @@ def pole_zero(w_in: np.ndarray, t_tau: float, w_out: np.ndarray) -> None:
 
         "wf_pz": {
             "function": "pole_zero",
-            "module": "pygama.dsp.processors",
+            "module": "dspeed.processors",
             "args": ["wf_bl", "400*us", "wf_pz"],
             "unit": "ADC"
         }
@@ -43,9 +42,24 @@ def pole_zero(w_in: np.ndarray, t_tau: float, w_out: np.ndarray) -> None:
         return
 
     const = np.exp(-1 / t_tau)
+
+    # Create a buffer of float64s, because performing the recursion at float32 causes instabilities in the filter due to truncation
+    w_tmp = np.zeros(2, dtype=np.float64)
+
+    # Initialize the arrays for recursion
     w_out[0] = w_in[0]
+    w_tmp[0] = w_in[0]
+
     for i in range(1, len(w_in), 1):
-        w_out[i] = w_out[i - 1] + w_in[i] - w_in[i - 1] * const
+        w_tmp[1] = w_tmp[0] + w_in[i] - w_in[i - 1] * const
+
+        w_out[i] = w_tmp[1]  # Put the higher precision buffer into the desired output
+        w_tmp[0] = w_tmp[1]  # Shuffle the buffer for the next iteration
+
+    # Check the output
+    if np.isnan(w_out).any():
+        raise DSPFatal("Pole-zero filter produced nans in output.")
+
 
 @guvectorize(
     ["void(float32[:], float32, float32[:])", "void(float64[:], float64, float64[:])"],
@@ -123,7 +137,7 @@ def double_pole_zero(
 
         "wf_pz": {
             "function": "double_pole_zero",
-            "module": "pygama.dsp.processors",
+            "module": "dspeed.processors",
             "args": ["wf_bl", "400*us", "20*us", "0.02", "wf_pz"],
             "unit": "ADC"
         }
@@ -174,18 +188,32 @@ def double_pole_zero(
     transfer_num_1 = -1 * (a + b)
     transfer_num_2 = a * b
 
+    # Create a buffer of float64s, because performing the recursion at float32 causes instabilities in the filter due to truncation
+    w_tmp = np.zeros(3, dtype=np.float64)
+
+    # Initialize the arrays for recursion
+    w_tmp[0] = w_in[0]
+    w_tmp[1] = w_in[1]
+
     w_out[0] = w_in[0]
     w_out[1] = w_in[1]
-    w_out[2] = w_in[2]
 
     for i in range(2, len(w_in), 1):
-        w_out[i] = (
+        w_tmp[2] = (
             w_in[i]
             + transfer_num_1 * w_in[i - 1]
             + transfer_num_2 * w_in[i - 2]
-            - transfer_denom_1 * w_out[i - 1]
-            - transfer_denom_2 * w_out[i - 2]
+            - transfer_denom_1 * w_tmp[1]
+            - transfer_denom_2 * w_tmp[0]
         )
+
+        w_out[i] = w_tmp[2]  # Put the higher precision buffer into the desired output
+        # Shuffle the buffer for the next iteration
+        w_tmp[0] = w_tmp[1]
+        w_tmp[1] = w_tmp[2]
+    # Check the output
+    if np.isnan(w_out).any():
+        raise DSPFatal("Double-pole-zero filter produced nans in output.")
 
 @guvectorize(
     [

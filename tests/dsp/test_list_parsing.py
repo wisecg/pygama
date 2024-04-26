@@ -18,7 +18,6 @@ def test_list_parisng(lgnd_test_data):
                 "function": "add",
                 "module": "numpy",
                 "args": ["[1,2,3,4,5]", "[6,7,8,9,10]", "out=wf_out"],
-                "kwargs": {"signature": "(n),(n),->(n)", "types": ["ff->f"]},
                 "unit": "ADC",
             },
         },

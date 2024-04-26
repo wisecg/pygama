@@ -6,7 +6,6 @@ from numba import guvectorize
 from pygama.dsp.errors import DSPFatal
 from pygama.dsp.utils import numba_defaults_kwargs as nb_kwargs
 
-
 @guvectorize(
     [
         "void(float32[:], float32, char, float32[:])",
@@ -56,7 +55,7 @@ def fixed_time_pickoff(w_in: np.ndarray, t_in: float, mode_in: np.int8, a_out: f
 
         "trapEftp": {
             "function": "fixed_time_pickoff",
-            "module": "pygama.dsp.processors",
+            "module": "dspeed.processors",
             "args": ["wf_trap", "tp_0+10*us", "'h'", "trapEftp"],
             "unit": "ADC",
         }

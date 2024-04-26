@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 from numba import guvectorize
 
+from pygama.dsp.errors import DSPFatal
 from pygama.dsp.utils import numba_defaults_kwargs as nb_kwargs
 
 
@@ -17,7 +18,6 @@ from pygama.dsp.utils import numba_defaults_kwargs as nb_kwargs
 def histogram(
     w_in: np.ndarray, weights_out: np.ndarray, borders_out: np.ndarray
 ) -> None:
-
     """Produces and returns an histogram of the waveform.
 
     Parameters
@@ -36,7 +36,7 @@ def histogram(
 
         "hist_weights, hist_borders": {
             "function": "histogram",
-            "module": "pygama.dsp.processors.histogram",
+            "module": "dspeed.processors.histogram",
             "args": ["waveform", "hist_weights(100)", "hist_borders(101)"],
             "unit": ["none", "ADC"]
         }
@@ -50,6 +50,9 @@ def histogram(
     --------
     .histogram_stats
     """
+
+    if len(weights_out) + 1 != len(borders_out):
+        raise DSPFatal("length borders_out must be exactly 1 + length of weights_out")
 
     weights_out[:] = 0
     borders_out[:] = np.nan
@@ -93,7 +96,6 @@ def histogram_stats(
     fwhm_out: float,
     max_in: float,
 ) -> None:
-
     """Compute useful histogram-related quantities.
 
     Parameters
@@ -122,7 +124,7 @@ def histogram_stats(
 
         "fwhm, idx_out, max_out": {
             "function": "histogram_stats",
-            "module": "pygama.dsp.processors.histogram",
+            "module": "dspeed.processors.histogram",
             "args": ["hist_weights","hist_borders","idx_out","max_out","fwhm","np.nan"],
             "unit": ["ADC", "none", "ADC"]
         }
@@ -138,6 +140,9 @@ def histogram_stats(
 
     if np.isnan(weights_in).any():
         return
+
+    if len(weights_in) + 1 != len(edges_in):
+        raise DSPFatal("length edges_in must be exactly 1 + length of weights_in")
 
     # find global maximum search from left to right
     max_index = 0
