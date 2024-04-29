@@ -84,7 +84,7 @@ from .multi_t_filter import multi_t_filter, remove_duplicates
 from .optimize import optimize_1pz, optimize_2pz
 from .param_lookup import param_lookup
 from .peak_snr_threshold import peak_snr_threshold
-from .pole_zero import double_pole_zero, pole_zero
+from .pole_zero import double_pole_zero, pole_zero, inverse_pole_zero, triple_pole_zero, double_pole_zero_two_fracs
 from .presum import presum
 from .pulse_injector import inject_exp_pulse, inject_sig_pulse
 from .rc_cr2 import rc_cr2
@@ -168,4 +168,7 @@ __all__ = [
     "transfer_function_convolver",
     "rc_cr2",
     "bi_level_zero_crossing_time_points",
+    "inverse_pole_zero",
+    "triple_pole_zero",
+    "double_pole_zero_two_fracs"
 ]
