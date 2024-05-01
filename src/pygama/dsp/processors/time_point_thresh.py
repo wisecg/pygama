@@ -371,10 +371,10 @@ def multi_time_point_thresh(
 
 @guvectorize(
     [
-        "void(float32[:], float32, float32, float32, float32, float32[:], float32[:])",
-        "void(float64[:], float64, float64, float64, float64, float64[:], float64[:])",
+        "void(float32[:], float32, float32, float32, float32, uint32[:], float32[:], float32[:])",
+        "void(float64[:], float64, float64, float64, float64, uint32[:], float64[:], float64[:])",
     ],
-    "(n),(),(),(),(),(m),(m)",
+    "(n),(),(),(),(),(),(m),(m)",
     **nb_kwargs,
 )
 def bi_level_zero_crossing_time_points(
@@ -383,6 +383,7 @@ def bi_level_zero_crossing_time_points(
     a_neg_threshold_in: float,
     gate_time_in: int,
     t_start_in: int,
+    n_crossings_out: int,
     polarity_out: np.array,
     t_trig_times_out: np.array,
 ) -> None:
@@ -403,6 +404,8 @@ def bi_level_zero_crossing_time_points(
         The number of samples that the next threshold crossing has to be within in order to count a 0 crossing
     t_start_in
         the starting index.
+    n_crossings_out
+        the number of zero-crossings found. Note: if there are more zeros than elements in output arrays, this will continue to increment but the polarity and trigger time will not be added to the output buffers
     polarity_out
         An array holding the polarity of identified pulses. 0 for negative and 1 for positive
     t_trig_times_out
@@ -418,7 +421,7 @@ def bi_level_zero_crossing_time_points(
         "trig_times_out": {
             "function": "multi_trigger_time",
             "module": "dspeed.processors",
-            "args": ["wf_rc_cr2", "5", "-10", 0, "polarity_out(20)", "trig_times_out(20)"],
+            "args": ["wf_rc_cr2", "5", "-10", 0, "n_crossings", "polarity_out(shape = 20)", "trig_times_out(shape = 20)"],
             "unit": "ns"
         }
     """
@@ -449,7 +452,7 @@ def bi_level_zero_crossing_time_points(
     is_above_thresh = False
     is_below_thresh = False
     crossed_zero = False
-    trig_array_idx = 0
+    n_crossings_out[0] = 0
     for i in range(int(t_start_in), len(w_in) - 1, 1):
         if is_below_thresh and (w_in[i] <= 0 < w_in[i + 1]):
             crossed_zero = True
@@ -459,9 +462,10 @@ def bi_level_zero_crossing_time_points(
         if w_in[i] <= a_pos_threshold_in < w_in[i + 1]:
             if crossed_zero and is_below_thresh:
                 if i - is_below_thresh < gate_time_in:
-                    t_trig_times_out[trig_array_idx] = neg_trig_time_candidate
-                    polarity_out[trig_array_idx] = 0
-                    trig_array_idx += 1
+                    if n_crossings_out[0] < len(polarity_out):
+                        t_trig_times_out[n_crossings_out[0]] = neg_trig_time_candidate
+                        polarity_out[n_crossings_out[0]] = 0
+                    n_crossings_out[0] += 1
                 else:
                     is_above_thresh = i
 
@@ -478,9 +482,10 @@ def bi_level_zero_crossing_time_points(
         if w_in[i] >= a_neg_threshold_in > w_in[i + 1]:
             if crossed_zero and is_above_thresh:
                 if i - is_above_thresh < gate_time_in:
-                    t_trig_times_out[trig_array_idx] = pos_trig_time_candidate
-                    polarity_out[trig_array_idx] = 1
-                    trig_array_idx += 1
+                    if n_crossings_out[0] < len(polarity_out):
+                        t_trig_times_out[n_crossings_out[0]] = pos_trig_time_candidate
+                        polarity_out[n_crossings_out[0]] = 1
+                    n_crossings_out[0] += 1
                 else:
                     is_below_thresh = i
                 is_above_thresh = False
